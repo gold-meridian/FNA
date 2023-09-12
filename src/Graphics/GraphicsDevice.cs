@@ -404,11 +404,14 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				GLDevice = FNA3D.FNA3D_CreateDevice(
 					ref PresentationParameters.parameters,
-#if DEBUG
+/*#if DEBUG
 					1
 #else
 					0
-#endif
+#endif*/
+					// Workaround for Linux with Mesa drivers, since Steam
+					// Overlay results in an odd crash.
+					(byte)(Environment.GetEnvironmentVariable("FNA_GRAPHICS_DEBUG") == "1" ? 1 : 0)
 				);
 			}
 			catch(Exception e)
@@ -1511,7 +1514,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				);
 			}
 
-			for (int sampler = 0; sampler < modifiedVertexSamplers.Length; sampler += 1) 
+			for (int sampler = 0; sampler < modifiedVertexSamplers.Length; sampler += 1)
 			{
 				if (!modifiedVertexSamplers[sampler])
 				{

@@ -15,8 +15,9 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
+	// TML: Publicize FNA3D; TODO: I'd like to not do this.
 	[System.Security.SuppressUnmanagedCodeSecurity]
-	internal static class FNA3D
+	public static class FNA3D
 	{
 		#region Private Constants
 
@@ -156,13 +157,16 @@ namespace Microsoft.Xna.Framework.Graphics
 			FNA3D_LogFunc error
 		);
 
+		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+		public static extern uint FNA3D_LinkedVersion();
+
 		#endregion
 
 		#region Driver Functions
 
 		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 		public static extern uint FNA3D_PrepareWindowAttributes();
-		
+
 		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 		public static extern void FNA3D_GetDrawableSize(
 			IntPtr window,

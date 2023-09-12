@@ -214,12 +214,19 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public void SetData<T>(T[] data) where T : struct
 		{
+			SetData(data, SetDataOptions.None);
+		}
+
+		// TML: Overload with SetDataOptions.
+		public void SetData<T>(T[] data, SetDataOptions options) where T : struct
+		{
 			SetData(
 				0,
 				data,
 				0,
 				data.Length,
-				MarshalHelper.SizeOf<T>()
+				MarshalHelper.SizeOf<T>(),
+				options
 			);
 		}
 
@@ -228,12 +235,23 @@ namespace Microsoft.Xna.Framework.Graphics
 			int startIndex,
 			int elementCount
 		) where T : struct {
+			SetData(data, startIndex, elementCount, SetDataOptions.None);
+		}
+
+		// TML: Overload with SetDataOptions.
+		public void SetData<T>(
+			T[] data,
+			int startIndex,
+			int elementCount,
+			SetDataOptions options
+		) where T : struct {
 			SetData(
 				0,
 				data,
 				startIndex,
 				elementCount,
-				MarshalHelper.SizeOf<T>()
+				MarshalHelper.SizeOf<T>(),
+				options
 			);
 		}
 
@@ -243,6 +261,25 @@ namespace Microsoft.Xna.Framework.Graphics
 			int startIndex,
 			int elementCount,
 			int vertexStride
+		) where T : struct {
+			SetData(
+				offsetInBytes,
+				data,
+				startIndex,
+				elementCount,
+				vertexStride,
+				SetDataOptions.None
+			);
+		}
+
+		// TML: Overload with SetDataOptions.
+		public void SetData<T>(
+			int offsetInBytes,
+			T[] data,
+			int startIndex,
+			int elementCount,
+			int vertexStride,
+			SetDataOptions options
 		) where T : struct {
 			ErrorCheck(data, startIndex, elementCount, vertexStride);
 

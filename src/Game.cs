@@ -238,7 +238,11 @@ namespace Microsoft.Xna.Framework
 
 		#region Public Constructor
 
-		public Game()
+		// TML: Add Game(bool) constructor for determining whether the game
+		// should run in headless mode.
+		public Game() : this(false) { }
+
+		public Game(bool headlessMode)
 		{
 			AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 
@@ -269,9 +273,14 @@ namespace Microsoft.Xna.Framework
 
 			gameTime = new GameTime();
 
-			Window = FNAPlatform.CreateWindow();
-			Mouse.WindowHandle = Window.Handle;
-			TouchPanel.WindowHandle = Window.Handle;
+			// TML: Added headless mode, which prevents the creation and
+			// management of a window.
+			// TODO: Might we want to provide a dummy Window object?
+			if (!headlessMode) {
+				Window = FNAPlatform.CreateWindow();
+				Mouse.WindowHandle = Window.Handle;
+				TouchPanel.WindowHandle = Window.Handle;
+			}
 
 			FrameworkDispatcher.Update();
 

@@ -38,6 +38,11 @@ namespace Microsoft.Xna.Framework
 
 			// Environment.GetEnvironmentVariable("FNA_PLATFORM_BACKEND");
 
+			// TML: Support FNA_PLATFORM_BACKEND=NONE for headless
+			// initialization.
+			if (Environment.GetEnvironmentVariable("FNA_PLATFORM_BACKEND") == "NONE")
+				return;
+
 			// Built-in command line arguments
 			LaunchParameters args = new LaunchParameters();
 			string arg;
