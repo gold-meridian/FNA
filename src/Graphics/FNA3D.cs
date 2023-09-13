@@ -10,14 +10,19 @@
 #region Using Statements
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 #endregion
 
+// Regrettably have to include this, see the comment below.
+[assembly: InternalsVisibleTo("tModLoader")]
+[assembly: InternalsVisibleTo("ReLogic")]
+
 namespace Microsoft.Xna.Framework.Graphics
 {
-	// TML: Publicize FNA3D; TODO: I'd like to not do this.
+	// TODO: TML changes this class to public, but I'm keeping it internal.
 	[System.Security.SuppressUnmanagedCodeSecurity]
-	public static class FNA3D
+	internal static class FNA3D
 	{
 		#region Private Constants
 
