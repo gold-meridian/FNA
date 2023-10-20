@@ -16,6 +16,7 @@ using System.Runtime.InteropServices;
 
 // Regrettably have to include this, see the comment below.
 [assembly: InternalsVisibleTo("tModLoader")]
+[assembly: InternalsVisibleTo("Terraria")]
 [assembly: InternalsVisibleTo("ReLogic")]
 
 namespace Microsoft.Xna.Framework.Graphics
