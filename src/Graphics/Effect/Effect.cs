@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2023 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -9,6 +9,7 @@
 
 #region Using Statements
 using System;
+using System.Threading;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 #endregion
@@ -72,8 +73,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				return obj.GetHashCode();
 			}
 		}
-
-		private IntPtr stateChangesPtr;
 
 		private IntPtr effectData;
 
@@ -236,19 +235,6 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			// The default technique is the first technique.
 			CurrentTechnique = Techniques[0];
-
-			// Use native memory for changes, .NET loves moving this around
-			unsafe
-			{
-				stateChangesPtr = FNAPlatform.Malloc(
-					sizeof(MOJOSHADER_effectStateChanges)
-				);
-				MOJOSHADER_effectStateChanges *stateChanges =
-					(MOJOSHADER_effectStateChanges*) stateChangesPtr;
-				stateChanges->render_state_change_count = 0;
-				stateChanges->sampler_state_change_count = 0;
-				stateChanges->vertex_sampler_state_change_count = 0;
-			}
 		}
 
 		#endregion
@@ -287,19 +273,6 @@ namespace Microsoft.Xna.Framework.Graphics
 					CurrentTechnique = Techniques[i];
 				}
 			}
-
-			// Use native memory for changes, .NET loves moving this around
-			unsafe
-			{
-				stateChangesPtr = FNAPlatform.Malloc(
-					sizeof(MOJOSHADER_effectStateChanges)
-				);
-				MOJOSHADER_effectStateChanges *stateChanges =
-					(MOJOSHADER_effectStateChanges*) stateChangesPtr;
-				stateChanges->render_state_change_count = 0;
-				stateChanges->sampler_state_change_count = 0;
-				stateChanges->vertex_sampler_state_change_count = 0;
-			}
 		}
 
 		#endregion
@@ -319,17 +292,13 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			if (!IsDisposed)
 			{
-				if (glEffect != IntPtr.Zero)
+				IntPtr toDispose = Interlocked.Exchange(ref glEffect, IntPtr.Zero);
+				if (toDispose != IntPtr.Zero)
 				{
 					FNA3D.FNA3D_AddDisposeEffect(
 						GraphicsDevice.GLDevice,
-						glEffect
+						toDispose
 					);
-				}
-				if (stateChangesPtr != IntPtr.Zero)
-				{
-					FNAPlatform.Free(stateChangesPtr);
-					stateChangesPtr = IntPtr.Zero;
 				}
 			}
 			base.Dispose(disposing);
@@ -349,10 +318,10 @@ namespace Microsoft.Xna.Framework.Graphics
 				GraphicsDevice.GLDevice,
 				glEffect,
 				pass,
-				stateChangesPtr
+				GraphicsDevice.effectStateChangesPtr
 			);
 			MOJOSHADER_effectStateChanges *stateChanges =
-				(MOJOSHADER_effectStateChanges*) stateChangesPtr;
+				(MOJOSHADER_effectStateChanges*) GraphicsDevice.effectStateChangesPtr;
 			if (stateChanges->render_state_change_count > 0)
 			{
 				PipelineCache pipelineCache = GraphicsDevice.PipelineCache;
@@ -932,8 +901,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				}
 
 				EffectParameter toAdd = new EffectParameter(
-					Marshal.PtrToStringAnsi(param.value.name),
-					Marshal.PtrToStringAnsi(param.value.semantic),
+					MarshalHelper.PtrToInternedStringAnsi(param.value.name),
+					MarshalHelper.PtrToInternedStringAnsi(param.value.semantic),
 					(int) param.value.type.rows,
 					(int) param.value.type.columns,
 					(int) param.value.type.elements,
@@ -983,7 +952,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				}
 
 				techniques.Add(new EffectTechnique(
-					Marshal.PtrToStringAnsi(techPtr->name),
+					MarshalHelper.PtrToInternedStringAnsi(techPtr->name),
 					(IntPtr) techPtr,
 					passes,
 					INTERNAL_readAnnotations(
@@ -1022,7 +991,7 @@ namespace Microsoft.Xna.Framework.Graphics
 							memSize *= mem[j].info.elements;
 						}
 						EffectParameter toAdd = new EffectParameter(
-							Marshal.PtrToStringAnsi(mem[j].name),
+							MarshalHelper.PtrToInternedStringAnsi(mem[j].name),
 							null,
 							(int) mem[j].info.rows,
 							(int) mem[j].info.columns,
@@ -1070,7 +1039,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			IntPtr techPtr, uint index
 		) {
 			return new EffectPass(
-				Marshal.PtrToStringAnsi(pass.name),
+				MarshalHelper.PtrToInternedStringAnsi(pass.name),
 				INTERNAL_readAnnotations(
 					pass.annotations,
 					pass.annotation_count
@@ -1097,8 +1066,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				MOJOSHADER_effectAnnotation anno = annoPtr[i];
 
 				EffectAnnotation toAdd = new EffectAnnotation(
-					Marshal.PtrToStringAnsi(anno.name),
-					Marshal.PtrToStringAnsi(anno.semantic),
+					MarshalHelper.PtrToInternedStringAnsi(anno.name),
+					MarshalHelper.PtrToInternedStringAnsi(anno.semantic),
 					(int) anno.type.rows,
 					(int) anno.type.columns,
 					XNAClass[(int) anno.type.parameter_class],

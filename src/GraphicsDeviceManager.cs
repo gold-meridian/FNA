@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2023 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -21,7 +21,7 @@ namespace Microsoft.Xna.Framework
 		#region Public Properties
 
 		public GraphicsProfile GraphicsProfile
-		{ 
+		{
 			get;
 			set;
 		}
@@ -281,6 +281,10 @@ namespace Microsoft.Xna.Framework
 			 */
 			if (graphicsDevice == null)
 			{
+				#if DEBUG
+				FNALoggerEXT.LogWarn("Forcing CreateDevice! Avoid calling ApplyChanges before Game.Run!");
+				#endif
+
 				(this as IGraphicsDeviceManager).CreateDevice();
 				return;
 			}

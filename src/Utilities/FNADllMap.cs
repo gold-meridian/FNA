@@ -1,13 +1,13 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2023 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
  */
 #endregion
 
-#if NET
+#if NET7_0_OR_GREATER
 
 #region Using Statements
 using System;
@@ -53,14 +53,14 @@ namespace Microsoft.Xna.Framework
 			}
 			else
 			{
-				// Maybe this platform statically links?
+				// What is this platform??
 				return "unknown";
 			}
 		}
 
 		#endregion
 
-		#region DllImportResolver Callback Method
+		#region DllImportResolver Callback Methods
 
 		private static IntPtr MapAndLoad(
 			string libraryName,
@@ -72,7 +72,16 @@ namespace Microsoft.Xna.Framework
 			{
 				mappedName = libraryName;
 			}
+
 			return NativeLibrary.Load(mappedName, assembly, dllImportSearchPath);
+		}
+
+		private static IntPtr LoadStaticLibrary(
+			string libraryName,
+			Assembly assembly,
+			DllImportSearchPath? dllImportSearchPath
+		) {
+			return NativeLibrary.GetMainProgramHandle();
 		}
 
 		#endregion
@@ -82,10 +91,19 @@ namespace Microsoft.Xna.Framework
 		[ModuleInitializer]
 		public static void Init()
 		{
-			// Ignore NativeAOT platforms since they don't perform dynamic loading.
-			// FIXME: Is the iOS check needed?
-			if (!RuntimeFeature.IsDynamicCodeSupported && !OperatingSystem.IsIOS())
+			if (!RuntimeFeature.IsDynamicCodeCompiled)
 			{
+				/* NativeAOT platforms don't perform dynamic loading,
+				 * so setting a DllImportResolver is unnecessary.
+				 *
+				 * However, iOS and tvOS with Mono AOT statically link
+				 * their dependencies, so we need special handling for them.
+				 */
+				if (OperatingSystem.IsIOS() || OperatingSystem.IsTvOS())
+				{
+					NativeLibrary.SetDllImportResolver(Assembly.GetExecutingAssembly(), LoadStaticLibrary);
+				}
+
 				return;
 			}
 
@@ -94,7 +112,7 @@ namespace Microsoft.Xna.Framework
 			string cpu = RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
 			string wordsize = (IntPtr.Size * 8).ToString();
 
-			// Get the path to the assembly
+			// Get the executing assembly
 			Assembly assembly = Assembly.GetExecutingAssembly();
 
 			// Locate the config file
@@ -199,4 +217,4 @@ namespace Microsoft.Xna.Framework
 	}
 }
 
-#endif // NET
+#endif // NET7_0_OR_GREATER
