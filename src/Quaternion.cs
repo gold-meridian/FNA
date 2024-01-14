@@ -1,3 +1,4 @@
+#if FALSE
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
  * Copyright 2009-2024 Ethan Lee and the MonoGame Team
@@ -1004,3 +1005,4 @@ namespace Microsoft.Xna.Framework
 		#endregion
 	}
 }
+#endif

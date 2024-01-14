@@ -314,6 +314,7 @@
 		<Compile Include="src\Media\Xiph\Video.cs" />
 		<Compile Include="src\Media\Xiph\VideoPlayer.cs" />
 		<Compile Include="src\NamespaceDocs.cs" />
+		<Compile Include="src\NumericsExtensions.cs" />
 		<Compile Include="src\Plane.cs" />
 		<Compile Include="src\PlaneIntersectionType.cs" />
 		<Compile Include="src\PlayerIndex.cs" />
@@ -329,6 +330,7 @@
 		<Compile Include="src\ThreadCheck.cs" />
 		<Compile Include="src\TitleContainer.cs" />
 		<Compile Include="src\TitleLocation.cs" />
+		<Compile Include="src\Usings.cs" />
 		<Compile Include="src\Utilities\AssemblyHelper.cs" />
 		<Compile Include="src\Utilities\FileHelpers.cs" />
 		<Compile Include="src\Utilities\FNADllMap.cs" />

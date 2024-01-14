@@ -77,9 +77,9 @@ namespace Microsoft.Xna.Framework.Graphics
             if ((dirtyFlags & EffectDirtyFlags.WorldViewProj) != 0)
             {
                 Matrix worldViewProj;
-                
-                Matrix.Multiply(ref world, ref view, out worldView);
-                Matrix.Multiply(ref worldView, ref projection, out worldViewProj);
+
+				worldView = Matrix.Multiply(world, view);
+				worldViewProj = Matrix.Multiply(worldView, projection);
                 
                 worldViewProjParam.SetValue(worldViewProj);
                 
@@ -155,8 +155,8 @@ namespace Microsoft.Xna.Framework.Graphics
                 Matrix worldTranspose;
                 Matrix worldInverseTranspose;
                 
-                Matrix.Invert(ref world, out worldTranspose);
-                Matrix.Transpose(ref worldTranspose, out worldInverseTranspose);
+                Matrix.Invert(world, out worldTranspose);
+				worldInverseTranspose = Matrix.Transpose(worldTranspose);
                 
                 worldParam.SetValue(world);
                 worldInverseTransposeParam.SetValue(worldInverseTranspose);
@@ -169,7 +169,7 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 Matrix viewInverse;
                 
-                Matrix.Invert(ref view, out viewInverse);
+                Matrix.Invert(view, out viewInverse);
 
                 eyePositionParam.SetValue(viewInverse.Translation);
 
