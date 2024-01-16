@@ -160,6 +160,64 @@ public static class NumericsExtensions
 		result.Y = MathHelper.Hermite(value1.Y, tangent1.Y, value2.Y, tangent2.Y, amount);
 	}
 
+	public static Vector3 Hermite(
+		Vector3 value1,
+		Vector3 tangent1,
+		Vector3 value2,
+		Vector3 tangent2,
+		float amount
+	)
+	{
+		Vector3 result = new Vector3();
+		Hermite(ref value1, ref tangent1, ref value2, ref tangent2, amount, out result);
+		return result;
+	}
+
+	public static void Hermite(
+		ref Vector3 value1,
+		ref Vector3 tangent1,
+		ref Vector3 value2,
+		ref Vector3 tangent2,
+		float amount,
+		out Vector3 result
+	)
+	{
+		result.X = MathHelper.Hermite(value1.X, tangent1.X, value2.X, tangent2.X, amount);
+		result.Y = MathHelper.Hermite(value1.Y, tangent1.Y, value2.Y, tangent2.Y, amount);
+		result.Z = MathHelper.Hermite(value1.Z, tangent1.Z, value2.Z, tangent2.Z, amount);
+	}
+
+	public static Vector4 Hermite(
+		Vector4 value1,
+		Vector4 tangent1,
+		Vector4 value2,
+		Vector4 tangent2,
+		float amount
+	)
+	{
+		return new Vector4(
+			MathHelper.Hermite(value1.X, tangent1.X, value2.X, tangent2.X, amount),
+			MathHelper.Hermite(value1.Y, tangent1.Y, value2.Y, tangent2.Y, amount),
+			MathHelper.Hermite(value1.Z, tangent1.Z, value2.Z, tangent2.Z, amount),
+			MathHelper.Hermite(value1.W, tangent1.W, value2.W, tangent2.W, amount)
+		);
+	}
+
+	public static void Hermite(
+		ref Vector4 value1,
+		ref Vector4 tangent1,
+		ref Vector4 value2,
+		ref Vector4 tangent2,
+		float amount,
+		out Vector4 result
+	)
+	{
+		result.W = MathHelper.Hermite(value1.W, tangent1.W, value2.W, tangent2.W, amount);
+		result.X = MathHelper.Hermite(value1.X, tangent1.X, value2.X, tangent2.X, amount);
+		result.Y = MathHelper.Hermite(value1.Y, tangent1.Y, value2.Y, tangent2.Y, amount);
+		result.Z = MathHelper.Hermite(value1.Z, tangent1.Z, value2.Z, tangent2.Z, amount);
+	}
+
 	public static Vector2 SmoothStep(Vector2 value1, Vector2 value2, float amount)
 	{
 		return new Vector2(
@@ -177,5 +235,49 @@ public static class NumericsExtensions
 	{
 		result.X = MathHelper.SmoothStep(value1.X, value2.X, amount);
 		result.Y = MathHelper.SmoothStep(value1.Y, value2.Y, amount);
+	}
+
+	public static Vector3 SmoothStep(Vector3 value1, Vector3 value2, float amount)
+	{
+		return new Vector3(
+			MathHelper.SmoothStep(value1.X, value2.X, amount),
+			MathHelper.SmoothStep(value1.Y, value2.Y, amount),
+			MathHelper.SmoothStep(value1.Z, value2.Z, amount)
+		);
+	}
+
+	public static void SmoothStep(
+		ref Vector3 value1,
+		ref Vector3 value2,
+		float amount,
+		out Vector3 result
+	)
+	{
+		result.X = MathHelper.SmoothStep(value1.X, value2.X, amount);
+		result.Y = MathHelper.SmoothStep(value1.Y, value2.Y, amount);
+		result.Z = MathHelper.SmoothStep(value1.Z, value2.Z, amount);
+	}
+
+	public static Vector4 SmoothStep(Vector4 value1, Vector4 value2, float amount)
+	{
+		return new Vector4(
+			MathHelper.SmoothStep(value1.X, value2.X, amount),
+			MathHelper.SmoothStep(value1.Y, value2.Y, amount),
+			MathHelper.SmoothStep(value1.Z, value2.Z, amount),
+			MathHelper.SmoothStep(value1.W, value2.W, amount)
+		);
+	}
+
+	public static void SmoothStep(
+		ref Vector4 value1,
+		ref Vector4 value2,
+		float amount,
+		out Vector4 result
+	)
+	{
+		result.X = MathHelper.SmoothStep(value1.X, value2.X, amount);
+		result.Y = MathHelper.SmoothStep(value1.Y, value2.Y, amount);
+		result.Z = MathHelper.SmoothStep(value1.Z, value2.Z, amount);
+		result.W = MathHelper.SmoothStep(value1.W, value2.W, amount);
 	}
 }
