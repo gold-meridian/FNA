@@ -1,16 +1,15 @@
 ﻿using System.Diagnostics;
 using System;
-using System.Numerics;
 
 namespace Microsoft.Xna.Framework;
 
 public static class NumericsExtensions
 {
-	public static Vector3 Vector3_Up{ get; } = new(0f, 1f, 0f);
+	public static Vector3 Vector3_Up { get; } = new(0f, 1f, 0f);
 
 	public static Vector3 Vector3_Forward { get; } = new(0f, 0f, -1f);
 
-	public static string DebugDisplayString(this Vector3 vector)
+	internal static string DebugDisplayString(this Vector3 vector)
 	{
 		return string.Concat(
 			vector.X.ToString(), " ",
@@ -20,7 +19,7 @@ public static class NumericsExtensions
 	}
 
 	[Conditional("DEBUG")]
-	public static void CheckForNaNs(this Vector2 vector)
+	internal static void CheckForNaNs(this Vector2 vector)
 	{
 		if (float.IsNaN(vector.X) || float.IsNaN(vector.Y))
 		{
@@ -29,7 +28,7 @@ public static class NumericsExtensions
 	}
 
 	[Conditional("DEBUG")]
-	public static void CheckForNaNs(this Vector3 vector)
+	internal static void CheckForNaNs(this Vector3 vector)
 	{
 		if (float.IsNaN(vector.X) ||
 			float.IsNaN(vector.Y) ||
@@ -40,7 +39,7 @@ public static class NumericsExtensions
 	}
 
 	[Conditional("DEBUG")]
-	public static void CheckForNaNs(this Vector4 vector)
+	internal static void CheckForNaNs(this Vector4 vector)
 	{
 		if (float.IsNaN(vector.X) ||
 			float.IsNaN(vector.Y) ||
@@ -52,7 +51,7 @@ public static class NumericsExtensions
 	}
 
 	[Conditional("DEBUG")]
-	public static void CheckForNaNs(this Matrix matrix)
+	internal static void CheckForNaNs(this Matrix matrix)
 	{
 		if (float.IsNaN(matrix.M11) ||
 			float.IsNaN(matrix.M12) ||
@@ -76,7 +75,7 @@ public static class NumericsExtensions
 	}
 
 	[Conditional("DEBUG")]
-	public static void CheckForNaNs(this Quaternion quaternion)
+	internal static void CheckForNaNs(this Quaternion quaternion)
 	{
 		if (float.IsNaN(quaternion.X) ||
 			float.IsNaN(quaternion.Y) ||
@@ -87,14 +86,14 @@ public static class NumericsExtensions
 		}
 	}
 
-	public static void Normalize(this Vector2 vector)
+	public static void Normalize(ref this Vector2 vector)
 	{
 		float val = 1.0f / (float) Math.Sqrt((vector.X * vector.X) + (vector.Y * vector.Y));
 		vector.X *= val;
 		vector.Y *= val;
 	}
 
-	public static void Normalize(this Vector3 vector)
+	public static void Normalize(ref this Vector3 vector)
 	{
 		float factor = 1.0f / (float) Math.Sqrt(
 			(vector.X * vector.X) +
@@ -106,7 +105,7 @@ public static class NumericsExtensions
 		vector.Z *= factor;
 	}
 
-	public static void Normalize(this Vector4 vector)
+	public static void Normalize(ref this Vector4 vector)
 	{
 		float factor = 1.0f / (float) Math.Sqrt(
 			(vector.X * vector.X) +
