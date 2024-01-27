@@ -1,6 +1,11 @@
+.vs/
+.vscode/
 .idea/
+
 bin/
 obj/
+obj_core/
+
 *.pidb
 *.user
 *.userprefs
