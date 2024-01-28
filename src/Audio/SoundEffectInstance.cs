@@ -404,9 +404,10 @@ namespace Microsoft.Xna.Framework.Audio
 				return;
 			}
 
-			// TML: CheckThread()
+#if USE_TML_EXTENSIONS
 			if (isDynamic)
 				ThreadCheck.CheckThread();
+#endif
 
 			if (immediate)
 			{

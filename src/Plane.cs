@@ -239,7 +239,11 @@ namespace Microsoft.Xna.Framework
 			 * for an explanation of how this works.
 			 */
 			Matrix transformedMatrix;
+#if USE_NUMERICS
 			Matrix.Invert(matrix, out transformedMatrix);
+#else
+			Matrix.Invert(ref matrix, out transformedMatrix);
+#endif
 			transformedMatrix = Matrix.Transpose(
 				transformedMatrix
 			);

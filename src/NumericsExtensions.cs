@@ -5,9 +5,11 @@ namespace Microsoft.Xna.Framework;
 
 public static class NumericsExtensions
 {
+#if USE_NUMERICS
 	public static Vector3 Vector3_Up { get; } = new(0f, 1f, 0f);
 
 	public static Vector3 Vector3_Forward { get; } = new(0f, 0f, -1f);
+#endif
 
 	internal static string DebugDisplayString(this Vector3 vector)
 	{
@@ -86,6 +88,7 @@ public static class NumericsExtensions
 		}
 	}
 
+#if USE_NUMERICS
 	public static void Normalize(ref this Vector2 vector)
 	{
 		float val = 1.0f / (float) Math.Sqrt((vector.X * vector.X) + (vector.Y * vector.Y));
@@ -279,4 +282,5 @@ public static class NumericsExtensions
 		result.Z = MathHelper.SmoothStep(value1.Z, value2.Z, amount);
 		result.W = MathHelper.SmoothStep(value1.W, value2.W, amount);
 	}
+#endif
 }

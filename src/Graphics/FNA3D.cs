@@ -14,16 +14,15 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 #endregion
 
-// Regrettably have to include this, see the comment below.
-[assembly: InternalsVisibleTo("tModLoader")]
-[assembly: InternalsVisibleTo("Terraria")]
-[assembly: InternalsVisibleTo("ReLogic")]
-
 namespace Microsoft.Xna.Framework.Graphics
 {
 	// TODO: TML changes this class to public, but I'm keeping it internal.
 	[System.Security.SuppressUnmanagedCodeSecurity]
+#if USE_TML_EXTENSIONS
+	public static class FNA3D
+#else
 	internal static class FNA3D
+#endif
 	{
 		#region Private Constants
 
@@ -163,8 +162,10 @@ namespace Microsoft.Xna.Framework.Graphics
 			FNA3D_LogFunc error
 		);
 
+#if USE_TML_EXTENSIONS
 		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 		public static extern uint FNA3D_LinkedVersion();
+#endif
 
 		#endregion
 
@@ -847,7 +848,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			FNA3D_SetStringMarker(device, utf8Text);
 			Marshal.FreeHGlobal((IntPtr) utf8Text);
 		}
-		
+
 		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 		private static extern unsafe void FNA3D_SetTextureName(
 			IntPtr device,
@@ -858,7 +859,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		public static unsafe void FNA3D_SetTextureName(
 			IntPtr device,
 			IntPtr texture,
-			string text 
+			string text
 		) {
 			byte* utf8Text = SDL2.SDL.Utf8EncodeHeap(text);
 			FNA3D_SetTextureName(device, texture, utf8Text);

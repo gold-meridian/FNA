@@ -283,7 +283,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Private Disposal Variables
 
-		/* 
+		/*
 		 * Use weak GCHandles for the global resources list as we do not
 		 * know when a resource may be disposed and collected. We do not
 		 * want to prevent a resource from being collected by holding a
@@ -423,6 +423,28 @@ namespace Microsoft.Xna.Framework.Graphics
 					// Overlay results in an odd crash.
 					(byte)(Environment.GetEnvironmentVariable("FNA_GRAPHICS_DEBUG") == "1" ? 1 : 0)
 				);
+#if USE_TML_EXTENSIONS
+				GLDevice = FNA3D.FNA3D_CreateDevice(
+					ref PresentationParameters.parameters,
+// #if DEBUG
+// 					1
+// #else
+// 					0
+// #endif
+					// Workaround for Linux with Mesa drivers, since Steam
+					// Overlay results in an odd crash.
+					(byte)(Environment.GetEnvironmentVariable("FNA_GRAPHICS_DEBUG") == "1" ? 1 : 0)
+				);
+#else
+				GLDevice = FNA3D.FNA3D_CreateDevice(
+					ref PresentationParameters.parameters,
+#if DEBUG
+					1
+#else
+					0
+#endif
+				);
+#endif
 			}
 			catch(Exception e)
 			{

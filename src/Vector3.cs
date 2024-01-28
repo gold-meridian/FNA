@@ -1,4 +1,4 @@
-#if FALSE
+#if !USE_NUMERICS
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
  * Copyright 2009-2024 Ethan Lee and the MonoGame Team
@@ -158,7 +158,7 @@ namespace Microsoft.Xna.Framework
 
 		#region Internal Properties
 
-		internal string DebugDisplayString
+		/*internal string DebugDisplayString
 		{
 			get
 			{
@@ -168,7 +168,7 @@ namespace Microsoft.Xna.Framework
 					Z.ToString()
 				);
 			}
-		}
+		}*/
 
 		#endregion
 

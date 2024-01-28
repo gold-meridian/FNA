@@ -252,11 +252,16 @@ namespace Microsoft.Xna.Framework.Graphics
 		public Vector3 Unproject(Vector3 source, Matrix projection, Matrix view, Matrix world)
 		{
 			Matrix matrix;
+			Matrix toInvert = Matrix.Multiply(
+				Matrix.Multiply(world, view),
+				projection
+			);
 			Matrix.Invert(
-				Matrix.Multiply(
-					Matrix.Multiply(world, view),
-					projection
-				),
+#if USE_NUMERICS
+				 toInvert,
+#else
+				ref toInvert,
+#endif
 				out matrix
 			);
 			source.X = (((source.X - X) / ((float) Width)) * 2f) - 1f;
