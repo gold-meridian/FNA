@@ -9,7 +9,6 @@ public static class NumericsExtensions
 	public static Vector3 Vector3_Up { get; } = new(0f, 1f, 0f);
 
 	public static Vector3 Vector3_Forward { get; } = new(0f, 0f, -1f);
-#endif
 
 	internal static string DebugDisplayString(this Vector3 vector)
 	{
@@ -19,6 +18,7 @@ public static class NumericsExtensions
 			vector.Z.ToString()
 		);
 	}
+#endif
 
 	[Conditional("DEBUG")]
 	internal static void CheckForNaNs(this Vector2 vector)
