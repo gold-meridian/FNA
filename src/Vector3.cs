@@ -158,7 +158,7 @@ namespace Microsoft.Xna.Framework
 
 		#region Internal Properties
 
-		/*internal string DebugDisplayString
+		internal string DebugDisplayString
 		{
 			get
 			{
@@ -168,7 +168,7 @@ namespace Microsoft.Xna.Framework
 					Z.ToString()
 				);
 			}
-		}*/
+		}
 
 		#endregion
 
