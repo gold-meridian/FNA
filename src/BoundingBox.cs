@@ -33,10 +33,17 @@ namespace Microsoft.Xna.Framework
 		{
 			get
 			{
+#if USE_NUMERICS
 				return string.Concat(
 					"Min( ", Min.DebugDisplayString(), " ) \r\n",
 					"Max( ", Max.DebugDisplayString(), " )"
 				);
+#else
+				return string.Concat(
+					"Min( ", Min.DebugDisplayString, " ) \r\n",
+					"Max( ", Max.DebugDisplayString, " )"
+				);
+#endif
 			}
 		}
 
