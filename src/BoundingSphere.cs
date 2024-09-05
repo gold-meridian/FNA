@@ -36,10 +36,17 @@ namespace Microsoft.Xna.Framework
 		{
 			get
 			{
+#if USE_NUMERICS
 				return string.Concat(
 					"Center( ", Center.DebugDisplayString(), " ) \r\n",
 					"Radius( ", Radius.ToString(), " ) "
 				);
+#else
+				return string.Concat(
+					"Center( ", Center.DebugDisplayString, " ) \r\n",
+					"Radius( ", Radius.ToString(), " ) "
+				);
+#endif
 			}
 		}
 
@@ -422,7 +429,7 @@ namespace Microsoft.Xna.Framework
 				max = maxz;
 				min = minz;
 			}
-			
+
 			Vector3 center = (min + max) * 0.5f;
 			float radius = Vector3.Distance(max, center);
 

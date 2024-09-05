@@ -32,10 +32,17 @@ namespace Microsoft.Xna.Framework
 		{
 			get
 			{
+#if USE_NUMERICS
 				return string.Concat(
 					"Pos( ", Position.DebugDisplayString(), " ) \r\n",
 					"Dir( ", Direction.DebugDisplayString(), " )"
 				);
+#else
+				return string.Concat(
+					"Pos( ", Position.DebugDisplayString, " ) \r\n",
+					"Dir( ", Direction.DebugDisplayString, " )"
+				);
+#endif
 			}
 		}
 

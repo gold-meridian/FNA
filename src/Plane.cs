@@ -32,10 +32,17 @@ namespace Microsoft.Xna.Framework
 		{
 			get
 			{
+#if USE_NUMERICS
 				return string.Concat(
 					Normal.DebugDisplayString(), " ",
 					D.ToString()
 				);
+#else
+				return string.Concat(
+					Normal.DebugDisplayString, " ",
+					D.ToString()
+				);
+#endif
 			}
 		}
 
