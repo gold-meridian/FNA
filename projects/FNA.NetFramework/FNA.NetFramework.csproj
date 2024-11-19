@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFrameworks>net4.0</TargetFrameworks>
         <Platforms>AnyCPU</Platforms>
-        <LangVersion>latest</LangVersion>
+        <LangVersion>4</LangVersion>
     </PropertyGroup>
 
     <PropertyGroup>
