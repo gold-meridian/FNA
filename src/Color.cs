@@ -15,6 +15,7 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -30,134 +31,42 @@ namespace Microsoft.Xna.Framework
 	[Serializable]
 	[TypeConverter(typeof(ColorConverter))]
 	[DebuggerDisplay("{DebugDisplayString,nq}")]
-#if USE_EXPLICIT_LAYOUT_COLOR
-	[StructLayout(LayoutKind.Explicit)]
-#endif
+	[StructLayout(LayoutKind.Explicit, Size = sizeof(uint))]
 	public struct Color : IEquatable<Color>, IPackedVector, IPackedVector<uint>
 	{
 		#region Public Properties
 
 		/// <summary>
+		/// Gets or sets the alpha component.
+		/// </summary>
+		[field: FieldOffset(sizeof(byte) * 0)]
+		public byte A { get; set; }
+		
+		/// <summary>
 		/// Gets or sets the blue component.
 		/// </summary>
-#if USE_EXPLICIT_LAYOUT_COLOR
-		[field: FieldOffset(sizeof(byte) * 0)]
-#endif
-		public byte B
-		{
-#if USE_EXPLICIT_LAYOUT_COLOR
-			get;
-			set;
-#else
-			get
-			{
-				unchecked
-				{
-					return (byte) (this.packedValue >> 16);
-				}
-			}
-			set
-			{
-				this.packedValue = (this.packedValue & 0xff00ffff) | ((uint) value << 16);
-			}
-#endif
-		}
+		[field: FieldOffset(sizeof(byte) * 1)]
+		public byte B { get; set; }
 
 		/// <summary>
 		/// Gets or sets the green component.
 		/// </summary>
-#if USE_EXPLICIT_LAYOUT_COLOR
-		[field: FieldOffset(sizeof(byte) * 1)]
-#endif
-		public byte G
-		{
-#if USE_EXPLICIT_LAYOUT_COLOR
-			get;
-			set;
-#else
-			get
-			{
-				unchecked
-				{
-					return (byte) (this.packedValue >> 8);
-				}
-			}
-			set
-			{
-				this.packedValue = (this.packedValue & 0xffff00ff) | ((uint) value << 8);
-			}
-#endif
-		}
+		[field: FieldOffset(sizeof(byte) * 2)]
+		public byte G { get; set; }
 
 		/// <summary>
 		/// Gets or sets the red component.
 		/// </summary>
-#if USE_EXPLICIT_LAYOUT_COLOR
-		[field: FieldOffset(sizeof(byte) * 2)]
-#endif
-		public byte R
-		{
-#if USE_EXPLICIT_LAYOUT_COLOR
-			get;
-			set;
-#else
-			get
-			{
-				unchecked
-				{
-					return (byte) (this.packedValue);
-				}
-			}
-			set
-			{
-				this.packedValue = (this.packedValue & 0xffffff00) | value;
-			}
-#endif
-		}
-
-		/// <summary>
-		/// Gets or sets the alpha component.
-		/// </summary>
-#if USE_EXPLICIT_LAYOUT_COLOR
 		[field: FieldOffset(sizeof(byte) * 3)]
-#endif
-		public byte A
-		{
-#if USE_EXPLICIT_LAYOUT_COLOR
-			get;
-			set;
-#else
-			get
-			{
-				unchecked
-				{
-					return (byte) (this.packedValue >> 24);
-				}
-			}
-			set
-			{
-				this.packedValue = (this.packedValue & 0x00ffffff) | ((uint) value << 24);
-			}
-#endif
-		}
-
+		public byte R { get; set; }
 		/// <summary>
 		/// Gets or sets packed value of this <see cref="Color"/>.
 		/// </summary>
 		[CLSCompliant(false)]
-		public UInt32 PackedValue
-		{
-			get
-			{
-				return packedValue;
-			}
-			set
-			{
-				packedValue = value;
-			}
-		}
+		[field: FieldOffset(0)]
+		public uint PackedValue { get; set; }
 
-		#endregion
+#endregion
 
 		#region Public Static Color Properties
 
@@ -1447,16 +1356,6 @@ namespace Microsoft.Xna.Framework
 
 		#endregion
 
-		#region Private Variables
-
-		// ARGB. Keep this name as it is used by XNA games in reflection!
-#if USE_EXPLICIT_LAYOUT_COLOR
-		[FieldOffset(0)]
-#endif
-		private uint packedValue;
-
-		#endregion
-
 		#region Private Static Constructors
 
 		static Color()
@@ -1614,8 +1513,6 @@ namespace Microsoft.Xna.Framework
 		/// <param name="color">A <see cref="Vector4"/> representing a color.</param>
 		public Color(Vector4 color)
 		{
-			packedValue = 0;
-
 			R = (byte) MathHelper.Clamp(color.X * 255, Byte.MinValue, Byte.MaxValue);
 			G = (byte) MathHelper.Clamp(color.Y * 255, Byte.MinValue, Byte.MaxValue);
 			B = (byte) MathHelper.Clamp(color.Z * 255, Byte.MinValue, Byte.MaxValue);
@@ -1628,8 +1525,6 @@ namespace Microsoft.Xna.Framework
 		/// <param name="color">A <see cref="Vector3"/> representing a color.</param>
 		public Color(Vector3 color)
 		{
-			packedValue = 0;
-
 			R = (byte) MathHelper.Clamp(color.X * 255, Byte.MinValue, Byte.MaxValue);
 			G = (byte) MathHelper.Clamp(color.Y * 255, Byte.MinValue, Byte.MaxValue);
 			B = (byte) MathHelper.Clamp(color.Z * 255, Byte.MinValue, Byte.MaxValue);
@@ -1644,8 +1539,6 @@ namespace Microsoft.Xna.Framework
 		/// <param name="b">Blue component value from 0.0f to 1.0f.</param>
 		public Color(float r, float g, float b)
 		{
-			packedValue = 0;
-
 			R = (byte) MathHelper.Clamp(r * 255, Byte.MinValue, Byte.MaxValue);
 			G = (byte) MathHelper.Clamp(g * 255, Byte.MinValue, Byte.MaxValue);
 			B = (byte) MathHelper.Clamp(b * 255, Byte.MinValue, Byte.MaxValue);
@@ -1660,7 +1553,6 @@ namespace Microsoft.Xna.Framework
 		/// <param name="b">Blue component value from 0 to 255.</param>
 		public Color(int r, int g, int b)
 		{
-			packedValue = 0;
 			R = (byte) MathHelper.Clamp(r, Byte.MinValue, Byte.MaxValue);
 			G = (byte) MathHelper.Clamp(g, Byte.MinValue, Byte.MaxValue);
 			B = (byte) MathHelper.Clamp(b, Byte.MinValue, Byte.MaxValue);
@@ -1676,7 +1568,6 @@ namespace Microsoft.Xna.Framework
 		/// <param name="alpha">Alpha component value from 0 to 255.</param>
 		public Color(int r, int g, int b, int alpha)
 		{
-			packedValue = 0;
 			R = (byte) MathHelper.Clamp(r, Byte.MinValue, Byte.MaxValue);
 			G = (byte) MathHelper.Clamp(g, Byte.MinValue, Byte.MaxValue);
 			B = (byte) MathHelper.Clamp(b, Byte.MinValue, Byte.MaxValue);
@@ -1692,8 +1583,6 @@ namespace Microsoft.Xna.Framework
 		/// <param name="alpha">Alpha component value from 0.0f to 1.0f.</param>
 		public Color(float r, float g, float b, float alpha)
 		{
-			packedValue = 0;
-
 			R = (byte) MathHelper.Clamp(r * 255, Byte.MinValue, Byte.MaxValue);
 			G = (byte) MathHelper.Clamp(g * 255, Byte.MinValue, Byte.MaxValue);
 			B = (byte) MathHelper.Clamp(b * 255, Byte.MinValue, Byte.MaxValue);
@@ -1706,7 +1595,7 @@ namespace Microsoft.Xna.Framework
 
 		private Color(uint packedValue)
 		{
-			this.packedValue = packedValue;
+			PackedValue = packedValue;
 		}
 
 		#endregion
@@ -1839,7 +1728,7 @@ namespace Microsoft.Xna.Framework
 		/// <returns>Hash code of this <see cref="Color"/>.</returns>
 		public override int GetHashCode()
 		{
-			return this.packedValue.GetHashCode();
+			return PackedValue.GetHashCode();
 		}
 
 		/// <summary>

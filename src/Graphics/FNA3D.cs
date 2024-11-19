@@ -10,19 +10,15 @@
 #region Using Statements
 using System;
 using System.IO;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 #endregion
 
 namespace Microsoft.Xna.Framework.Graphics
 {
-	// TODO: TML changes this class to public, but I'm keeping it internal.
 	[System.Security.SuppressUnmanagedCodeSecurity]
-#if USE_TML_EXTENSIONS
 	public static class FNA3D
-#else
-	internal static class FNA3D
-#endif
 	{
 		#region Private Constants
 
@@ -162,10 +158,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			FNA3D_LogFunc error
 		);
 
-#if USE_TML_EXTENSIONS
 		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 		public static extern uint FNA3D_LinkedVersion();
-#endif
 
 		#endregion
 

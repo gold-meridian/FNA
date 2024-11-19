@@ -9,6 +9,7 @@
 
 #region Using Statements
 using System.Collections.Generic;
+using System.Numerics;
 
 using Microsoft.Xna.Framework.Graphics;
 #endregion
@@ -59,7 +60,7 @@ namespace Microsoft.Xna.Framework.Content
 			for (uint i = 0; i < boneCount; i += 1)
 			{
 				string name = reader.ReadObject<string>();
-				Matrix matrix = reader.ReadMatrix();
+				Matrix4x4 matrix = reader.ReadMatrix();
 				ModelBone bone = new ModelBone {
 					Transform = matrix,
 					Index = (int) i,

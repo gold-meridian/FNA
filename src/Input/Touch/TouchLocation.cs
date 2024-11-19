@@ -9,6 +9,7 @@
 
 #region Using Statements
 using System;
+using System.Numerics;
 #endregion
 
 namespace Microsoft.Xna.Framework.Input.Touch

@@ -11,6 +11,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Numerics;
 
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Audio;
@@ -47,12 +48,10 @@ namespace Microsoft.Xna.Framework
 				SetEnv = SDL2_FNAPlatform.SetEnv;
 			}
 
-#if USE_TML_EXTENSIONS
 			// TML: Support FNA_PLATFORM_BACKEND=NONE for headless
 			// initialization.
 			if (Environment.GetEnvironmentVariable("FNA_PLATFORM_BACKEND") == "NONE")
 				return;
-#endif
 
 			// Built-in command line arguments
 			LaunchParameters args = new LaunchParameters();

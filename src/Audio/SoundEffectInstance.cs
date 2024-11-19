@@ -404,10 +404,8 @@ namespace Microsoft.Xna.Framework.Audio
 				return;
 			}
 
-#if USE_TML_EXTENSIONS
 			if (isDynamic)
 				ThreadCheck.CheckThread();
-#endif
 
 			if (immediate)
 			{
@@ -601,7 +599,7 @@ namespace Microsoft.Xna.Framework.Audio
 			 * 2. Stereo panning is WAY more complicated than you think.
 			 *    The main thing is that hard panning does NOT eliminate an
 			 *    entire channel; the two channels are blended on each side.
-			 * Aside from that, XNA is pretty naive about the output matrix.
+			 * Aside from that, XNA is pretty naive about the output Matrix4x4.
 			 * -flibit
 			 */
 			float* outputMatrix = (float*) dspSettings.pMatrixCoefficients;

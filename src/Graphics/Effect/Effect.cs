@@ -98,8 +98,8 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			EffectParameterClass.Scalar,	// MOJOSHADER_SYMCLASS_SCALAR
 			EffectParameterClass.Vector,	// MOJOSHADER_SYMCLASS_VECTOR
-			EffectParameterClass.Matrix,	// MOJOSHADER_SYMCLASS_MATRIX_ROWS
-			EffectParameterClass.Matrix,	// MOJOSHADER_SYMCLASS_MATRIX_COLUMNS
+			EffectParameterClass.Matrix4x4,	// MOJOSHADER_SYMCLASS_MATRIX_ROWS
+			EffectParameterClass.Matrix4x4,	// MOJOSHADER_SYMCLASS_MATRIX_COLUMNS
 			EffectParameterClass.Object,	// MOJOSHADER_SYMCLASS_OBJECT
 			EffectParameterClass.Struct	// MOJOSHADER_SYMCLASS_STRUCT
 		};

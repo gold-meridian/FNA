@@ -11,7 +11,6 @@
  */
 #endregion
 
-#if USE_TML_EXTENSIONS
 using System;
 using System.Threading;
 
@@ -29,4 +28,3 @@ namespace Microsoft.Xna.Framework {
 		}
 	}
 }
-#endif

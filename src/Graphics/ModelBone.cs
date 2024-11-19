@@ -9,6 +9,7 @@
 
 #region Using Statements
 using System.Collections.Generic;
+using System.Numerics;
 #endregion
 
 namespace Microsoft.Xna.Framework.Graphics
@@ -57,10 +58,10 @@ namespace Microsoft.Xna.Framework.Graphics
 		}
 
 		/// <summary>
-		/// Gets or sets the matrix used to transform this bone relative to its parent
+		/// Gets or sets the Matrix4x4 used to transform this bone relative to its parent
 		/// bone.
 		/// </summary>
-		public Matrix Transform
+		public Matrix4x4 Transform
 		{
 			get;
 			set;

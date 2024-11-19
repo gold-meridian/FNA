@@ -217,7 +217,6 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Public SetData Methods
 
-#if USE_TML_EXTENSIONS
 		public void SetData<T>(T[] data) where T : struct
 		{
 			SetData(data, SetDataOptions.None);
@@ -244,9 +243,9 @@ namespace Microsoft.Xna.Framework.Graphics
 		}
 
 		public void SetData<T>(
-			T[] data,
-			int startIndex,
-			int elementCount,
+			T[]            data,
+			int            startIndex,
+			int            elementCount,
 			SetDataOptions options
 		) where T : struct {
 			SetData(
@@ -277,17 +276,17 @@ namespace Microsoft.Xna.Framework.Graphics
 		}
 
 		public void SetData<T>(
-			int offsetInBytes,
-			T[] data,
-			int startIndex,
-			int elementCount,
-			int vertexStride,
+			int            offsetInBytes,
+			T[]            data,
+			int            startIndex,
+			int            elementCount,
+			int            vertexStride,
 			SetDataOptions options
 		) where T : struct {
 			ErrorCheck(data, startIndex, elementCount, vertexStride);
 
-			int elementSizeInBytes = MarshalHelper.SizeOf<T>();
-			GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
+			int      elementSizeInBytes = MarshalHelper.SizeOf<T>();
+			GCHandle handle             = GCHandle.Alloc(data, GCHandleType.Pinned);
 			FNA3D.FNA3D_SetVertexBufferData(
 				GraphicsDevice.GLDevice,
 				buffer,
@@ -300,56 +299,6 @@ namespace Microsoft.Xna.Framework.Graphics
 			);
 			handle.Free();
 		}
-#else
-		public void SetData<T>(T[] data) where T : struct
-		{
-			SetData(
-				0,
-				data,
-				0,
-				data.Length,
-				MarshalHelper.SizeOf<T>()
-			);
-		}
-
-		public void SetData<T>(
-			T[] data,
-			int startIndex,
-			int elementCount
-		) where T : struct {
-			SetData(
-				0,
-				data,
-				startIndex,
-				elementCount,
-				MarshalHelper.SizeOf<T>()
-			);
-		}
-
-		public void SetData<T>(
-			int offsetInBytes,
-			T[] data,
-			int startIndex,
-			int elementCount,
-			int vertexStride
-		) where T : struct {
-			ErrorCheck(data, startIndex, elementCount, vertexStride);
-
-			int elementSizeInBytes = MarshalHelper.SizeOf<T>();
-			GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
-			FNA3D.FNA3D_SetVertexBufferData(
-				GraphicsDevice.GLDevice,
-				buffer,
-				offsetInBytes,
-				handle.AddrOfPinnedObject() + (startIndex * elementSizeInBytes),
-				elementCount,
-				elementSizeInBytes,
-				vertexStride,
-				SetDataOptions.None
-			);
-			handle.Free();
-		}
-#endif
 
 		#endregion
 

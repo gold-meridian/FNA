@@ -9,6 +9,7 @@
 
 #region Using Statements
 using System;
+using System.Numerics;
 #endregion
 
 namespace Microsoft.Xna.Framework.Graphics
@@ -211,18 +212,18 @@ namespace Microsoft.Xna.Framework.Graphics
 		/// Projects a <see cref="Vector3"/> from world space into screen space.
 		/// </summary>
 		/// <param name="source">The <see cref="Vector3"/> to project.</param>
-		/// <param name="projection">The projection <see cref="Matrix"/>.</param>
-		/// <param name="view">The view <see cref="Matrix"/>.</param>
-		/// <param name="world">The world <see cref="Matrix"/>.</param>
+		/// <param name="projection">The projection <see cref="Matrix4x4"/>.</param>
+		/// <param name="view">The view <see cref="Matrix4x4"/>.</param>
+		/// <param name="world">The world <see cref="Matrix4x4"/>.</param>
 		/// <returns></returns>
 		public Vector3 Project(
-			Vector3 source,
-			Matrix projection,
-			Matrix view,
-			Matrix world
+			Vector3   source,
+			Matrix4x4 projection,
+			Matrix4x4 view,
+			Matrix4x4 world
 		) {
-			Matrix matrix = Matrix.Multiply(
-				Matrix.Multiply(world, view),
+			Matrix4x4 matrix = Matrix4x4.Multiply(
+				Matrix4x4.Multiply(world, view),
 				projection
 			);
 			Vector3 vector = Vector3.Transform(source, matrix);
@@ -245,23 +246,19 @@ namespace Microsoft.Xna.Framework.Graphics
 		/// Unprojects a <see cref="Vector3"/> from screen space into world space.
 		/// </summary>
 		/// <param name="source">The <see cref="Vector3"/> to unproject.</param>
-		/// <param name="projection">The projection <see cref="Matrix"/>.</param>
-		/// <param name="view">The view <see cref="Matrix"/>.</param>
-		/// <param name="world">The world <see cref="Matrix"/>.</param>
+		/// <param name="projection">The projection <see cref="Matrix4x4"/>.</param>
+		/// <param name="view">The view <see cref="Matrix4x4"/>.</param>
+		/// <param name="world">The world <see cref="Matrix4x4"/>.</param>
 		/// <returns></returns>
-		public Vector3 Unproject(Vector3 source, Matrix projection, Matrix view, Matrix world)
+		public Vector3 Unproject(Vector3 source, Matrix4x4 projection, Matrix4x4 view, Matrix4x4 world)
 		{
-			Matrix matrix;
-			Matrix toInvert = Matrix.Multiply(
-				Matrix.Multiply(world, view),
+			Matrix4x4 matrix;
+			Matrix4x4 toInvert = Matrix4x4.Multiply(
+				Matrix4x4.Multiply(world, view),
 				projection
 			);
-			Matrix.Invert(
-#if USE_NUMERICS
-				 toInvert,
-#else
-				ref toInvert,
-#endif
+			Matrix4x4.Invert(
+				toInvert,
 				out matrix
 			);
 			source.X = (((source.X - X) / ((float) Width)) * 2f) - 1f;

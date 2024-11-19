@@ -9,6 +9,7 @@
 
 #region Using Statements
 using System;
+using System.Numerics;
 #endregion
 
 namespace Microsoft.Xna.Framework.Graphics
@@ -110,12 +111,12 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 		}
 
-		public Matrix GetValueMatrix()
+		public Matrix4x4 GetValueMatrix()
 		{
 			unsafe
 			{
 				float* resPtr = (float*) values;
-				return new Matrix(
+				return new Matrix4x4(
 					resPtr[0],
 					resPtr[4],
 					resPtr[8],

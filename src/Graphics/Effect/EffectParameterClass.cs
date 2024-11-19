@@ -23,9 +23,9 @@ namespace Microsoft.Xna.Framework.Graphics
 		/// </summary>
 		Vector,
 		/// <summary>
-		/// Matrix class type.
+		/// Matrix4x4 class type.
 		/// </summary>
-		Matrix,
+		Matrix4x4,
 		/// <summary>
 		/// Class type for textures, shaders or strings.
 		/// </summary>

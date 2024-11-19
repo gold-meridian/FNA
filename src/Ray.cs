@@ -15,6 +15,7 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Numerics;
 
 using Microsoft.Xna.Framework.Design;
 #endregion
@@ -28,25 +29,12 @@ namespace Microsoft.Xna.Framework
 	{
 		#region Internal Properties
 
-		internal string DebugDisplayString
-		{
-			get
-			{
-#if USE_NUMERICS
-				return string.Concat(
-					"Pos( ", Position.DebugDisplayString(), " ) \r\n",
-					"Dir( ", Direction.DebugDisplayString(), " )"
-				);
-#else
-				return string.Concat(
-					"Pos( ", Position.DebugDisplayString, " ) \r\n",
-					"Dir( ", Direction.DebugDisplayString, " )"
-				);
-#endif
-			}
-		}
-
-		#endregion
+		internal string DebugDisplayString =>
+			string.Concat(
+				"Pos( ", Position.ToString(), " ) \r\n",
+				"Dir( ", Direction.ToString(), " )"
+			);
+#endregion
 
 		#region Public Fields
 

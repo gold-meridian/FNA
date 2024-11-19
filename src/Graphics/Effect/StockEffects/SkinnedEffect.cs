@@ -9,6 +9,7 @@
 
 #region Using Statements
 using System;
+using System.Numerics;
 #endregion
 
 namespace Microsoft.Xna.Framework.Graphics
@@ -44,11 +45,11 @@ namespace Microsoft.Xna.Framework.Graphics
         bool oneLight;
         bool fogEnabled;
 
-        Matrix world = Matrix.Identity;
-        Matrix view = Matrix.Identity;
-        Matrix projection = Matrix.Identity;
+        Matrix4x4 world      = Matrix4x4.Identity;
+        Matrix4x4 view       = Matrix4x4.Identity;
+        Matrix4x4 projection = Matrix4x4.Identity;
 
-        Matrix worldView;
+        Matrix4x4 worldView;
 
         Vector3 diffuseColor = Vector3.One;
         Vector3 emissiveColor = Vector3.Zero;
@@ -73,9 +74,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
 
         /// <summary>
-        /// Gets or sets the world matrix.
+        /// Gets or sets the world Matrix4x4.
         /// </summary>
-        public Matrix World
+        public Matrix4x4 World
         {
             get { return world; }
             
@@ -88,9 +89,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
 
         /// <summary>
-        /// Gets or sets the view matrix.
+        /// Gets or sets the view Matrix4x4.
         /// </summary>
-        public Matrix View
+        public Matrix4x4 View
         {
             get { return view; }
             
@@ -103,9 +104,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
 
         /// <summary>
-        /// Gets or sets the projection matrix.
+        /// Gets or sets the projection Matrix4x4.
         /// </summary>
-        public Matrix Projection
+        public Matrix4x4 Projection
         {
             get { return projection; }
             
@@ -326,7 +327,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <summary>
         /// Sets an array of skinning bone transform matrices.
         /// </summary>
-        public void SetBoneTransforms(Matrix[] boneTransforms)
+        public void SetBoneTransforms(Matrix4x4[] boneTransforms)
         {
             if ((boneTransforms == null) || (boneTransforms.Length == 0))
                 throw new ArgumentNullException("boneTransforms");
@@ -341,12 +342,12 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <summary>
         /// Gets a copy of the current skinning bone transform matrices.
         /// </summary>
-        public Matrix[] GetBoneTransforms(int count)
+        public Matrix4x4[] GetBoneTransforms(int count)
         {
             if (count <= 0 || count > MaxBones)
                 throw new ArgumentOutOfRangeException("count");
 
-            Matrix[] bones = bonesParam.GetValueMatrixArray(count);
+            Matrix4x4[] bones = bonesParam.GetValueMatrixArray(count);
             
             // Convert matrices from 43 to 44 format.
             for (int i = 0; i < bones.Length; i++)
@@ -387,11 +388,11 @@ namespace Microsoft.Xna.Framework.Graphics
             SpecularColor = Vector3.One;
             SpecularPower = 16;
             
-            Matrix[] identityBones = new Matrix[MaxBones];
+            Matrix4x4[] identityBones = new Matrix4x4[MaxBones];
             
             for (int i = 0; i < MaxBones; i++)
             {
-                identityBones[i] = Matrix.Identity;
+                identityBones[i] = Matrix4x4.Identity;
             }
             
             SetBoneTransforms(identityBones);
@@ -485,7 +486,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         protected internal override void OnApply()
         {
-            // Recompute the world+view+projection matrix or fog vector?
+            // Recompute the world+view+projection Matrix4x4 or fog vector?
             dirtyFlags = EffectHelpers.SetWorldViewProjAndFog(dirtyFlags, ref world, ref view, ref projection, ref worldView, fogEnabled, fogStart, fogEnd, worldViewProjParam, fogVectorParam);
 
             // Recompute the world inverse transpose and eye position?

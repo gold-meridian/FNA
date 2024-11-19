@@ -14,6 +14,7 @@
 #region Using Statements
 using System;
 using System.Diagnostics;
+using System.Numerics;
 using System.Text;
 #endregion
 
@@ -30,7 +31,7 @@ namespace Microsoft.Xna.Framework
 		/// <summary>
 		/// Gets or sets the <see cref="Matrix"/> of the frustum.
 		/// </summary>
-		public Matrix Matrix
+		public Matrix4x4 Matrix
 		{
 			get
 			{
@@ -145,9 +146,9 @@ namespace Microsoft.Xna.Framework
 
 		#region Private Fields
 
-		private Matrix matrix;
+		private          Matrix4x4 matrix;
 		private readonly Vector3[] corners = new Vector3[CornerCount];
-		private readonly Plane[] planes = new Plane[PlaneCount];
+		private readonly Plane[]   planes  = new Plane[PlaneCount];
 
 		/// <summary>
 		/// The number of planes in the frustum.
@@ -162,7 +163,7 @@ namespace Microsoft.Xna.Framework
 		/// Constructs the frustum by extracting the view planes from a matrix.
 		/// </summary>
 		/// <param name="value">Combined matrix which usually is (View * Projection).</param>
-		public BoundingFrustum(Matrix value)
+		public BoundingFrustum(Matrix4x4 value)
 		{
 			this.matrix = value;
 			this.CreatePlanes();

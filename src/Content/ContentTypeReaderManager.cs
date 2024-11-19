@@ -15,6 +15,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Reflection;
 using System.Text.RegularExpressions;
 #endregion
@@ -144,7 +145,7 @@ namespace Microsoft.Xna.Framework.Content
 				ArrayReader<float> hArrayFloatReader = new ArrayReader<float>();
 				ArrayReader<Vector2> hArrayVector2Reader = new ArrayReader<Vector2>();
 				ListReader<Vector2> hListVector2Reader = new ListReader<Vector2>();
-				ArrayReader<Matrix> hArrayMatrixReader = new ArrayReader<Matrix>();
+				ArrayReader<Matrix4x4> hArrayMatrixReader = new ArrayReader<Matrix4x4>();
 				EnumReader<Microsoft.Xna.Framework.Graphics.Blend> hEnumBlendReader = new EnumReader<Graphics.Blend>();
 				NullableReader<Rectangle> hNullableRectReader = new NullableReader<Rectangle>();
 				EffectMaterialReader hEffectMaterialReader = new EffectMaterialReader();
@@ -195,12 +196,10 @@ namespace Microsoft.Xna.Framework.Content
 						string readerTypeString = originalReaderTypeString;
 						readerTypeString = PrepareType(readerTypeString);
 
-#if USE_NUMERICS
 						readerTypeString = readerTypeString
-							.Replace("Microsoft.Xna.Framework.Vector2, FNA, Version=24.1.0.0, Culture=neutral, PublicKeyToken=null", typeof(Vector2).AssemblyQualifiedName)
-							.Replace("Microsoft.Xna.Framework.Vector3, FNA, Version=24.1.0.0, Culture=neutral, PublicKeyToken=null", typeof(Vector3).AssemblyQualifiedName)
-							.Replace("Microsoft.Xna.Framework.Vector4, FNA, Version=24.1.0.0, Culture=neutral, PublicKeyToken=null", typeof(Vector4).AssemblyQualifiedName);
-#endif
+						                  .Replace("Microsoft.Xna.Framework.Vector2, FNA, Version=24.1.0.0, Culture=neutral, PublicKeyToken=null", typeof(Vector2).AssemblyQualifiedName)
+						                  .Replace("Microsoft.Xna.Framework.Vector3, FNA, Version=24.1.0.0, Culture=neutral, PublicKeyToken=null", typeof(Vector3).AssemblyQualifiedName)
+						                  .Replace("Microsoft.Xna.Framework.Vector4, FNA, Version=24.1.0.0, Culture=neutral, PublicKeyToken=null", typeof(Vector4).AssemblyQualifiedName);
 
 						Type l_readerType = Type.GetType(readerTypeString);
 						if (l_readerType != null)

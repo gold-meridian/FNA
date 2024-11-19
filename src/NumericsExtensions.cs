@@ -1,24 +1,13 @@
 ﻿using System.Diagnostics;
 using System;
+using System.Numerics;
 
 namespace Microsoft.Xna.Framework;
 
 public static class NumericsExtensions
 {
-#if USE_NUMERICS
-	public static Vector3 Vector3_Up { get; } = new(0f, 1f, 0f);
-
-	public static Vector3 Vector3_Forward { get; } = new(0f, 0f, -1f);
-
-	internal static string DebugDisplayString(this Vector3 vector)
-	{
-		return string.Concat(
-			vector.X.ToString(), " ",
-			vector.Y.ToString(), " ",
-			vector.Z.ToString()
-		);
-	}
-#endif
+	// Vector3::Up      ->  Vector3::UnitY
+	// Vector3::Forward -> -Vector3::UnitZ
 
 	[Conditional("DEBUG")]
 	internal static void CheckForNaNs(this Vector2 vector)
@@ -53,7 +42,7 @@ public static class NumericsExtensions
 	}
 
 	[Conditional("DEBUG")]
-	internal static void CheckForNaNs(this Matrix matrix)
+	internal static void CheckForNaNs(this Matrix4x4 matrix)
 	{
 		if (float.IsNaN(matrix.M11) ||
 			float.IsNaN(matrix.M12) ||
@@ -72,7 +61,7 @@ public static class NumericsExtensions
 			float.IsNaN(matrix.M43) ||
 			float.IsNaN(matrix.M44))
 		{
-			throw new InvalidOperationException("Matrix contains NaNs!");
+			throw new InvalidOperationException("Matrix4x4 contains NaNs!");
 		}
 	}
 
@@ -88,7 +77,6 @@ public static class NumericsExtensions
 		}
 	}
 
-#if USE_NUMERICS
 	public static void Normalize(ref this Vector2 vector)
 	{
 		float val = 1.0f / (float) Math.Sqrt((vector.X * vector.X) + (vector.Y * vector.Y));
@@ -282,5 +270,4 @@ public static class NumericsExtensions
 		result.Z = MathHelper.SmoothStep(value1.Z, value2.Z, amount);
 		result.W = MathHelper.SmoothStep(value1.W, value2.W, amount);
 	}
-#endif
 }

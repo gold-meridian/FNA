@@ -59,7 +59,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		/// <summary>
 		/// Gets the parent bone for this mesh. The parent bone of a mesh contains a
-		/// transformation matrix that describes how the mesh is located relative to
+		/// transformation Matrix4x4 that describes how the mesh is located relative to
 		/// any parent meshes in a model.
 		/// </summary>
 		public ModelBone ParentBone

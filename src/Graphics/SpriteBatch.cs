@@ -10,6 +10,7 @@
 #region Using Statements
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 #endregion
@@ -121,8 +122,8 @@ namespace Microsoft.Xna.Framework.Graphics
 		private int bufferOffset;
 		private bool supportsNoOverwrite;
 
-		// Matrix to be used when creating the projection matrix
-		private Matrix transformMatrix;
+		// Matrix4x4 to be used when creating the projection Matrix4x4
+		private Matrix4x4 transformMatrix;
 
 		// User-provided Effect, if applicable
 		private Effect customEffect;
@@ -214,7 +215,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				DepthStencilState.None,
 				RasterizerState.CullCounterClockwise,
 				null,
-				Matrix.Identity
+				Matrix4x4.Identity
 			);
 		}
 
@@ -229,7 +230,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				DepthStencilState.None,
 				RasterizerState.CullCounterClockwise,
 				null,
-				Matrix.Identity
+				Matrix4x4.Identity
 			);
 		}
 
@@ -247,7 +248,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				depthStencilState,
 				rasterizerState,
 				null,
-				Matrix.Identity
+				Matrix4x4.Identity
 			);
 		}
 
@@ -266,7 +267,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				depthStencilState,
 				rasterizerState,
 				effect,
-				Matrix.Identity
+				Matrix4x4.Identity
 			);
 		}
 
@@ -277,7 +278,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			DepthStencilState depthStencilState,
 			RasterizerState rasterizerState,
 			Effect effect,
-			Matrix transformMatrix
+			Matrix4x4 transformMatrix
 		) {
 			if (beginCalled)
 			{

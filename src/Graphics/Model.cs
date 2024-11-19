@@ -10,6 +10,7 @@
 #region Using Statements
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 #endregion
 
 namespace Microsoft.Xna.Framework.Graphics
@@ -67,7 +68,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Private Static Variables
 
-		private static Matrix[] sharedDrawBoneMatrices;
+		private static Matrix4x4[] sharedDrawBoneMatrices;
 
 		#endregion
 
@@ -95,14 +96,14 @@ namespace Microsoft.Xna.Framework.Graphics
 		/// <param name="world">The world transform.</param>
 		/// <param name="view">The view transform.</param>
 		/// <param name="projection">The projection transform.</param>
-		public void Draw(Matrix world, Matrix view, Matrix projection)
+		public void Draw(Matrix4x4 world, Matrix4x4 view, Matrix4x4 projection)
 		{
 			int boneCount = Bones.Count;
 
 			if (sharedDrawBoneMatrices == null ||
 				sharedDrawBoneMatrices.Length < boneCount)
 			{
-				sharedDrawBoneMatrices = new Matrix[boneCount];
+				sharedDrawBoneMatrices = new Matrix4x4[boneCount];
 			}
 
 			// Look up combined bone matrices for the entire model.
@@ -131,7 +132,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		/// Copies bone transforms relative to all parent bones of the each bone from this model to a given array.
 		/// </summary>
 		/// <param name="destinationBoneTransforms">The array receiving the transformed bones.</param>
-		public void CopyAbsoluteBoneTransformsTo(Matrix[] destinationBoneTransforms)
+		public void CopyAbsoluteBoneTransformsTo(Matrix4x4[] destinationBoneTransforms)
 		{
 			if (destinationBoneTransforms == null)
 			{
@@ -153,8 +154,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				else
 				{
 					int index2 = modelBone.Parent.Index;
-					Matrix modelBoneTransform = modelBone.Transform;
-					destinationBoneTransforms[index1] = Matrix.Multiply(
+					Matrix4x4 modelBoneTransform = modelBone.Transform;
+					destinationBoneTransforms[index1] = Matrix4x4.Multiply(
 						modelBoneTransform,
 						destinationBoneTransforms[index2]
 					);
@@ -166,7 +167,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		/// Copies bone transforms relative to <see cref="Model.Root"/> bone from a given array to this model.
 		/// </summary>
 		/// <param name="sourceBoneTransforms">The array of prepared bone transform data.</param>
-		public void CopyBoneTransformsFrom(Matrix[] sourceBoneTransforms)
+		public void CopyBoneTransformsFrom(Matrix4x4[] sourceBoneTransforms)
 		{
 			if (sourceBoneTransforms == null)
 			{
@@ -186,7 +187,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		/// Copies bone transforms relative to <see cref="Model.Root"/> bone from this model to a given array.
 		/// </summary>
 		/// <param name="destinationBoneTransforms">The array receiving the transformed bones.</param>
-		public void CopyBoneTransformsTo(Matrix[] destinationBoneTransforms)
+		public void CopyBoneTransformsTo(Matrix4x4[] destinationBoneTransforms)
 		{
 			if (destinationBoneTransforms == null)
 			{

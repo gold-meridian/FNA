@@ -10,6 +10,7 @@
 #region Using Statements
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Runtime.InteropServices;
 #endregion
 
@@ -412,28 +413,12 @@ namespace Microsoft.Xna.Framework.Graphics
 			// Set up the FNA3D Device
 			try
 			{
-#if USE_TML_EXTENSIONS
 				GLDevice = FNA3D.FNA3D_CreateDevice(
 					ref PresentationParameters.parameters,
-// #if DEBUG
-// 					1
-// #else
-// 					0
-// #endif
 					// Workaround for Linux with Mesa drivers, since Steam
 					// Overlay results in an odd crash.
 					(byte)(Environment.GetEnvironmentVariable("FNA_GRAPHICS_DEBUG") == "1" ? 1 : 0)
 				);
-#else
-				GLDevice = FNA3D.FNA3D_CreateDevice(
-					ref PresentationParameters.parameters,
-#if DEBUG
-					1
-#else
-					0
-#endif
-				);
-#endif
 			}
 			catch(Exception e)
 			{
