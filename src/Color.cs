@@ -15,6 +15,7 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 
 using Microsoft.Xna.Framework.Design;
@@ -29,6 +30,9 @@ namespace Microsoft.Xna.Framework
 	[Serializable]
 	[TypeConverter(typeof(ColorConverter))]
 	[DebuggerDisplay("{DebugDisplayString,nq}")]
+#if USE_EXPLICIT_LAYOUT_COLOR
+	[StructLayout(LayoutKind.Explicit)]
+#endif
 	public struct Color : IEquatable<Color>, IPackedVector, IPackedVector<uint>
 	{
 		#region Public Properties
@@ -36,8 +40,15 @@ namespace Microsoft.Xna.Framework
 		/// <summary>
 		/// Gets or sets the blue component.
 		/// </summary>
+#if USE_EXPLICIT_LAYOUT_COLOR
+		[field: FieldOffset(sizeof(byte) * 0)]
+#endif
 		public byte B
 		{
+#if USE_EXPLICIT_LAYOUT_COLOR
+			get;
+			set;
+#else
 			get
 			{
 				unchecked
@@ -49,13 +60,21 @@ namespace Microsoft.Xna.Framework
 			{
 				this.packedValue = (this.packedValue & 0xff00ffff) | ((uint) value << 16);
 			}
+#endif
 		}
 
 		/// <summary>
 		/// Gets or sets the green component.
 		/// </summary>
+#if USE_EXPLICIT_LAYOUT_COLOR
+		[field: FieldOffset(sizeof(byte) * 1)]
+#endif
 		public byte G
 		{
+#if USE_EXPLICIT_LAYOUT_COLOR
+			get;
+			set;
+#else
 			get
 			{
 				unchecked
@@ -67,13 +86,21 @@ namespace Microsoft.Xna.Framework
 			{
 				this.packedValue = (this.packedValue & 0xffff00ff) | ((uint) value << 8);
 			}
+#endif
 		}
 
 		/// <summary>
 		/// Gets or sets the red component.
 		/// </summary>
+#if USE_EXPLICIT_LAYOUT_COLOR
+		[field: FieldOffset(sizeof(byte) * 2)]
+#endif
 		public byte R
 		{
+#if USE_EXPLICIT_LAYOUT_COLOR
+			get;
+			set;
+#else
 			get
 			{
 				unchecked
@@ -85,13 +112,21 @@ namespace Microsoft.Xna.Framework
 			{
 				this.packedValue = (this.packedValue & 0xffffff00) | value;
 			}
+#endif
 		}
 
 		/// <summary>
 		/// Gets or sets the alpha component.
 		/// </summary>
+#if USE_EXPLICIT_LAYOUT_COLOR
+		[field: FieldOffset(sizeof(byte) * 3)]
+#endif
 		public byte A
 		{
+#if USE_EXPLICIT_LAYOUT_COLOR
+			get;
+			set;
+#else
 			get
 			{
 				unchecked
@@ -103,6 +138,7 @@ namespace Microsoft.Xna.Framework
 			{
 				this.packedValue = (this.packedValue & 0x00ffffff) | ((uint) value << 24);
 			}
+#endif
 		}
 
 		/// <summary>
@@ -1414,6 +1450,9 @@ namespace Microsoft.Xna.Framework
 		#region Private Variables
 
 		// ARGB. Keep this name as it is used by XNA games in reflection!
+#if USE_EXPLICIT_LAYOUT_COLOR
+		[FieldOffset(0)]
+#endif
 		private uint packedValue;
 
 		#endregion

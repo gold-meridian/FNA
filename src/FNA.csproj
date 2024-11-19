@@ -8,7 +8,7 @@
         <LangVersion>latest</LangVersion>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-        <DefineConstants>$(DefineConstants);USE_NUMERICS;USE_TML_EXTENSIONS</DefineConstants>
+        <DefineConstants>$(DefineConstants);USE_NUMERICS;USE_TML_EXTENSIONS;USE_EXPLICIT_LAYOUT_COLOR</DefineConstants>
 
         <Company>Ethan "flibitijibibo" Lee</Company>
         <Product>FNA</Product>
