@@ -13,6 +13,6 @@ jobs:
 
     - name: dotnet build FNA
       run: |
-        dotnet build -c Debug ./FNA.csproj
-        dotnet build -c Release ./FNA.csproj
+        dotnet build -c Debug ./src/FNA.csproj
+        dotnet build -c Release ./src/FNA.csproj
 
