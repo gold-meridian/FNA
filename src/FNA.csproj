@@ -1,17 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>netstandard2.0</TargetFrameworks>
-        <Platforms>AnyCPU</Platforms>
-        <LangVersion>latest</LangVersion>
-    </PropertyGroup>
-
-    <PropertyGroup>
-        <EnableDefaultItems>false</EnableDefaultItems>
         <AssemblyName>FNA</AssemblyName>
         <RootNamespace>Microsoft.Xna.Framework</RootNamespace>
+
+        <TargetFrameworks>net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
+        <LangVersion>latest</LangVersion>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+
+        <DefineConstants>$(DefineConstants);USE_NUMERICS;USE_TML_EXTENSIONS</DefineConstants>
+
+        <Company>Ethan "flibitijibibo" Lee</Company>
+        <Product>FNA</Product>
+        <Copyright>Copyright (c) 2009-2024</Copyright>
+        <Version>24.11.0.0</Version>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -25,34 +27,33 @@
     </Target>
 
     <ItemGroup>
-        <Compile Include="..\..\src\**\*.cs"/>
-        <Compile Include="..\..\lib\**\*.cs"/>
+        <Compile Include="../lib/SDL2-CS/src/SDL2.cs"/>
+        <Compile Include="../lib/SDL3-CS/SDL3/SDL3.Legacy.cs"/>
+        <Compile Include="../lib/FAudio/csharp/FAudio.cs"/>
+        <Compile Include="../lib/Theorafile/csharp/Theorafile.cs"/>
+        <None Include="../app.config"/>
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="..\..\app.config"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <EmbeddedResource Include="..\..\src\Graphics\Effect\StockEffects\FXB\AlphaTestEffect.fxb">
+        <EmbeddedResource Include="Graphics/Effect/StockEffects/FXB/AlphaTestEffect.fxb">
             <LogicalName>Microsoft.Xna.Framework.Graphics.Effect.Resources.AlphaTestEffect.fxb</LogicalName>
         </EmbeddedResource>
-        <EmbeddedResource Include="..\..\src\Graphics\Effect\StockEffects\FXB\BasicEffect.fxb">
+        <EmbeddedResource Include="Graphics/Effect/StockEffects/FXB/BasicEffect.fxb">
             <LogicalName>Microsoft.Xna.Framework.Graphics.Effect.Resources.BasicEffect.fxb</LogicalName>
         </EmbeddedResource>
-        <EmbeddedResource Include="..\..\src\Graphics\Effect\StockEffects\FXB\DualTextureEffect.fxb">
+        <EmbeddedResource Include="Graphics/Effect/StockEffects/FXB/DualTextureEffect.fxb">
             <LogicalName>Microsoft.Xna.Framework.Graphics.Effect.Resources.DualTextureEffect.fxb</LogicalName>
         </EmbeddedResource>
-        <EmbeddedResource Include="..\..\src\Graphics\Effect\StockEffects\FXB\EnvironmentMapEffect.fxb">
+        <EmbeddedResource Include="Graphics/Effect/StockEffects/FXB/EnvironmentMapEffect.fxb">
             <LogicalName>Microsoft.Xna.Framework.Graphics.Effect.Resources.EnvironmentMapEffect.fxb</LogicalName>
         </EmbeddedResource>
-        <EmbeddedResource Include="..\..\src\Graphics\Effect\StockEffects\FXB\SkinnedEffect.fxb">
+        <EmbeddedResource Include="Graphics/Effect/StockEffects/FXB/SkinnedEffect.fxb">
             <LogicalName>Microsoft.Xna.Framework.Graphics.Effect.Resources.SkinnedEffect.fxb</LogicalName>
         </EmbeddedResource>
-        <EmbeddedResource Include="..\..\src\Graphics\Effect\StockEffects\FXB\SpriteEffect.fxb">
+        <EmbeddedResource Include="Graphics/Effect/StockEffects/FXB/SpriteEffect.fxb">
             <LogicalName>Microsoft.Xna.Framework.Graphics.Effect.Resources.SpriteEffect.fxb</LogicalName>
         </EmbeddedResource>
-        <EmbeddedResource Include="..\..\src\Graphics\Effect\YUVToRGBA\YUVToRGBAEffect.fxb">
+        <EmbeddedResource Include="Graphics/Effect/YUVToRGBA/YUVToRGBAEffect.fxb">
             <LogicalName>Microsoft.Xna.Framework.Graphics.Effect.Resources.YUVToRGBAEffect.fxb</LogicalName>
         </EmbeddedResource>
     </ItemGroup>
