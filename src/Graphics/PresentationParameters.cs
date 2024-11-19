@@ -150,7 +150,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Internal FNA3D Variables
 
-		internal FNA3D.FNA3D_PresentationParameters parameters;
+		internal FNA3D.PresentationParameters parameters;
 
 		#endregion
 

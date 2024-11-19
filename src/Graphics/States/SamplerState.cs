@@ -153,7 +153,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Internal FNA3D Variables
 
-		internal FNA3D.FNA3D_SamplerState state;
+		internal FNA3D.SamplerState state;
 
 		internal protected override bool IsHarmlessToLeakInstance
 		{

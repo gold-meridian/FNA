@@ -32,9 +32,9 @@ namespace Microsoft.Xna.Framework
 
 		#region Private Static Variables
 
-		private static FNA3D.FNA3D_LogFunc LogInfoFunc = FNA3DLogInfo;
-		private static FNA3D.FNA3D_LogFunc LogWarnFunc = FNA3DLogWarn;
-		private static FNA3D.FNA3D_LogFunc LogErrorFunc = FNA3DLogError;
+		private static FNA3D.LogFunc LogInfoFunc = FNA3DLogInfo;
+		private static FNA3D.LogFunc LogWarnFunc = FNA3DLogWarn;
+		private static FNA3D.LogFunc LogErrorFunc = FNA3DLogError;
 
 		#endregion
 
@@ -78,19 +78,19 @@ namespace Microsoft.Xna.Framework
 
 		#region Private Static Functions
 
-		[ObjCRuntime.MonoPInvokeCallback(typeof(FNA3D.FNA3D_LogFunc))]
+		[ObjCRuntime.MonoPInvokeCallback(typeof(FNA3D.LogFunc))]
 		private static void FNA3DLogInfo(IntPtr msg)
 		{
 			LogInfo(UTF8_ToManaged(msg));
 		}
 
-		[ObjCRuntime.MonoPInvokeCallback(typeof(FNA3D.FNA3D_LogFunc))]
+		[ObjCRuntime.MonoPInvokeCallback(typeof(FNA3D.LogFunc))]
 		private static void FNA3DLogWarn(IntPtr msg)
 		{
 			LogWarn(UTF8_ToManaged(msg));
 		}
 
-		[ObjCRuntime.MonoPInvokeCallback(typeof(FNA3D.FNA3D_LogFunc))]
+		[ObjCRuntime.MonoPInvokeCallback(typeof(FNA3D.LogFunc))]
 		private static void FNA3DLogError(IntPtr msg)
 		{
 			string err = UTF8_ToManaged(msg);

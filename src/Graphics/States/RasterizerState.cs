@@ -108,7 +108,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Internal FNA3D Variables
 
-		internal FNA3D.FNA3D_RasterizerState state;
+		internal FNA3D.RasterizerState state;
 
 		internal protected override bool IsHarmlessToLeakInstance
 		{

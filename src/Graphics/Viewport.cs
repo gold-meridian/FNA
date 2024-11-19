@@ -167,7 +167,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Internal FNA3D Variables
 
-		internal FNA3D.FNA3D_Viewport viewport;
+		internal FNA3D.Viewport viewport;
 
 		#endregion
 

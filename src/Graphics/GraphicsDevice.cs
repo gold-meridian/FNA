@@ -322,10 +322,10 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		internal readonly RenderTargetBinding[] renderTargetBindings =
 			new RenderTargetBinding[MAX_RENDERTARGET_BINDINGS];
-		private FNA3D.FNA3D_RenderTargetBinding[] nativeTargetBindings =
-			new FNA3D.FNA3D_RenderTargetBinding[MAX_RENDERTARGET_BINDINGS];
-		private FNA3D.FNA3D_RenderTargetBinding[] nativeTargetBindingsNext =
-			new FNA3D.FNA3D_RenderTargetBinding[MAX_RENDERTARGET_BINDINGS];
+		private FNA3D.RenderTargetBinding[] nativeTargetBindings =
+			new FNA3D.RenderTargetBinding[MAX_RENDERTARGET_BINDINGS];
+		private FNA3D.RenderTargetBinding[] nativeTargetBindingsNext =
+			new FNA3D.RenderTargetBinding[MAX_RENDERTARGET_BINDINGS];
 
 		internal int renderTargetCount = 0;
 
@@ -338,8 +338,8 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		private readonly VertexBufferBinding[] vertexBufferBindings =
 			new VertexBufferBinding[MAX_VERTEX_ATTRIBUTES];
-		private readonly FNA3D.FNA3D_VertexBufferBinding[] nativeBufferBindings =
-			new FNA3D.FNA3D_VertexBufferBinding[MAX_VERTEX_ATTRIBUTES];
+		private readonly FNA3D.VertexBufferBinding[] nativeBufferBindings =
+			new FNA3D.VertexBufferBinding[MAX_VERTEX_ATTRIBUTES];
 		private int vertexBufferCount = 0;
 		private bool vertexBuffersUpdated = false;
 
@@ -970,7 +970,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				IRenderTarget target = renderTargets[0].RenderTarget as IRenderTarget;
 				unsafe
 				{
-					fixed (FNA3D.FNA3D_RenderTargetBinding* rt = &nativeTargetBindingsNext[0])
+					fixed (FNA3D.RenderTargetBinding* rt = &nativeTargetBindingsNext[0])
 					{
 						PrepareRenderTargetBindings(rt, renderTargets);
 						FNA3D.FNA3D_SetRenderTargets(
@@ -1615,7 +1615,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		private unsafe void PrepareVertexBindingArray(int baseVertex)
 		{
-			fixed (FNA3D.FNA3D_VertexBufferBinding* b = &nativeBufferBindings[0])
+			fixed (FNA3D.VertexBufferBinding* b = &nativeBufferBindings[0])
 			{
 				for (int i = 0; i < vertexBufferCount; i += 1)
 				{
@@ -1678,7 +1678,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				SetDataOptions.Discard
 			);
 
-			fixed (FNA3D.FNA3D_VertexBufferBinding* b = &nativeBufferBindings[0])
+			fixed (FNA3D.VertexBufferBinding* b = &nativeBufferBindings[0])
 			{
 				b->vertexBuffer = userVertexBuffer;
 				b->vertexDeclaration.vertexStride = vertexDeclaration.VertexStride;
@@ -1729,7 +1729,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		/* Needed by VideoPlayer */
 		internal static unsafe void PrepareRenderTargetBindings(
-			FNA3D.FNA3D_RenderTargetBinding *b,
+			FNA3D.RenderTargetBinding *b,
 			RenderTargetBinding[] bindings
 		) {
 			for (int i = 0; i < bindings.Length; i += 1, b += 1)

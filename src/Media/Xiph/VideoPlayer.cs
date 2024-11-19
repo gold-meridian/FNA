@@ -58,10 +58,10 @@ namespace Microsoft.Xna.Framework.Media
 		private DepthStencilState prevDepthStencil;
 		private RasterizerState prevRasterizer;
 		private Viewport prevViewport;
-		private FNA3D.FNA3D_RenderTargetBinding[] nativeVideoTexture =
-			new FNA3D.FNA3D_RenderTargetBinding[3];
-		private FNA3D.FNA3D_RenderTargetBinding[] nativeOldTargets =
-			new FNA3D.FNA3D_RenderTargetBinding[GraphicsDevice.MAX_RENDERTARGET_BINDINGS];
+		private FNA3D.RenderTargetBinding[] nativeVideoTexture =
+			new FNA3D.RenderTargetBinding[3];
+		private FNA3D.RenderTargetBinding[] nativeOldTargets =
+			new FNA3D.RenderTargetBinding[GraphicsDevice.MAX_RENDERTARGET_BINDINGS];
 
 		private void GL_initialize()
 		{
@@ -193,7 +193,7 @@ namespace Microsoft.Xna.Framework.Media
 
 			unsafe
 			{
-				fixed (FNA3D.FNA3D_RenderTargetBinding* rt = &nativeVideoTexture[0])
+				fixed (FNA3D.RenderTargetBinding* rt = &nativeVideoTexture[0])
 				{
 					GraphicsDevice.PrepareRenderTargetBindings(
 						rt,
@@ -262,7 +262,7 @@ namespace Microsoft.Xna.Framework.Media
 
 				unsafe
 				{
-					fixed (FNA3D.FNA3D_RenderTargetBinding* rt = &nativeOldTargets[0])
+					fixed (FNA3D.RenderTargetBinding* rt = &nativeOldTargets[0])
 					{
 						GraphicsDevice.PrepareRenderTargetBindings(
 							rt,
