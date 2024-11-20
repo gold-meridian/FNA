@@ -5,12 +5,13 @@
         <LangVersion>latest</LangVersion>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <RootNamespace>FAudio</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
         <InternalsVisibleTo Include="FNA"/>
 
-        <Compile Include="../../lib/SDL2-CS/src/SDL2.cs"/>
+        <Compile Include="../../lib/FAudio/csharp/FAudio.cs"/>
     </ItemGroup>
 
 </Project>

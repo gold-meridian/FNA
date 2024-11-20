@@ -12,10 +12,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\FAudio\FAudio.csproj"/>
-        <ProjectReference Include="..\SDL2\SDL2.csproj"/>
-        <ProjectReference Include="..\SDL3\SDL3.csproj"/>
-        <ProjectReference Include="..\Theorafile\Theorafile.csproj"/>
+        <ProjectReference Include="..\Tomat.FAudio.Native\Tomat.FAudio.Native.csproj" />
+        <ProjectReference Include="..\Tomat.SDL2.Native\Tomat.SDL2.Native.csproj" />
+        <ProjectReference Include="..\Tomat.SDL3.Native\Tomat.SDL3.Native.csproj" />
+        <ProjectReference Include="..\Tomat.Theorafile.Native\Tomat.Theorafile.Native.csproj" />
     </ItemGroup>
 
     <PropertyGroup>
