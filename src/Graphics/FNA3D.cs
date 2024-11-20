@@ -17,17 +17,19 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.Xna.Framework.Graphics;
 
-public static class FNA3D
+public static partial class FNA3D
 {
 	[SuppressMessage("ReSharper", "MemberHidesStaticFromOuterClass")]
-	private static class Impl
+	private static partial class Impl
 	{
 #region Driver Functions
-		[DllImport(native_lib_name, CallingConvention = CallingConvention.Cdecl)]
-		public static extern uint FNA3D_PrepareWindowAttributes();
+		[LibraryImport(native_lib_name)]
+        [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+        public static partial uint FNA3D_PrepareWindowAttributes();
 
-		[DllImport(native_lib_name, CallingConvention = CallingConvention.Cdecl)]
-		public static extern void FNA3D_GetDrawableSize(
+		[LibraryImport(native_lib_name)]
+        [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+        public static partial void FNA3D_GetDrawableSize(
 			IntPtr  window,
 			out int w,
 			out int h
@@ -36,14 +38,16 @@ public static class FNA3D
 
 #region Init/Quit
 		/* IntPtr refers to an FNA3D_Device* */
-		[DllImport(native_lib_name, CallingConvention = CallingConvention.Cdecl)]
-		public static extern IntPtr FNA3D_CreateDevice(
+		[LibraryImport(native_lib_name)]
+        [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+        public static partial IntPtr FNA3D_CreateDevice(
 			ref FNA3D.PresentationParameters presentationParameters,
 			byte                             debugMode
 		);
 
-		[DllImport(native_lib_name, CallingConvention = CallingConvention.Cdecl)]
-		public static extern void FNA3D_DestroyDevice(IntPtr device);
+		[LibraryImport(native_lib_name)]
+        [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+        public static partial void FNA3D_DestroyDevice(IntPtr device);
 #endregion
 
 #region Presentation
