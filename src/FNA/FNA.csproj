@@ -11,6 +11,13 @@
         <Version>24.11.0.0</Version>
     </PropertyGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="..\FAudio\FAudio.csproj"/>
+        <ProjectReference Include="..\SDL2\SDL2.csproj"/>
+        <ProjectReference Include="..\SDL3\SDL3.csproj"/>
+        <ProjectReference Include="..\Theorafile\Theorafile.csproj"/>
+    </ItemGroup>
+
     <PropertyGroup>
         <FNASettingsPropsFilePath>$(SolutionDir)FNA.Settings.props</FNASettingsPropsFilePath>
     </PropertyGroup>
@@ -22,11 +29,7 @@
     </Target>
 
     <ItemGroup>
-        <Compile Include="../lib/SDL2-CS/src/SDL2.cs"/>
-        <Compile Include="../lib/SDL3-CS/SDL3/SDL3.Legacy.cs"/>
-        <Compile Include="../lib/FAudio/csharp/FAudio.cs"/>
-        <Compile Include="../lib/Theorafile/csharp/Theorafile.cs"/>
-        <None Include="../app.config"/>
+        <None Include="../../app.config"/>
     </ItemGroup>
 
     <ItemGroup>
