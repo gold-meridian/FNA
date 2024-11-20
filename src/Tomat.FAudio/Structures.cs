@@ -1,14 +1,16 @@
 using System.Runtime.InteropServices;
 
-using wchar_t = short;
-
 namespace FAudio;
 
-#region Forward-declared structs
+public struct FAudio;
+
 public struct FAudioVoice;
 
+public struct FAudioEngineCallback;
+
+public struct FAudioVoiceCallback;
+
 public struct Fapo;
-#endregion
 
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
 public unsafe struct FAudioGuid

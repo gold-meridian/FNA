@@ -35,7 +35,7 @@ public enum FAudioStreamCategory
 	Media,
 }
 
-public enum Processor : uint
+public enum FAudioProcessor : uint
 {
 	DefaultProcessor = 0xFFFFFFFF,
 }
