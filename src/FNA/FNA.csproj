@@ -12,7 +12,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Tomat.FAudio.Native\Tomat.FAudio.Native.csproj" />
+        <ProjectReference Include="..\Tomat.FAudio\Tomat.FAudio.csproj" />
         <ProjectReference Include="..\Tomat.SDL2.Native\Tomat.SDL2.Native.csproj" />
         <ProjectReference Include="..\Tomat.SDL3.Native\Tomat.SDL3.Native.csproj" />
         <ProjectReference Include="..\Tomat.Theorafile.Native\Tomat.Theorafile.Native.csproj" />
