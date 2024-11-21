@@ -8,4 +8,10 @@
         <RootNamespace>FAudio</RootNamespace>
     </PropertyGroup>
 
+    <ItemGroup>
+        <InternalsVisibleTo Include="FNA"/>
+
+        <Compile Include="../../lib/FAudio/csharp/FAudio.cs"/>
+    </ItemGroup>
+
 </Project>
