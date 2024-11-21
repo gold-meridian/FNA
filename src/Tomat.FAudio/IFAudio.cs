@@ -960,4 +960,23 @@ public unsafe interface IFAudio
 		uint*                 channelMask
 	);
 #endregion
+
+#region FAudioFX
+	// TODO: Does not implement custom allocator functions or I3DL2 functions.
+
+	uint CreateVolumeMeter(
+		Fapo** apo,
+		uint   flags
+	);
+
+	uint CreateReverb(
+		Fapo** apo,
+		uint   flags
+	);
+
+	uint CreateReverb9(
+		Fapo** apo,
+		uint   flags
+	);
+#endregion
 }

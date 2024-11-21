@@ -436,3 +436,143 @@ public struct FAudioXma2WaveFormatEx
 	public ushort BlockCount { get; set; }
 }
 #endregion
+
+#region FAudioFX
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+public unsafe struct FAudioFxVolumeMeterLevels
+{
+	public float* PeakLevels { get; set; }
+
+	public float* RmsLevels { get; set; }
+
+	public uint ChannelCount { get; set; }
+}
+
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+public struct FAudioFxReverbParameters
+{
+	public float WetDryMix { get; set; }
+
+	public uint ReflectionsDelay { get; set; }
+
+	public byte ReverbDelay { get; set; }
+
+	public byte RearDelay { get; set; }
+
+	public byte PositionLeft { get; set; }
+
+	public byte PositionRight { get; set; }
+
+	public byte PositionMatrixLeft { get; set; }
+
+	public byte PositionMatrixRight { get; set; }
+
+	public byte EarlyDiffusion { get; set; }
+
+	public byte LateDiffusion { get; set; }
+
+	public byte LowEqGain { get; set; }
+
+	public byte LowEqCutoff { get; set; }
+
+	public byte HighEqGain { get; set; }
+
+	public byte HighEqCutoff { get; set; }
+
+	public float RoomFilterFreq { get; set; }
+
+	public float RoomFilterMain { get; set; }
+
+	public float RoomFilterHf { get; set; }
+
+	public float ReflectionsGain { get; set; }
+
+	public float ReverbGain { get; set; }
+
+	public float DecayTime { get; set; }
+
+	public float Density { get; set; }
+
+	public float RoomSize { get; set; }
+}
+
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+public struct FAudioFxReverbParameters9
+{
+	public float WetDryMix { get; set; }
+
+	public uint ReflectionsDelay { get; set; }
+
+	public byte ReverbDelay { get; set; }
+
+	public byte RearDelay { get; set; }
+
+	public byte SideDelay { get; set; }
+
+	public byte PositionLeft { get; set; }
+
+	public byte PositionRight { get; set; }
+
+	public byte PositionMatrixLeft { get; set; }
+
+	public byte PositionMatrixRight { get; set; }
+
+	public byte EarlyDiffusion { get; set; }
+
+	public byte LateDiffusion { get; set; }
+
+	public byte LowEqGain { get; set; }
+
+	public byte LowEqCutoff { get; set; }
+
+	public byte HighEqGain { get; set; }
+
+	public byte HighEqCutoff { get; set; }
+
+	public float RoomFilterFreq { get; set; }
+
+	public float RoomFilterMain { get; set; }
+
+	public float RoomFilterHf { get; set; }
+
+	public float ReflectionsGain { get; set; }
+
+	public float ReverbGain { get; set; }
+
+	public float DecayTime { get; set; }
+
+	public float Density { get; set; }
+
+	public float RoomSize { get; set; }
+}
+
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+public struct FAudioFxReverbI3Dl2Parameters
+{
+	public float WetDryMix { get; set; }
+
+	public int Room { get; set; }
+
+	public int RoomHf { get; set; }
+
+	public float RoomRolloffFactor { get; set; }
+
+	public float DecayTime { get; set; }
+
+	public float DecayHfRatio { get; set; }
+
+	public int Reflections { get; set; }
+
+	public float ReflectionsDelay { get; set; }
+
+	public int Reverb { get; set; }
+
+	public float ReverbDelay { get; set; }
+
+	public float Diffusion { get; set; }
+
+	public float Density { get; set; }
+
+	public float HfReference { get; set; }
+}
+#endregion
