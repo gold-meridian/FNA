@@ -1,5 +1,6 @@
 namespace FAudio;
 
+#region FAudio
 public enum FAudioDeviceRole
 {
 	NotDefaultDevice            = 0x0,
@@ -39,3 +40,4 @@ public enum FAudioProcessor : uint
 {
 	DefaultProcessor = 0xFFFFFFFF,
 }
+#endregion

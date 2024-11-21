@@ -2,6 +2,7 @@ namespace FAudio;
 
 public static class Constants
 {
+#region FAudio
 	// Targeting compatibility with XAudio 2.8.
 	public const uint FAUDIO_TARGET_VERSION = 8;
 
@@ -78,4 +79,5 @@ public static class Constants
 	public const uint FAUDIO_FORMAT_WMAUDIO_LOSSLESS = 0x0163;
 	public const uint FAUDIO_FORMAT_XMAUDIO2         = 0x0166;
 	public const uint FAUDIO_FORMAT_EXTENSIBLE       = 0xFFFE;
+#endregion
 }

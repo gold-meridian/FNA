@@ -2,11 +2,11 @@ using System.Runtime.InteropServices;
 
 namespace FAudio;
 
+#region FAudio
 public struct FAudio;
 
 public struct FAudioVoice;
 
-// TODO
 public unsafe struct FAudioEngineCallback
 {
 	/// <summary>
@@ -435,3 +435,4 @@ public struct FAudioXma2WaveFormatEx
 
 	public ushort BlockCount { get; set; }
 }
+#endregion
