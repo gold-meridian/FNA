@@ -6,9 +6,86 @@ public struct FAudio;
 
 public struct FAudioVoice;
 
-public struct FAudioEngineCallback;
+// TODO
+public unsafe struct FAudioEngineCallback
+{
+	/// <summary>
+	///		If something horrible happens, this will be called.
+	///		<br />
+	///		<c>error</c>:  The error code that spawned this callback.
+	/// </summary>
+	public delegate* unmanaged<FAudioEngineCallback*, uint, void> OnCriticalError { get; set; }
 
-public struct FAudioVoiceCallback;
+	/// <summary>
+	///		This is called at the end of a processing update.
+	/// </summary>
+	public delegate* unmanaged<FAudioEngineCallback*, void> OnProcessingPassStart { get; set; }
+
+	/// <summary>
+	///		This is called at the beginning of a processing update.
+	/// </summary>
+	public delegate* unmanaged<FAudioEngineCallback*, void> OnProcessingPassEnd { get; set; }
+}
+
+public unsafe struct FAudioVoiceCallback
+{
+	/// <summary>
+	///		When a buffer is no longer in use, this is called.
+	///		<br />
+	///		<c>bufferContext</c>:  The context for the
+	///		<see cref="FAudioBuffer"/> in question.
+	/// </summary>
+	public delegate* unmanaged<FAudioVoiceCallback*, void*, void> OnBufferEnd { get; set; }
+
+	/// <summary>
+	///		When a buffer is now being used, this is called.
+	///		<br />
+	///		<c>bufferContext</c>:  The context for the
+	///		<see cref="FAudioBuffer"/> in question.
+	/// </summary>
+	public delegate* unmanaged<FAudioVoiceCallback*, void*, void> OnBufferStart { get; set; }
+
+	/// <summary>
+	///		When a buffer completes a loop, this is called.
+	///		<br />
+	///		<c>bufferContext</c>:  The context for the
+	///		<see cref="FAudioBuffer"/> in question.
+	/// </summary>
+	public delegate* unmanaged<FAudioVoiceCallback*, void*, void> OnLoopEnd { get; set; }
+
+	/// <summary>
+	///		Whe a buffer that has the
+	///		<see cref="Constants.FAUDIO_END_OF_STREAM"/> flag is finished, this
+	///		is called.
+	/// </summary>
+	public delegate* unmanaged<FAudioVoiceCallback*, void> OnStreamEnd { get; set; }
+
+	/// <summary>
+	///		If something horrible happens to a voice, this is called.
+	///		<br />
+	///		<c>bufferContext</c>:  The context for the
+	///		<see cref="FAudioBuffer"/> in question.
+	///		<br />
+	///		<c>error</c>:  The error code that spawned this callback.
+	/// </summary>
+	public delegate* unmanaged<FAudioVoiceCallback*, void*, uint, void> OnVoiceError { get; set; }
+
+	/// <summary>
+	///		When this voice is done being processed, this is called.
+	/// </summary>
+	public delegate* unmanaged<FAudioVoiceCallback*, void> OnVoiceProcessingPassEnd { get; set; }
+
+	/// <summary>
+	///		When a voice is about to start being processed, this is called.
+	///		<br />
+	///		<c>bytesRequested</c>:  The number of bytes needed from the
+	///		application to complete a full update.  For example, if we need
+	///		<c>512</c> frames for a whole update, and the voice is a
+	///		<see langword="float"/> stereo source, <c>bytesRequested</c> will be
+	///		<c>4096</c>.
+	/// </summary>
+	public delegate* unmanaged<FAudioVoiceCallback*, uint, void> OnVoiceProcessingPassStart { get; set; }
+}
 
 public struct Fapo;
 

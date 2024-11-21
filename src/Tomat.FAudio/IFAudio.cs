@@ -15,7 +15,7 @@ public unsafe interface IFAudio
 	/// <summary>
 	///		This should be your first FAudio call.
 	/// </summary>
-	/// <param name="audio">Filled with the FAudio core context.</param>
+	/// <param name="audio">The FAudio core context.</param>
 	/// <param name="flags">
 	///		Can be <c>0</c> or <see cref="Constants.FAUDIO_DEBUG_ENGINE"/>.
 	/// </param>
@@ -24,7 +24,7 @@ public unsafe interface IFAudio
 	/// </param>
 	/// <returns><c>0</c> on success.</returns>
 	uint Create(
-		FAudio**        audio,
+		out FAudio*     audio,
 		uint            flags,
 		FAudioProcessor xaudio2Processor
 	);
@@ -36,8 +36,8 @@ public unsafe interface IFAudio
 	/// <param name="version"></param>
 	/// <returns></returns>
 	uint ComConstructExt(
-		FAudio** faudio,
-		byte     version
+		out FAudio* faudio,
+		byte        version
 	);
 
 	/// <summary>
@@ -173,14 +173,14 @@ public unsafe interface IFAudio
 	/// </param>
 	/// <returns></returns>
 	uint CreateSourceVoice(
-		FAudio*              audio,
-		FAudioSourceVoice**  sourceVoice,
-		FAudioWaveFormatEx*  sourceFormat,
-		uint                 flags,
-		float                maxFrequencyRatio,
-		FAudioVoiceCallback* callback,
-		FAudioVoiceSends*    sendList,
-		FAudioEffectChain*   effectChain
+		FAudio*                audio,
+		out FAudioSourceVoice* sourceVoice,
+		ref FAudioWaveFormatEx sourceFormat,
+		uint                   flags,
+		float                  maxFrequencyRatio,
+		FAudioVoiceCallback*   callback,
+		FAudioVoiceSends*      sendList,
+		FAudioEffectChain*     effectChain
 	);
 
 	/// <summary>
@@ -215,14 +215,14 @@ public unsafe interface IFAudio
 	/// </param>
 	/// <returns><c>0</c> on success.</returns>
 	uint CreateSubmixVoice(
-		FAudio*             audio,
-		FAudioSubmixVoice** submixVoice,
-		uint                inputChannels,
-		uint                inputSampleRate,
-		uint                flags,
-		uint                processingStage,
-		FAudioVoiceSends*   sendList,
-		FAudioEffectChain*  effectChain
+		FAudio*                audio,
+		out FAudioSubmixVoice* submixVoice,
+		uint                   inputChannels,
+		uint                   inputSampleRate,
+		uint                   flags,
+		uint                   processingStage,
+		FAudioVoiceSends*      sendList,
+		FAudioEffectChain*     effectChain
 	);
 
 	/// <summary>
@@ -251,13 +251,13 @@ public unsafe interface IFAudio
 	/// </param>
 	/// <returns><c>0</c> on success.</returns>
 	uint CreateMasteringVoice(
-		FAudio*                audio,
-		FAudioMasteringVoice** masteringVoice,
-		uint                   inputChannels,
-		uint                   inputSampleRate,
-		uint                   flags,
-		uint                   deviceIndex,
-		FAudioEffectChain*     effectChain
+		FAudio*                   audio,
+		out FAudioMasteringVoice* masteringVoice,
+		uint                      inputChannels,
+		uint                      inputSampleRate,
+		uint                      flags,
+		uint                      deviceIndex,
+		FAudioEffectChain*        effectChain
 	);
 
 	/// <summary>
@@ -315,8 +315,8 @@ public unsafe interface IFAudio
 	///		The data.  See <see cref="FAudioPerformanceData"/> for details.
 	/// </param>
 	void GetPerformanceData(
-		FAudio*                audio,
-		FAudioPerformanceData* perfData
+		FAudio*                   audio,
+		out FAudioPerformanceData perfData
 	);
 
 	/// <summary>
@@ -329,9 +329,9 @@ public unsafe interface IFAudio
 	/// </param>
 	/// <param name="reserved">Set this to <see langword="null"/>.</param>
 	void SetDebugConfiguration(
-		FAudio*                   audio,
-		FAudioDebugConfiguration* debugConfiguration,
-		void*                     reserved
+		FAudio*                      audio,
+		ref FAudioDebugConfiguration debugConfiguration,
+		void*                        reserved
 	);
 
 	// /* Requests the values that determine's the engine's update size.
@@ -348,9 +348,9 @@ public unsafe interface IFAudio
 	// 	uint32_t *quantumDenominator
 	// );
 	void GetProcessingQuantum(
-		FAudio* audio,
-		uint*   quantumNumerator,
-		uint*   quantumDenominator
+		FAudio*  audio,
+		out uint quantumNumerator,
+		out uint quantumDenominator
 	);
 #endregion
 
@@ -364,8 +364,8 @@ public unsafe interface IFAudio
 	// 	FAudioVoiceDetails *pVoiceDetails
 	// );
 	void GetVoiceDetails(
-		FAudioVoice*        voice,
-		FAudioVoiceDetails* voiceDetails
+		FAudioVoice*           voice,
+		out FAudioVoiceDetails voiceDetails
 	);
 
 	// /* Change the output voices for this voice.
@@ -381,8 +381,8 @@ public unsafe interface IFAudio
 	// 	const FAudioVoiceSends *pSendList
 	// );
 	uint SetOutputVoices(
-		FAudioVoice*      voice,
-		FAudioVoiceSends* sendList
+		FAudioVoice*         voice,
+		ref FAudioVoiceSends sendList
 	);
 
 	// /* Change/Remove the effect chain for this voice.
@@ -399,8 +399,8 @@ public unsafe interface IFAudio
 	// 	const FAudioEffectChain *pEffectChain
 	// );
 	uint SetEffectChain(
-		FAudioVoice*       voice,
-		FAudioEffectChain* effectChain
+		FAudioVoice*          voice,
+		ref FAudioEffectChain effectChain
 	);
 
 	// /* Enables an effect in the effect chain.
@@ -418,7 +418,7 @@ public unsafe interface IFAudio
 	uint EnableEffect(
 		FAudioVoice* voice,
 		uint         effectIndex,
-		uint         operaitonSet
+		uint         operationSet
 	);
 
 	// /* Disables an effect in the effect chain.
@@ -454,7 +454,7 @@ public unsafe interface IFAudio
 	void GetEffectState(
 		FAudioVoice* voice,
 		uint         effectIndex,
-		int*         enabled
+		out int      enabled
 	);
 
 	// /* Submits a block of memory to be sent to FAPO::SetParameters.
@@ -516,9 +516,9 @@ public unsafe interface IFAudio
 	// 	uint32_t OperationSet
 	// );
 	uint SetFilterParameters(
-		FAudioVoice*            voice,
-		FAudioFilterParameters* parameters,
-		uint                    operationSet
+		FAudioVoice*               voice,
+		ref FAudioFilterParameters parameters,
+		uint                       operationSet
 	);
 
 	// /* Requests the filter variables for a voice.
@@ -531,8 +531,8 @@ public unsafe interface IFAudio
 	// 	FAudioFilterParameters *pParameters
 	// );
 	void GetFilterParameters(
-		FAudioVoice*            voice,
-		FAudioFilterParameters* parameters
+		FAudioVoice*               voice,
+		out FAudioFilterParameters parameters
 	);
 
 	// /* Sets the filter variables for a voice's output voice.
@@ -551,10 +551,10 @@ public unsafe interface IFAudio
 	// 	uint32_t OperationSet
 	// );
 	uint SetOutputFilterParameters(
-		FAudioVoice*            voice,
-		FAudioVoice*            destinationVoice,
-		FAudioFilterParameters* parameters,
-		uint                    operationSet
+		FAudioVoice*               voice,
+		FAudioVoice*               destinationVoice,
+		ref FAudioFilterParameters parameters,
+		uint                       operationSet
 	);
 
 	// /* Requests the filter variables for a voice's output voice.
@@ -569,9 +569,9 @@ public unsafe interface IFAudio
 	// 	FAudioFilterParameters *pParameters
 	// );
 	void GetOutputFilterParameters(
-		FAudioVoice*            voice,
-		FAudioVoice*            destinationVoice,
-		FAudioFilterParameters* parameters
+		FAudioVoice*               voice,
+		FAudioVoice*               destinationVoice,
+		out FAudioFilterParameters parameters
 	);
 
 	// /* Sets the filter variables for a voice.
@@ -588,9 +588,9 @@ public unsafe interface IFAudio
 	// 	uint32_t OperationSet
 	// );
 	uint SetFilterParametersExt(
-		FAudioVoice*               voice,
-		FAudioFilterParametersExt* parameters,
-		uint                       operationSet
+		FAudioVoice*                  voice,
+		ref FAudioFilterParametersExt parameters,
+		uint                          operationSet
 	);
 
 	// /* Requests the filter variables for a voice.
@@ -603,8 +603,8 @@ public unsafe interface IFAudio
 	// 	FAudioFilterParametersEXT* pParameters
 	// );
 	void GetFilterParametersExt(
-		FAudioVoice*               voice,
-		FAudioFilterParametersExt* parameters
+		FAudioVoice*                  voice,
+		out FAudioFilterParametersExt parameters
 	);
 
 	// /* Sets the filter variables for a voice's output voice.
@@ -623,10 +623,10 @@ public unsafe interface IFAudio
 	// 	uint32_t OperationSet
 	// );
 	uint SetOutputFilterParametersExt(
-		FAudioVoice*               voice,
-		FAudioVoice*               destinationVoice,
-		FAudioFilterParametersExt* parameters,
-		uint                       operationSet
+		FAudioVoice*                  voice,
+		FAudioVoice*                  destinationVoice,
+		ref FAudioFilterParametersExt parameters,
+		uint                          operationSet
 	);
 
 	// /* Requests the filter variables for a voice's output voice.
@@ -641,9 +641,9 @@ public unsafe interface IFAudio
 	// 	FAudioFilterParametersEXT* pParameters
 	// );
 	void GetOutputFilterParametersExt(
-		FAudioVoice*               voice,
-		FAudioVoice*               destinationVoice,
-		FAudioFilterParametersExt* parameters
+		FAudioVoice*                  voice,
+		FAudioVoice*                  destinationVoice,
+		out FAudioFilterParametersExt parameters
 	);
 
 	// /* Sets the global volume of a voice.
@@ -676,7 +676,7 @@ public unsafe interface IFAudio
 	// );
 	void GetVolume(
 		FAudioVoice* voice,
-		float        volume
+		out float    volume
 	);
 
 	// /* Sets the per-channel volumes of a voice.
@@ -696,7 +696,7 @@ public unsafe interface IFAudio
 	uint SetChannelVolumes(
 		FAudioVoice* voice,
 		uint         channels,
-		float*       volumes,
+		float[]      volumes,
 		uint         operationSet
 	);
 
@@ -713,7 +713,7 @@ public unsafe interface IFAudio
 	void GetChannelVolumes(
 		FAudioVoice* voice,
 		uint         channels,
-		float*       volumes
+		float[]      volumes
 	);
 
 	// /* Sets the volumes of a send's output channels. The matrix is based on the
@@ -769,7 +769,7 @@ public unsafe interface IFAudio
 		FAudioVoice* destinationVoice,
 		uint         sourceChannels,
 		uint         destinationChannels,
-		float*       levelMatrix
+		float[]      levelMatrix
 	);
 
 	// /* Removes this voice from the audio graph and frees memory. */
@@ -779,7 +779,7 @@ public unsafe interface IFAudio
 	//  * Returns S_OK on success and E_FAIL if voice could not be destroyed (e. g., because it is in use).
 	//  */
 	// FAUDIOAPI uint32_t FAudioVoice_DestroyVoiceSafeEXT(FAudioVoice *voice);
-	uint DestroyVOiceSafeExt(FAudioVoice* voice);
+	uint DestroyVoiceSafeExt(FAudioVoice* voice);
 #endregion
 
 #region FAudioSourceVoice Interface
@@ -834,9 +834,9 @@ public unsafe interface IFAudio
 	// 	const FAudioBufferWMA *pBufferWMA
 	// );
 	uint SubmitSourceBuffer(
-		FAudioSourceVoice* voice,
-		FAudioBuffer*      buffer,
-		FAudioBufferWma*   bufferWma
+		FAudioSourceVoice*  voice,
+		ref FAudioBuffer    buffer,
+		ref FAudioBufferWma bufferWma
 	);
 
 	// /* Removes all buffers from a source, with a minor exception.
@@ -885,9 +885,9 @@ public unsafe interface IFAudio
 	// 	uint32_t Flags
 	// );
 	void GetState(
-		FAudioSourceVoice* voice,
-		FAudioVoiceState*  voiceState,
-		uint               flags
+		FAudioSourceVoice*   voice,
+		out FAudioVoiceState voiceState,
+		uint                 flags
 	);
 
 	// /* Sets the frequency ratio (fancy phrase for pitch) of this source.
@@ -918,7 +918,7 @@ public unsafe interface IFAudio
 	// );
 	void GetFrequencyRatio(
 		FAudioSourceVoice* voice,
-		float*             ratio
+		out float          ratio
 	);
 
 	// /* Resets the core sample rate of this source.
