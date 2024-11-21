@@ -15,8 +15,9 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
 
-using Microsoft.Xna.Framework.Design;
+using RectangleConverter = Microsoft.Xna.Framework.Design.RectangleConverter;
 #endregion
 
 namespace Microsoft.Xna.Framework

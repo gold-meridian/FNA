@@ -15,6 +15,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Numerics;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -196,10 +197,7 @@ namespace Microsoft.Xna.Framework.Content
 						string readerTypeString = originalReaderTypeString;
 						readerTypeString = PrepareType(readerTypeString);
 
-						readerTypeString = readerTypeString
-						                  .Replace("Microsoft.Xna.Framework.Vector2, FNA, Version=24.1.0.0, Culture=neutral, PublicKeyToken=null", typeof(Vector2).AssemblyQualifiedName)
-						                  .Replace("Microsoft.Xna.Framework.Vector3, FNA, Version=24.1.0.0, Culture=neutral, PublicKeyToken=null", typeof(Vector3).AssemblyQualifiedName)
-						                  .Replace("Microsoft.Xna.Framework.Vector4, FNA, Version=24.1.0.0, Culture=neutral, PublicKeyToken=null", typeof(Vector4).AssemblyQualifiedName);
+						readerTypeString = ConvertReaderType(readerTypeString);
 
 						Type l_readerType = Type.GetType(readerTypeString);
 						if (l_readerType != null)
@@ -381,5 +379,34 @@ namespace Microsoft.Xna.Framework.Content
 		}
 
 		#endregion
+
+		private static readonly Dictionary<string, Type> reader_map = new()
+		{
+			{ "Vector2", typeof(Vector2) },
+			{ "Vector3", typeof(Vector3) },
+			{ "Vector4", typeof(Vector4) },
+			{ "Quaternion", typeof(Quaternion) },
+			{ "Point", typeof(Point) },
+		};
+
+		private static string ConvertReaderType(string readerType)
+		{
+			foreach (var pair in reader_map)
+			{
+				if (!readerType.Contains(pair.Key))
+				{
+					continue;
+				}
+
+				return readerType.Replace(pair.Key, pair.Value.FullName);
+			}
+
+			return readerType;
+
+			static bool IsOfType(string typeName)
+			{
+				return typeName.StartsWith("Microsoft.Xna.Framework." + typeName + ',');
+			}
+		}
 	}
 }
