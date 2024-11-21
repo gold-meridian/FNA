@@ -979,4 +979,14 @@ public unsafe interface IFAudio
 		uint   flags
 	);
 #endregion
+
+#region FAPO
+	// TODO: Nothing implemented.
+#endregion
+
+#region FAPOBase
+	// TODO: Only Release implemented.
+
+	int Release(FapoBase* fapo);
+#endregion
 }

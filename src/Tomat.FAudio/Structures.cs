@@ -576,3 +576,8 @@ public struct FAudioFxReverbI3Dl2Parameters
 	public float HfReference { get; set; }
 }
 #endregion
+
+#region FAPOBase
+// TODO
+public struct FapoBase;
+#endregion
