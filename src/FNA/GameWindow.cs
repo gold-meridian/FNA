@@ -11,8 +11,6 @@
 using System;
 using System.ComponentModel;
 using System.Drawing;
-
-using Microsoft.Xna.Framework.Input;
 #endregion
 
 namespace Microsoft.Xna.Framework

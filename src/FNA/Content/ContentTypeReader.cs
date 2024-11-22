@@ -13,7 +13,6 @@
 
 #region Using Statements
 using System;
-using System.IO;
 #endregion
 
 namespace Microsoft.Xna.Framework.Content

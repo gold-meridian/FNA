@@ -7,15 +7,16 @@
         <TargetFramework>net9.0</TargetFramework>
         <LangVersion>latest</LangVersion>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <Nullable>enable</Nullable>
 
         <Version>24.11.0.0</Version>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Tomat.FAudio\Tomat.FAudio.csproj" />
-        <ProjectReference Include="..\Tomat.SDL2.Native\Tomat.SDL2.Native.csproj" />
-        <ProjectReference Include="..\Tomat.SDL3.Native\Tomat.SDL3.Native.csproj" />
-        <ProjectReference Include="..\Tomat.Theorafile.Native\Tomat.Theorafile.Native.csproj" />
+        <ProjectReference Include="..\Tomat.FAudio\Tomat.FAudio.csproj"/>
+        <ProjectReference Include="..\Tomat.SDL2.Native\Tomat.SDL2.Native.csproj"/>
+        <ProjectReference Include="..\Tomat.SDL3.Native\Tomat.SDL3.Native.csproj"/>
+        <ProjectReference Include="..\Tomat.Theorafile.Native\Tomat.Theorafile.Native.csproj"/>
     </ItemGroup>
 
     <PropertyGroup>

@@ -8,7 +8,6 @@
 #endregion
 
 #region Using Statements
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 #endregion
 

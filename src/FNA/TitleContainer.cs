@@ -7,140 +7,104 @@
  */
 #endregion
 
-#region CASE_SENSITIVITY_HACK Option
-// #define CASE_SENSITIVITY_HACK
-/* On Linux, the file system is case sensitive.
- * This means that unless you really focused on it, there's a good chance that
- * your filenames are not actually accurate! The result: File/DirectoryNotFound.
- * This is a quick alternative to MONO_IOMAP=all, but the point is that you
- * should NOT depend on either of these two things. PLEASE fix your paths!
- * -flibit
- */
-#endregion
-
-#region Using Statements
 using System;
 using System.IO;
-#endregion
 
-namespace Microsoft.Xna.Framework
+namespace Microsoft.Xna.Framework;
+
+public static class TitleContainer
 {
-	public static class TitleContainer
+	internal static string TitlePath => FNAPlatform.TitleLocation;
+
+	// On Linux, the file system is case-sensitive.  This means that unless you
+	// really focused on it, there's a good chance that your filenames are not
+	// actually accurate!  The result: File/DirectoryNotFound.  This is a quick
+	// alternative to MONO_IOMAP=all, but the point is that you should NOT
+	// depend on either of these two things.  PLEASE, fix your paths!
+	// -flibit
+	private static readonly bool use_case_sensitivity_hack = Environment.GetEnvironmentVariable("FNA_CASE_SENSITIVITY_HACK") == "1";
+
+	public static Stream OpenStream(string name)
 	{
-		#region Public Static Methods
+		return File.OpenRead(GetNormalizedPathName(name));
+	}
 
-		public static Stream OpenStream(string name)
+	internal static IntPtr ReadToPointer(string name, out IntPtr size)
+	{
+		name = GetNormalizedPathName(name);
+		
+		if (!File.Exists(name))
 		{
-			string safeName = MonoGame.Utilities.FileHelpers.NormalizeFilePathSeparators(name);
+			throw new FileNotFoundException(name);
+		}
+		return FNAPlatform.ReadFileToPointer(name, out size);
+	}
 
-#if CASE_SENSITIVITY_HACK
-			if (Path.IsPathRooted(safeName))
-			{
-				safeName = GetCaseName(safeName);
-			}
-			else
-			{
-				safeName = GetCaseName(Path.Combine(TitleLocation.Path, safeName));
-			}
-#endif
-			if (Path.IsPathRooted(safeName))
-			{
-				return File.OpenRead(safeName);
-			}
-			return File.OpenRead(Path.Combine(TitleLocation.Path, safeName));
+	private static string GetNormalizedPathName(string name)
+	{
+		var safeName = MonoGame.Utilities.FileHelpers.NormalizeFilePathSeparators(name);
+
+		if (use_case_sensitivity_hack)
+		{
+			safeName = GetCaseName(
+				Path.IsPathRooted(safeName)
+					? safeName
+					: Path.Combine(TitlePath, safeName)
+			);
 		}
 
-		#endregion
+		return Path.IsPathRooted(safeName)
+			? safeName
+			: Path.Combine(TitlePath, safeName);
+	}
 
-		#region Internal Static Methods
-
-		internal static IntPtr ReadToPointer(string name, out IntPtr size)
+	private static string GetCaseName(string name)
+	{
+		if (File.Exists(name))
 		{
-			string safeName = MonoGame.Utilities.FileHelpers.NormalizeFilePathSeparators(name);
-
-#if CASE_SENSITIVITY_HACK
-			if (Path.IsPathRooted(safeName))
-			{
-				safeName = GetCaseName(safeName);
-			}
-			else
-			{
-				safeName = GetCaseName(Path.Combine(TitleLocation.Path, safeName));
-			}
-#endif
-			string realName;
-			if (Path.IsPathRooted(safeName))
-			{
-				realName = safeName;
-			}
-			else
-			{
-				realName = Path.Combine(TitleLocation.Path, safeName);
-			}
-			if (!File.Exists(realName))
-			{
-				throw new FileNotFoundException(realName);
-			}
-			return FNAPlatform.ReadFileToPointer(realName, out size);
+			return name;
 		}
 
-		#endregion
+		string[] splits = name.Split(Path.DirectorySeparatorChar);
+		splits[0] = "/";
+		int i;
 
-		#region Private Static fcaseopen Method
-
-#if CASE_SENSITIVITY_HACK
-		private static string GetCaseName(string name)
+		// The directories...
+		for (i = 1; i < splits.Length - 1; i += 1)
 		{
-			if (File.Exists(name))
-			{
-				return name;
-			}
-
-			string[] splits = name.Split(Path.DirectorySeparatorChar);
-			splits[0] = "/";
-			int i;
-
-			// The directories...
-			for (i = 1; i < splits.Length - 1; i += 1)
-			{
-				splits[0] += SearchCase(
-					splits[i],
-					Directory.GetDirectories(splits[0])
-				);
-			}
-
-			// The file...
 			splits[0] += SearchCase(
 				splits[i],
-				Directory.GetFiles(splits[0])
+				Directory.GetDirectories(splits[0])
 			);
-
-			// Finally.
-			splits[0] = splits[0].Remove(0, 1);
-			FNALoggerEXT.LogError(
-				"Case sensitivity!\n\t" +
-				name.Substring(TitleLocation.Path.Length) + "\n\t" +
-				splits[0].Substring(TitleLocation.Path.Length)
-			);
-			return splits[0];
 		}
 
-		private static string SearchCase(string name, string[] list)
+		// The file...
+		splits[0] += SearchCase(
+			splits[i],
+			Directory.GetFiles(splits[0])
+		);
+
+		// Finally.
+		splits[0] = splits[0].Remove(0, 1);
+		FNALoggerEXT.LogError(
+			"Case sensitivity!\n\t"                   +
+			name.Substring(TitlePath.Length) + "\n\t" +
+			splits[0].Substring(TitlePath.Length)
+		);
+		return splits[0];
+	}
+
+	private static string SearchCase(string name, string[] list)
+	{
+		foreach (string l in list)
 		{
-			foreach (string l in list)
+			string li = l.Substring(l.LastIndexOf("/") + 1);
+			if (name.ToLower().Equals(li.ToLower()))
 			{
-				string li = l.Substring(l.LastIndexOf("/") + 1);
-				if (name.ToLower().Equals(li.ToLower()))
-				{
-					return Path.DirectorySeparatorChar + li;
-				}
+				return Path.DirectorySeparatorChar + li;
 			}
-			// If you got here, get ready to crash!
-			return Path.DirectorySeparatorChar + name;
 		}
-#endif
-
-		#endregion
+		// If you got here, get ready to crash!
+		return Path.DirectorySeparatorChar + name;
 	}
 }
-
