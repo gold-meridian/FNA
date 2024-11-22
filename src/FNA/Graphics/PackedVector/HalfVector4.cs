@@ -83,10 +83,10 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
 		public Vector4 ToVector4()
 		{
 			return new Vector4(
-				HalfTypeHelper.Convert((ushort) packedValue),
-				HalfTypeHelper.Convert((ushort) (packedValue >> 0x10)),
-				HalfTypeHelper.Convert((ushort) (packedValue >> 0x20)),
-				HalfTypeHelper.Convert((ushort) (packedValue >> 0x30))
+				HalfTypeHelper.HalfAsU16BitsToSingle((ushort) packedValue),
+				HalfTypeHelper.HalfAsU16BitsToSingle((ushort) (packedValue >> 0x10)),
+				HalfTypeHelper.HalfAsU16BitsToSingle((ushort) (packedValue >> 0x20)),
+				HalfTypeHelper.HalfAsU16BitsToSingle((ushort) (packedValue >> 0x30))
 			);
 		}
 
@@ -187,10 +187,10 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
 		private static ulong Pack(float x, float y, float z, float w)
 		{
 			return (ulong) (
-				((ulong) HalfTypeHelper.Convert(x)) |
-				(((ulong) HalfTypeHelper.Convert(y) << 0x10)) |
-				(((ulong) HalfTypeHelper.Convert(z) << 0x20)) |
-				(((ulong) HalfTypeHelper.Convert(w) << 0x30))
+				((ulong) HalfTypeHelper.SingleToHalf(x)) |
+				(((ulong) HalfTypeHelper.SingleToHalf(y) << 0x10)) |
+				(((ulong) HalfTypeHelper.SingleToHalf(z) << 0x20)) |
+				(((ulong) HalfTypeHelper.SingleToHalf(w) << 0x30))
 			);
 		}
 

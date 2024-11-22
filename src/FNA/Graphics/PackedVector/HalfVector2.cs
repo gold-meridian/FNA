@@ -58,8 +58,8 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
 		public Vector2 ToVector2()
 		{
 			Vector2 vector;
-			vector.X = HalfTypeHelper.Convert((ushort) packedValue);
-			vector.Y = HalfTypeHelper.Convert((ushort) (packedValue >> 0x10));
+			vector.X = (ushort) packedValue;
+			vector.Y = HalfTypeHelper.HalfAsU16BitsToSingle((ushort) (packedValue >> 0x10));
 			return vector;
 		}
 
@@ -118,8 +118,8 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
 		private static uint PackHelper(float vectorX, float vectorY)
 		{
 			return (uint) (
-				HalfTypeHelper.Convert(vectorX) |
-				((uint) (HalfTypeHelper.Convert(vectorY) << 0x10))
+				HalfTypeHelper.SingleToHalfAsU16Bits(vectorX) |
+				((uint) (HalfTypeHelper.SingleToHalfAsU16Bits(vectorY) << 0x10))
 			);
 		}
 

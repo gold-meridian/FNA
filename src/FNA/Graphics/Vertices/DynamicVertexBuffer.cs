@@ -68,57 +68,5 @@ namespace Microsoft.Xna.Framework.Graphics
 		}
 
 		#endregion
-
-		#region Public SetData Methods
-
-		public void SetData<T>(
-			int offsetInBytes,
-			T[] data,
-			int startIndex,
-			int elementCount,
-			int vertexStride,
-			SetDataOptions options
-		) where T : struct {
-			ErrorCheck(data, startIndex, elementCount, vertexStride);
-
-			int elementSizeInBytes = MarshalHelper.SizeOf<T>();
-			GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
-			FNA3D.FNA3D_SetVertexBufferData(
-				GraphicsDevice.GLDevice,
-				buffer,
-				offsetInBytes,
-				handle.AddrOfPinnedObject() + (startIndex * elementSizeInBytes),
-				elementCount,
-				elementSizeInBytes,
-				vertexStride,
-				options
-			);
-			handle.Free();
-		}
-
-		public void SetData<T>(
-			T[] data,
-			int startIndex,
-			int elementCount,
-			SetDataOptions options
-		) where T : struct {
-			int elementSizeInBytes = MarshalHelper.SizeOf<T>();
-			ErrorCheck(data, startIndex, elementCount, elementSizeInBytes);
-
-			GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
-			FNA3D.FNA3D_SetVertexBufferData(
-				GraphicsDevice.GLDevice,
-				buffer,
-				0,
-				handle.AddrOfPinnedObject() + (startIndex * elementSizeInBytes),
-				elementCount,
-				elementSizeInBytes,
-				elementSizeInBytes,
-				options
-			);
-			handle.Free();
-		}
-
-		#endregion
 	}
 }

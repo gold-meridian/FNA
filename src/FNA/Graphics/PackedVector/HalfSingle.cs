@@ -43,7 +43,7 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
 
 		public HalfSingle(float single)
 		{
-			packedValue = HalfTypeHelper.Convert(single);
+			packedValue = HalfTypeHelper.SingleToHalfAsU16Bits(single);
 		}
 
 		#endregion
@@ -52,7 +52,7 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
 
 		public float ToSingle()
 		{
-			return HalfTypeHelper.Convert(packedValue);
+			return HalfTypeHelper.HalfAsU16BitsToSingle(packedValue);
 		}
 
 		#endregion
@@ -61,7 +61,7 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
 
 		void IPackedVector.PackFromVector4(Vector4 vector)
 		{
-			packedValue = HalfTypeHelper.Convert(vector.X);
+			packedValue = HalfTypeHelper.SingleToHalfAsU16Bits(vector.X);
 		}
 
 		Vector4 IPackedVector.ToVector4()

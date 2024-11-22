@@ -12,6 +12,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
@@ -678,7 +679,11 @@ namespace Microsoft.Xna.Framework
 
 		public static Rectangle GetWindowBounds(IntPtr window)
 		{
-			Rectangle result;
+			var x = 0;
+			var y = 0;
+			var w = 0;
+			var h = 0;
+			
 			if ((SDL.SDL_GetWindowFlags(window) & (uint) SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN) != 0)
 			{
 				/* It's easier/safer to just use the display mode here */
@@ -689,25 +694,25 @@ namespace Microsoft.Xna.Framework
 					),
 					out mode
 				);
-				result.X = 0;
-				result.Y = 0;
-				result.Width = mode.w;
-				result.Height = mode.h;
+				x = 0;
+				y = 0;
+				w = mode.w;
+				h = mode.h;
 			}
 			else
 			{
 				SDL.SDL_GetWindowPosition(
 					window,
-					out result.X,
-					out result.Y
+					out x,
+					out y
 				);
 				SDL.SDL_GetWindowSize(
 					window,
-					out result.Width,
-					out result.Height
+					out w,
+					out h
 				);
 			}
-			return result;
+			return new Rectangle(x, y, w, h);
 		}
 
 		public static bool GetWindowResizable(IntPtr window)
