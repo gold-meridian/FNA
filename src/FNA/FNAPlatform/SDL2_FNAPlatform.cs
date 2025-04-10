@@ -212,13 +212,18 @@ namespace Microsoft.Xna.Framework
 			 */
 			if (args.TryGetValue("audiodriver", out arg))
 			{
+				// tModLoader: tML has its own `-audiodriver` argument with
+				// some more safety.
+				/*
 				SDL.SDL_SetHintWithPriority(
 					"SDL_AUDIODRIVER",
 					arg,
 					SDL.SDL_HintPriority.SDL_HINT_OVERRIDE
 				);
+				*/
 			}
 
+			/*
 			// This _should_ be the first real SDL call we make...
 			if (SDL.SDL_Init(
 				SDL.SDL_INIT_VIDEO |
@@ -227,6 +232,22 @@ namespace Microsoft.Xna.Framework
 			{
 				throw new Exception("SDL_Init failed: " + SDL.SDL_GetError());
 			}
+			*/
+
+			// tModLoader: Separate and add logging to determine if a silent
+			// crash is caused by controllers.
+			FNALoggerEXT.LogInfo("SDL.SDL_Init(SDL.SDL_INIT_VIDEO)...");
+			if (SDL.SDL_Init(SDL.SDL_INIT_VIDEO) != 0)
+			{
+				throw new Exception("SDL.SDL_Init(SDL.SDL_INIT_VIDEO) failed: " + SDL.SDL_GetError());
+			}
+			FNALoggerEXT.LogInfo("Success");
+			FNALoggerEXT.LogInfo("SDL.SDL_InitSubSystem(SDL.SDL_INIT_GAMECONTROLLER)...");
+			if (SDL.SDL_InitSubSystem(SDL.SDL_INIT_GAMECONTROLLER) != 0)
+			{
+				throw new Exception("SDL.SDL_InitSubSystem(SDL.SDL_INIT_GAMECONTROLLER) failed: " + SDL.SDL_GetError());
+			}
+			FNALoggerEXT.LogInfo("Success");
 
 			string videoDriver = SDL.SDL_GetCurrentVideoDriver();
 

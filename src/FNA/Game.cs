@@ -238,7 +238,13 @@ namespace Microsoft.Xna.Framework
 
 		#region Public Constructor
 
-		public Game()
+		// tModLoader(headless): Introduce `headlessMode` parameter to
+		// determine if the game should launch in "headless" mode.
+		// Tomat: Separate into two constructors for ABI compatibility.
+
+		public Game() : this(headlessMode: false) { }
+
+		public Game(bool headlessMode)
 		{
 			AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 
@@ -269,10 +275,23 @@ namespace Microsoft.Xna.Framework
 
 			gameTime = new GameTime();
 
+			// tModLoader(headless): If in "headless" mode, don't initialize
+			// these values (as they depend on a window).
+
+			/*
 			Window = FNAPlatform.CreateWindow();
 			Mouse.WindowHandle = Window.Handle;
 			TouchPanel.WindowHandle = Window.Handle;
 			TextInputEXT.WindowHandle = Window.Handle;
+			*/
+
+			if (!headlessMode)
+			{
+				Window = FNAPlatform.CreateWindow();
+				Mouse.WindowHandle = Window.Handle;
+				TouchPanel.WindowHandle = Window.Handle;
+				TextInputEXT.WindowHandle = Window.Handle;
+			}
 
 			FrameworkDispatcher.Update();
 

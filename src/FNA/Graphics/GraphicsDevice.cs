@@ -414,11 +414,20 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				GLDevice = FNA3D.FNA3D_CreateDevice(
 					ref PresentationParameters.parameters,
+					// tModLoader: The following is a workaround for the fact
+					// that enabling graphics debugging on Linux with Mesa
+					// drivers while using the Steam Overlay results in a
+					// difficult-to-debug crash.
+
+					/*
 #if DEBUG
 					1
 #else
 					0
 #endif
+					*/
+
+					(byte) (Environment.GetEnvironmentVariable("FNA_GRAPHICS_DEBUG") == "1" ? 1 : 0)
 				);
 			}
 			catch(Exception e)

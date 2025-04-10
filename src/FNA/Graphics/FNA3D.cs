@@ -13,14 +13,20 @@ using System.IO;
 using System.Runtime.InteropServices;
 #endregion
 
+using static Microsoft.Xna.Framework.Graphics.FNA3D;
+
 namespace Microsoft.Xna.Framework.Graphics
 {
+	// tModLoader: Publicize FNA3D for internal use,
+	// tModLoader(thread-safety): Make partial and implement wrappers for
+	// various functions (see FNA3D_SafeAccess.cs and FNA3D_Impl below).
 	[System.Security.SuppressUnmanagedCodeSecurity]
-	internal static class FNA3D
+	public static partial class FNA3D
 	{
 		#region Private Constants
 
-		private const string nativeLibName = "FNA3D";
+		// tModLoader: Make internal for use elsewhere in the project.
+		internal const string nativeLibName = "FNA3D";
 
 		#endregion
 
@@ -156,8 +162,17 @@ namespace Microsoft.Xna.Framework.Graphics
 			FNA3D_LogFunc error
 		);
 
-		#endregion
+		// tModLoader: Define FNA3D_LinkedVersion import.
+		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+		public static extern uint FNA3D_LinkedVersion();
 
+		#endregion
+	}
+
+	// tModLoader(thread-safety): Wrap these functions and re-export them in
+	// FNA3D_SafeAccess.cs for thread safety.
+	internal static partial class FNA3D_Impl
+	{
 		#region Driver Functions
 
 		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
@@ -820,7 +835,10 @@ namespace Microsoft.Xna.Framework.Graphics
 		);
 
 		#endregion
+	}
 
+	public static partial class FNA3D
+	{
 		#region Debugging
 
 		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]

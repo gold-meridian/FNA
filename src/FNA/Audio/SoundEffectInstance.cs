@@ -404,6 +404,12 @@ namespace Microsoft.Xna.Framework.Audio
 				return;
 			}
 
+			// tModLoader(thread-safety): Add thread guard.
+			if (isDynamic)
+			{
+				ThreadCheck.CheckThread();
+			}
+
 			if (immediate)
 			{
 				FAudio.FAudioSourceVoice_Stop(handle, 0, 0);

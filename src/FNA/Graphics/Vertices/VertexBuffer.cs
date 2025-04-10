@@ -217,14 +217,23 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Public SetData Methods
 
+		// tModLoader: Add `SetDataOptions` parameter to SetData<T>().
+		// Tomat: Split up definitions for ABI compatibility.
+
 		public void SetData<T>(T[] data) where T : struct
+		{
+			SetData(data, SetDataOptions.None);
+		}
+
+		public void SetData<T>(T[] data, SetDataOptions options) where T : struct
 		{
 			SetData(
 				0,
 				data,
 				0,
 				data.Length,
-				MarshalHelper.SizeOf<T>()
+				MarshalHelper.SizeOf<T>(),
+				options
 			);
 		}
 
@@ -233,12 +242,22 @@ namespace Microsoft.Xna.Framework.Graphics
 			int startIndex,
 			int elementCount
 		) where T : struct {
+			SetData(data, startIndex, elementCount, SetDataOptions.None);
+		}
+
+		public void SetData<T>(
+			T[] data,
+			int startIndex,
+			int elementCount,
+			SetDataOptions options
+		) where T : struct {
 			SetData(
 				0,
 				data,
 				startIndex,
 				elementCount,
-				MarshalHelper.SizeOf<T>()
+				MarshalHelper.SizeOf<T>(),
+				options
 			);
 		}
 
@@ -248,6 +267,17 @@ namespace Microsoft.Xna.Framework.Graphics
 			int startIndex,
 			int elementCount,
 			int vertexStride
+		) where T : struct {
+			SetData(offsetInBytes, data, startIndex, elementCount, vertexStride, SetDataOptions.None);
+		}
+
+		public void SetData<T>(
+			int offsetInBytes,
+			T[] data,
+			int startIndex,
+			int elementCount,
+			int vertexStride,
+			SetDataOptions options
 		) where T : struct {
 			ErrorCheck(data, startIndex, elementCount, vertexStride);
 
@@ -261,7 +291,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				elementCount,
 				elementSizeInBytes,
 				vertexStride,
-				SetDataOptions.None
+				options
 			);
 			handle.Free();
 		}

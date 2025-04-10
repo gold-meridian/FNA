@@ -36,6 +36,13 @@ namespace Microsoft.Xna.Framework
 			 * -flibit
 			 */
 
+			// tModLoader(headless): Support "NONE" as a backend option, which
+			// skips loading.
+			if (Environment.GetEnvironmentVariable("FNA_PLATFORM_BACKEND") == "NONE")
+			{
+				return;
+			}
+
 			bool useSDL2 = Environment.GetEnvironmentVariable("FNA_PLATFORM_BACKEND") == "SDL2";
 
 			if (!useSDL2)
