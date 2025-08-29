@@ -183,7 +183,7 @@ namespace Microsoft.Xna.Framework
 			if (args.TryGetValue("audiodriver", out arg))
 			{
 				SDL.SDL_SetHintWithPriority(
-					"SDL_AUDIODRIVER",
+					"SDL_AUDIO_DRIVER",
 					arg,
 					SDL.SDL_HintPriority.SDL_HINT_OVERRIDE
 				);
@@ -258,7 +258,8 @@ namespace Microsoft.Xna.Framework
 				INTERNAL_AddInstance(evt[0].gdevice.which);
 			}
 
-			if (OSVersion.Equals("Windows"))
+			if (	OSVersion.Equals("Windows") &&
+				SDL.SDL_GetHint("FNA_WIN32_IGNORE_WM_PAINT") != "1" )
 			{
 				/* Windows has terrible event pumping and doesn't give us
 				 * WM_PAINT events correctly. So we get to do this!
@@ -931,7 +932,7 @@ namespace Microsoft.Xna.Framework
 						evt.tfinger.dy
 					);
 				}
-				else if (evt.type == (uint) SDL.SDL_EventType.SDL_EVENT_FINGER_UP)
+				else if (evt.type == (uint) SDL.SDL_EventType.SDL_EVENT_FINGER_UP || evt.type == (uint) SDL.SDL_EventType.SDL_EVENT_FINGER_CANCELED)
 				{
 					TouchPanel.INTERNAL_onTouchEvent(
 						(int) evt.tfinger.fingerID,
@@ -979,9 +980,13 @@ namespace Microsoft.Xna.Framework
 					// Window Resize
 					else if (evt.type == (uint) SDL.SDL_EventType.SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED)
 					{
-						// This is called on both API and WM resizes
-						Mouse.INTERNAL_WindowWidth = evt.window.data1;
-						Mouse.INTERNAL_WindowHeight = evt.window.data2;
+						/* This is called on both API and WM resizes.
+						 * We have to use WindowBounds instead of data1/2,
+						 * since data1/2 are in pixels, not desktop units.
+						 */
+						Rectangle b = GetWindowBounds(Mouse.WindowHandle);
+						Mouse.INTERNAL_WindowWidth = b.Width;
+						Mouse.INTERNAL_WindowHeight = b.Height;
 					}
 					else if (evt.type == (uint) SDL.SDL_EventType.SDL_EVENT_WINDOW_RESIZED)
 					{
@@ -1030,6 +1035,24 @@ namespace Microsoft.Xna.Framework
 					else if (evt.type == (uint) SDL.SDL_EventType.SDL_EVENT_WINDOW_MOUSE_LEAVE)
 					{
 						SDL.SDL_EnableScreenSaver();
+					}
+
+					// Full screen
+					else if (evt.type == (uint) SDL.SDL_EventType.SDL_EVENT_WINDOW_ENTER_FULLSCREEN)
+					{
+						Object manager = game.Services.GetService(typeof(IGraphicsDeviceManager));
+						if (manager != null && manager is GraphicsDeviceManager)
+						{
+							((GraphicsDeviceManager) manager).IsFullScreen = true;
+						}
+					}
+					else if (evt.type == (uint) SDL.SDL_EventType.SDL_EVENT_WINDOW_LEAVE_FULLSCREEN)
+					{
+						Object manager = game.Services.GetService(typeof(IGraphicsDeviceManager));
+						if (manager != null && manager is GraphicsDeviceManager)
+						{
+							((GraphicsDeviceManager) manager).IsFullScreen = false;
+						}
 					}
 				}
 
@@ -1315,7 +1338,6 @@ namespace Microsoft.Xna.Framework
 			{
 				/* This is inaccurate, but what can you do... */
 				flags = SDL.SDL_GetMouseState(out fx, out fy);
-
 			}
 			// FIXME SDL3: Should this be rounded?
 			x = (int) fx;
