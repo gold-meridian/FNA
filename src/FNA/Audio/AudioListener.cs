@@ -104,9 +104,9 @@ namespace Microsoft.Xna.Framework.Audio
 		public AudioListener()
 		{
 			listenerData = new FAudio.F3DAUDIO_LISTENER();
-			Forward = Vector3.Forward;
+			Forward = Vector3_Forward;
 			Position = Vector3.Zero;
-			Up = Vector3.Up;
+			Up = Vector3_Up;
 			Velocity = Vector3.Zero;
 
 			/* Unused variables, defaults based on XNA behavior */

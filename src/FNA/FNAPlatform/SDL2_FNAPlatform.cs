@@ -702,23 +702,21 @@ namespace Microsoft.Xna.Framework
 					),
 					out mode
 				);
-				result.X = 0;
-				result.Y = 0;
-				result.Width = mode.w;
-				result.Height = mode.h;
+				result = new Rectangle(0, 0, mode.w, mode.h);
 			}
 			else
 			{
 				SDL.SDL_GetWindowPosition(
 					window,
-					out result.X,
-					out result.Y
+					out var x,
+					out var y
 				);
 				SDL.SDL_GetWindowSize(
 					window,
-					out result.Width,
-					out result.Height
+					out var width,
+					out var height
 				);
+				result = new Rectangle(x, y, width, height);
 			}
 			return result;
 		}
@@ -1252,7 +1250,7 @@ namespace Microsoft.Xna.Framework
 					}
 				}
 
-				else if (evt.type == SDL.SDL_EventType.SDL_TEXTEDITING) 
+				else if (evt.type == SDL.SDL_EventType.SDL_TEXTEDITING)
 				{
 					int bytes = MeasureStringLength(evt.edit.text);
 					if (bytes > 0)
