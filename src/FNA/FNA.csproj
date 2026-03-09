@@ -18,6 +18,7 @@
         <Compile Include="..\..\lib\SDL3-CS\SDL3\SDL3.Legacy.cs"/>
         <Compile Include="..\..\lib\FAudio\csharp\FAudio.cs"/>
         <Compile Include="..\..\lib\Theorafile\csharp\Theorafile.cs"/>
+		<Compile Include="..\..\lib\dav1dfile\csharp\dav1dfile.Legacy.cs" />
 
 		<Using Alias="Vector2" Include="System.Numerics.Vector2"/>
 		<Using Alias="Vector3" Include="System.Numerics.Vector3"/>
