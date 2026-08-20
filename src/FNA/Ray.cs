@@ -77,7 +77,7 @@ namespace Microsoft.Xna.Framework
 
 		public override int GetHashCode()
 		{
-			return Position.GetHashCode() ^ Direction.GetHashCode();
+			return Position.GetHashCode() + Direction.GetHashCode();
 		}
 
 		// Adapted from http://www.scratchapixel.com/lessons/3d-basic-lessons/lesson-7-intersecting-simple-shapes/ray-box-intersection/
@@ -198,6 +198,10 @@ namespace Microsoft.Xna.Framework
 
 		public float? Intersects(BoundingFrustum frustum)
 		{
+			if (ReferenceEquals(frustum, null))
+			{
+				throw new ArgumentNullException("frustum");
+			}
 			float? result;
 			frustum.Intersects(ref this, out result);
 			return result;
@@ -236,11 +240,11 @@ namespace Microsoft.Xna.Framework
 
 			float distanceAlongRay;
 
-			/* If the distance between the ray start and the sphere's center is less than
+			/* If the distance between the ray start and the sphere's center is less than or equal
 			 * the radius of the sphere, it means we've intersected. Checking the
 			 * LengthSquared is faster.
 			 */
-			if (differenceLengthSquared < sphereRadiusSquared)
+			if (differenceLengthSquared <= sphereRadiusSquared)
 			{
 				result = 0.0f;
 				return;

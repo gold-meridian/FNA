@@ -74,11 +74,11 @@ namespace Microsoft.Xna.Framework.Audio
 		) {
 			if (audioEngine == null)
 			{
-				throw new ArgumentNullException("audioEngine");
+				throw new ArgumentNullException("audioEngine", "You must pass in a valid audio engine.");
 			}
-			if (String.IsNullOrEmpty(nonStreamingWaveBankFilename))
+			if (string.IsNullOrEmpty(nonStreamingWaveBankFilename))
 			{
-				throw new ArgumentNullException("nonStreamingWaveBankFilename");
+				throw new ArgumentNullException("nonStreamingWaveBankFilename", "This method does not accept null for this parameter.");
 			}
 
 			bankData = TitleContainer.ReadToPointer(
@@ -109,11 +109,11 @@ namespace Microsoft.Xna.Framework.Audio
 		) {
 			if (audioEngine == null)
 			{
-				throw new ArgumentNullException("audioEngine");
+				throw new ArgumentNullException("audioEngine", "You must pass in a valid audio engine.");
 			}
-			if (String.IsNullOrEmpty(streamingWaveBankFilename))
+			if (string.IsNullOrEmpty(streamingWaveBankFilename))
 			{
-				throw new ArgumentNullException("streamingWaveBankFilename");
+				throw new ArgumentNullException("streamingWaveBankFilename", "This method does not accept null for this parameter.");
 			}
 
 			string safeName = MonoGame.Utilities.FileHelpers.NormalizeFilePathSeparators(
@@ -130,11 +130,15 @@ namespace Microsoft.Xna.Framework.Audio
 
 			FAudio.FACTStreamingParameters settings = new FAudio.FACTStreamingParameters();
 			settings.file = bankData;
-			FAudio.FACTAudioEngine_CreateStreamingWaveBank(
+			uint ret = FAudio.FACTAudioEngine_CreateStreamingWaveBank(
 				audioEngine.handle,
 				ref settings,
 				out handle
 			);
+			if (ret == 0x8ac70007) // FACTENGINE_E_INVALIDDATA
+			{
+				throw new ArgumentException("XACT could not load the data provided. Make sure you are using the correct version of the XACT tool.");
+			}
 
 			engine = audioEngine;
 			selfReference = new WeakReference(this, true);
@@ -182,17 +186,17 @@ namespace Microsoft.Xna.Framework.Audio
 			{
 				if (!IsDisposed)
 				{
-					if (Disposing != null)
-					{
-						Disposing.Invoke(this, null);
-					}
-
 					// If this is disposed, stop leaking memory!
 					if (!engine.IsDisposed)
 					{
 						FAudio.FACTWaveBank_Destroy(handle);
 					}
 					OnWaveBankDestroyed();
+
+					if (disposing && Disposing != null)
+					{
+						Disposing(this, EventArgs.Empty);
+					}
 				}
 			}
 		}

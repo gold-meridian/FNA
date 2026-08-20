@@ -98,6 +98,10 @@ namespace Microsoft.Xna.Framework
 				);
 			}
 
+#if DEBUG_WRAP_WINDOW
+			SDL.SDL_SetHint(SDL.SDL_HINT_INVALID_PARAM_CHECKS, "1");
+#endif
+
 			// Are you even surprised this is necessary?
 			if (Environment.GetEnvironmentVariable("FNA_NUKE_STEAM_INPUT") == "1")
 			{
@@ -346,7 +350,7 @@ namespace Microsoft.Xna.Framework
 				string cachePath = SDL.SDL_GetHint(
 					"FNA3D_VULKAN_PIPELINE_CACHE_FILE_NAME"
 				);
-				if (cachePath == null) // Empty is a valid value
+				if (ReferenceEquals(cachePath, null)) // Empty is a valid value
 				{
 					if (	OSVersion.Equals("Windows") ||
 						OSVersion.Equals("macOS") ||
@@ -391,13 +395,13 @@ namespace Microsoft.Xna.Framework
 			}
 
 			string title = MonoGame.Utilities.AssemblyHelper.GetDefaultWindowTitle();
-			IntPtr window = SDL.SDL_CreateWindow(
+			IntPtr sdlWindow = SDL.SDL_CreateWindow(
 				title,
 				GraphicsDeviceManager.DefaultBackBufferWidth,
 				GraphicsDeviceManager.DefaultBackBufferHeight,
 				initFlags
 			);
-			if (window == IntPtr.Zero)
+			if (sdlWindow == IntPtr.Zero)
 			{
 				/* If this happens, the GL attributes were
 				 * rejected by the platform. This is EXTREMELY
@@ -407,7 +411,7 @@ namespace Microsoft.Xna.Framework
 					SDL.SDL_GetError()
 				);
 			}
-			INTERNAL_SetIcon(window, title);
+			INTERNAL_SetIcon(sdlWindow, title);
 
 			// Disable the screensaver.
 			SDL.SDL_DisableScreenSaver();
@@ -419,17 +423,18 @@ namespace Microsoft.Xna.Framework
 			 * This is our way to communicate that it failed...
 			 * -flibit
 			 */
-			initFlags = (SDL.SDL_WindowFlags) SDL.SDL_GetWindowFlags(window);
+			initFlags = (SDL.SDL_WindowFlags) SDL.SDL_GetWindowFlags(sdlWindow);
 			if ((initFlags & SDL.SDL_WindowFlags.SDL_WINDOW_HIGH_PIXEL_DENSITY) == 0)
 			{
 				Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI", "0");
 			}
 
 			return new FNAWindow(
-				window,
+				UnwrapWindow(sdlWindow),
 				@"\\.\DISPLAY" + (
-					SDL.SDL_GetDisplayForWindow(window)
-				).ToString()
+					SDL.SDL_GetDisplayForWindow(sdlWindow)
+				).ToString(),
+				title
 			);
 		}
 
@@ -461,7 +466,7 @@ namespace Microsoft.Xna.Framework
 				TextInputEXT.WindowHandle = IntPtr.Zero;
 			}
 
-			SDL.SDL_DestroyWindow(window.Handle);
+			SDL.SDL_DestroyWindow(WrapWindow(window.Handle));
 		}
 
 		public static void ApplyWindowChanges(
@@ -480,20 +485,22 @@ namespace Microsoft.Xna.Framework
 			 */
 			ScaleForWindow(window, false, ref clientWidth, ref clientHeight);
 
+			IntPtr sdlWindow = WrapWindow(window);
+
 			// When windowed, set the size before moving
 			if (!wantsFullscreen)
 			{
 				bool resize = false;
-				if ((SDL.SDL_GetWindowFlags(window) & SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN) != 0)
+				if ((SDL.SDL_GetWindowFlags(sdlWindow) & SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN) != 0)
 				{
-					SDL.SDL_SetWindowFullscreen(window, false);
+					SDL.SDL_SetWindowFullscreen(sdlWindow, false);
 					resize = true;
 				}
 				else
 				{
 					int w, h;
 					SDL.SDL_GetWindowSize(
-						window,
+						sdlWindow,
 						out w,
 						out h
 					);
@@ -501,8 +508,7 @@ namespace Microsoft.Xna.Framework
 				}
 				if (resize)
 				{
-					SDL.SDL_RestoreWindow(window);
-					SDL.SDL_SetWindowSize(window, clientWidth, clientHeight);
+					SDL.SDL_SetWindowSize(sdlWindow, clientWidth, clientHeight);
 					center = true;
 				}
 			}
@@ -521,7 +527,7 @@ namespace Microsoft.Xna.Framework
 			// Just to be sure, become a window first before changing displays
 			if (resultDeviceName != screenDeviceName)
 			{
-				SDL.SDL_SetWindowFullscreen(window, false);
+				SDL.SDL_SetWindowFullscreen(sdlWindow, false);
 				resultDeviceName = screenDeviceName;
 				center = true;
 			}
@@ -532,7 +538,7 @@ namespace Microsoft.Xna.Framework
 				// FIXME CSHARP: SDL_WINDOWPOS_CENTERED_DISPLAY
 				int pos = (int) (0x2FFF0000 | displayIds[displayIndex]);
 				SDL.SDL_SetWindowPosition(
-					window,
+					sdlWindow,
 					pos,
 					pos
 				);
@@ -541,7 +547,7 @@ namespace Microsoft.Xna.Framework
 			// Set fullscreen after we've done all the ugly stuff.
 			if (wantsFullscreen)
 			{
-				if ((SDL.SDL_GetWindowFlags(window) & SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN) != 0)
+				if ((SDL.SDL_GetWindowFlags(sdlWindow) & SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN) != 0)
 				{
 					/* If we're still hidden, we can't actually go fullscreen yet.
 					 * But, we can at least set the hidden window size to match
@@ -549,12 +555,12 @@ namespace Microsoft.Xna.Framework
 					 * -flibit
 					 */
 					SDL.SDL_DisplayMode* mode = (SDL.SDL_DisplayMode*) SDL.SDL_GetCurrentDisplayMode(
-						SDL.SDL_GetDisplayForWindow(window)
+						SDL.SDL_GetDisplayForWindow(sdlWindow)
 					);
-					SDL.SDL_SetWindowSize(window, mode->w, mode->h);
+					SDL.SDL_SetWindowSize(sdlWindow, mode->w, mode->h);
 				}
 				SDL.SDL_SetWindowFullscreen(
-					window,
+					sdlWindow,
 					true
 				);
 			}
@@ -571,8 +577,9 @@ namespace Microsoft.Xna.Framework
 		public static void ScaleForWindow(IntPtr window, bool invert, ref int w, ref int h)
 		{
 			int ww, wh, dw, dh;
-			SDL.SDL_GetWindowSize(window, out ww, out wh);
-			FNA3D.FNA3D_GetDrawableSize(window, out dw, out dh);
+			IntPtr sdlWindow = WrapWindow(window);
+			SDL.SDL_GetWindowSize(sdlWindow, out ww, out wh);
+			FNA3D.FNA3D_GetDrawableSize(sdlWindow, out dw, out dh);
 			if (	ww != 0 &&
 				wh != 0 &&
 				dw != 0 &&
@@ -595,23 +602,24 @@ namespace Microsoft.Xna.Framework
 		public static Rectangle GetWindowBounds(IntPtr window)
 		{
 			Rectangle result;
-			if ((SDL.SDL_GetWindowFlags(window) & SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN) != 0)
+			IntPtr sdlWindow = WrapWindow(window);
+			if ((SDL.SDL_GetWindowFlags(sdlWindow) & SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN) != 0)
 			{
 				/* It's easier/safer to just use the display mode here */
 				SDL.SDL_DisplayMode* mode = (SDL.SDL_DisplayMode*) SDL.SDL_GetCurrentDisplayMode(
-					SDL.SDL_GetDisplayForWindow(window)
+					SDL.SDL_GetDisplayForWindow(sdlWindow)
 				);
 				result = new Rectangle(0, 0, mode->w, mode->h);
 			}
 			else
 			{
 				SDL.SDL_GetWindowPosition(
-					window,
+					sdlWindow,
 					out var x,
 					out var y
 				);
 				SDL.SDL_GetWindowSize(
-					window,
+					sdlWindow,
 					out var width,
 					out var height
 				);
@@ -622,26 +630,26 @@ namespace Microsoft.Xna.Framework
 
 		public static bool GetWindowResizable(IntPtr window)
 		{
-			return ((SDL.SDL_GetWindowFlags(window) & SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE) != 0);
+			return ((SDL.SDL_GetWindowFlags(WrapWindow(window)) & SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE) != 0);
 		}
 
 		public static void SetWindowResizable(IntPtr window, bool resizable)
 		{
 			SDL.SDL_SetWindowResizable(
-				window,
+				WrapWindow(window),
 				resizable
 			);
 		}
 
 		public static bool GetWindowBorderless(IntPtr window)
 		{
-			return ((SDL.SDL_GetWindowFlags(window) & SDL.SDL_WindowFlags.SDL_WINDOW_BORDERLESS) != 0);
+			return ((SDL.SDL_GetWindowFlags(WrapWindow(window)) & SDL.SDL_WindowFlags.SDL_WINDOW_BORDERLESS) != 0);
 		}
 
 		public static void SetWindowBorderless(IntPtr window, bool borderless)
 		{
 			SDL.SDL_SetWindowBordered(
-				window,
+				WrapWindow(window),
 				!borderless
 			);
 		}
@@ -649,14 +657,14 @@ namespace Microsoft.Xna.Framework
 		public static void SetWindowTitle(IntPtr window, string title)
 		{
 			SDL.SDL_SetWindowTitle(
-				window,
+				WrapWindow(window),
 				title
 			);
 		}
 
 		public static bool IsScreenKeyboardShown(IntPtr window)
 		{
-			return SDL.SDL_ScreenKeyboardShown(window);
+			return SDL.SDL_ScreenKeyboardShown(WrapWindow(window));
 		}
 
 		private static void INTERNAL_SetIcon(IntPtr window, string title)
@@ -760,13 +768,41 @@ namespace Microsoft.Xna.Framework
 
 		public static void SetTextInputRectangle(IntPtr window, Rectangle rectangle)
 		{
-			SDL.SDL_Rect rect = new SDL.SDL_Rect();
+			SDL.SDL_Rect rect;
 			rect.x = rectangle.X;
 			rect.y = rectangle.Y;
 			rect.w = rectangle.Width;
 			rect.h = rectangle.Height;
 			// FIXME SDL3: Do we need a cursor here?
-			SDL.SDL_SetTextInputArea(window, ref rect, 0);
+			SDL.SDL_SetTextInputArea(WrapWindow(window), ref rect, 0);
+		}
+
+		public static IntPtr WrapWindow(IntPtr handle)
+		{
+#if DEBUG_WRAP_WINDOW
+			if (handle == IntPtr.Zero)
+				return handle;
+			IntPtr wrapped = SDL.SDL_GetWindowFromID((uint)handle);
+			if (wrapped == IntPtr.Zero)
+				throw new ArgumentException(SDL.SDL_GetError());
+			return wrapped;
+#else
+			return handle;
+#endif
+		}
+
+		public static IntPtr UnwrapWindow(IntPtr handle)
+		{
+#if DEBUG_WRAP_WINDOW
+			if (handle == IntPtr.Zero)
+				return handle;
+			uint unwrapped = SDL.SDL_GetWindowID(handle);
+			if (unwrapped == 0)
+				throw new ArgumentException(SDL.SDL_GetError());
+			return (IntPtr)unwrapped;
+#else
+			return handle;
+#endif
 		}
 
 		#endregion
@@ -837,12 +873,13 @@ namespace Microsoft.Xna.Framework
 
 		public static GraphicsAdapter RegisterGame(Game game)
 		{
-			SDL.SDL_ShowWindow(game.Window.Handle);
+			IntPtr sdlWindow = WrapWindow(game.Window.Handle);
+			SDL.SDL_ShowWindow(sdlWindow);
 
 			// Store this for internal event filter work
 			activeGames.Add(game);
 
-			return FetchDisplayAdapter(game.Window.Handle);
+			return FetchDisplayAdapter(sdlWindow);
 		}
 
 		public static void UnregisterGame(Game game)
@@ -864,16 +901,17 @@ namespace Microsoft.Xna.Framework
 				if (evt.type == (uint) SDL.SDL_EventType.SDL_EVENT_KEY_DOWN)
 				{
 					Keys key = ToXNAKey(ref evt.key.key, ref evt.key.scancode);
-					if (!Keyboard.keys.Contains(key))
+					if (Keyboard.keys.IsKeyUp(key))
 					{
-						Keyboard.keys.Add(key);
+						Keyboard.keys.AddPressedKey((int) key);
 						int textIndex;
 						if (FNAPlatform.TextInputBindings.TryGetValue(key, out textIndex))
 						{
 							textInputControlDown[textIndex] = true;
 							TextInputEXT.OnTextInput(FNAPlatform.TextInputCharacters[textIndex]);
 						}
-						else if ((Keyboard.keys.Contains(Keys.LeftControl) || Keyboard.keys.Contains(Keys.RightControl))
+						else if ((Keyboard.keys.IsKeyDown(Keys.LeftControl) || Keyboard.keys.IsKeyDown(Keys.RightControl))
+							&& Keyboard.keys.IsKeyUp(Keys.LeftAlt)
 							&& key == Keys.V)
 						{
 							textInputControlDown[6] = true;
@@ -888,7 +926,7 @@ namespace Microsoft.Xna.Framework
 						{
 							TextInputEXT.OnTextInput(FNAPlatform.TextInputCharacters[textIndex]);
 						}
-						else if ((Keyboard.keys.Contains(Keys.LeftControl) || Keyboard.keys.Contains(Keys.RightControl))
+						else if ((Keyboard.keys.IsKeyDown(Keys.LeftControl) || Keyboard.keys.IsKeyDown(Keys.RightControl))
 							&& key == Keys.V)
 						{
 							TextInputEXT.OnTextInput(FNAPlatform.TextInputCharacters[6]);
@@ -898,14 +936,15 @@ namespace Microsoft.Xna.Framework
 				else if (evt.type == (uint) SDL.SDL_EventType.SDL_EVENT_KEY_UP)
 				{
 					Keys key = ToXNAKey(ref evt.key.key, ref evt.key.scancode);
-					if (Keyboard.keys.Remove(key))
+					if (Keyboard.keys.IsKeyDown(key))
 					{
+						Keyboard.keys.RemovePressedKey((int) key);
 						int value;
 						if (FNAPlatform.TextInputBindings.TryGetValue(key, out value))
 						{
 							textInputControlDown[value] = false;
 						}
-						else if (((!Keyboard.keys.Contains(Keys.LeftControl) && !Keyboard.keys.Contains(Keys.RightControl)) && textInputControlDown[6])
+						else if (((Keyboard.keys.IsKeyUp(Keys.LeftControl) && Keyboard.keys.IsKeyUp(Keys.RightControl)) && textInputControlDown[6])
 							|| key == Keys.V)
 						{
 							textInputControlDown[6] = false;
@@ -921,9 +960,7 @@ namespace Microsoft.Xna.Framework
 				}
 				else if (evt.type == (uint) SDL.SDL_EventType.SDL_EVENT_MOUSE_WHEEL)
 				{
-					// FIXME SDL3: Should this be rounded?
-					// 120 units per notch. Because reasons.
-					Mouse.INTERNAL_MouseWheel += (int) evt.wheel.y * 120;
+					Mouse.INTERNAL_MouseWheel += evt.wheel.y * 120; // WHEEL_DELTA
 				}
 
 				// Touch Input
@@ -976,7 +1013,7 @@ namespace Microsoft.Xna.Framework
 						{
 							// If we alt-tab away, we lose the 'fullscreen desktop' flag on some WMs
 							SDL.SDL_SetWindowFullscreen(
-								game.Window.Handle,
+								WrapWindow(game.Window.Handle),
 								game.GraphicsDevice.PresentationParameters.IsFullScreen
 							);
 						}
@@ -990,7 +1027,7 @@ namespace Microsoft.Xna.Framework
 
 						if (SDL.SDL_GetCurrentVideoDriver() == "x11")
 						{
-							SDL.SDL_SetWindowFullscreen(game.Window.Handle, false);
+							SDL.SDL_SetWindowFullscreen(WrapWindow(game.Window.Handle), false);
 						}
 
 						// Give the screensaver back, we're not that important now.
@@ -1015,7 +1052,7 @@ namespace Microsoft.Xna.Framework
 						 * Also ignore any other "resizes" (alt-tab, fullscreen, etc.)
 						 * -flibit
 						 */
-						SDL.SDL_WindowFlags flags = SDL.SDL_GetWindowFlags(game.Window.Handle);
+						SDL.SDL_WindowFlags flags = SDL.SDL_GetWindowFlags(WrapWindow(game.Window.Handle));
 						if (	(flags & SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE) != 0 &&
 							(flags & (SDL.SDL_WindowFlags.SDL_WINDOW_INPUT_FOCUS | SDL.SDL_WindowFlags.SDL_WINDOW_MOUSE_FOCUS)) != 0	)
 						{
@@ -1029,13 +1066,13 @@ namespace Microsoft.Xna.Framework
 					}
 
 					// Window Move
-					else if (evt.type == (uint) SDL.SDL_EventType.SDL_EVENT_WINDOW_MOVED)
+					else if (evt.type == (uint) SDL.SDL_EventType.SDL_EVENT_WINDOW_DISPLAY_CHANGED)
 					{
 						/* Apparently if you move the window to a new
 						 * display, a GraphicsDevice Reset occurs.
 						 * -flibit
 						 */
-						GraphicsAdapter next = FetchDisplayAdapter(game.Window.Handle);
+						GraphicsAdapter next = FetchDisplayAdapter(WrapWindow(game.Window.Handle));
 
 						if (next != currentAdapter)
 						{
@@ -1060,18 +1097,18 @@ namespace Microsoft.Xna.Framework
 					// Full screen
 					else if (evt.type == (uint) SDL.SDL_EventType.SDL_EVENT_WINDOW_ENTER_FULLSCREEN)
 					{
-						Object manager = game.Services.GetService(typeof(IGraphicsDeviceManager));
-						if (manager != null && manager is GraphicsDeviceManager)
+						GraphicsDeviceManager manager = game.Services.INTERNAL_GetService(typeof(IGraphicsDeviceManager)) as GraphicsDeviceManager;
+						if (manager != null)
 						{
-							((GraphicsDeviceManager) manager).IsFullScreen = true;
+							manager.IsFullScreen = true;
 						}
 					}
 					else if (evt.type == (uint) SDL.SDL_EventType.SDL_EVENT_WINDOW_LEAVE_FULLSCREEN)
 					{
-						Object manager = game.Services.GetService(typeof(IGraphicsDeviceManager));
-						if (manager != null && manager is GraphicsDeviceManager)
+						GraphicsDeviceManager manager = game.Services.INTERNAL_GetService(typeof(IGraphicsDeviceManager)) as GraphicsDeviceManager;
+						if (manager != null)
 						{
-							((GraphicsDeviceManager) manager).IsFullScreen = false;
+							manager.IsFullScreen = false;
 						}
 					}
 				}
@@ -1081,7 +1118,7 @@ namespace Microsoft.Xna.Framework
 				{
 					GraphicsAdapter.AdaptersChanged();
 
-					currentAdapter = FetchDisplayAdapter(game.Window.Handle);
+					currentAdapter = FetchDisplayAdapter(WrapWindow(game.Window.Handle));
 
 					// Orientation Change
 					if (evt.type == (uint) SDL.SDL_EventType.SDL_EVENT_DISPLAY_ORIENTATION)
@@ -1254,7 +1291,7 @@ namespace Microsoft.Xna.Framework
 				}
 			}
 
-			if (index < 0 || index > GraphicsAdapter.Adapters.Count)
+			if (unchecked((uint) index > (uint) GraphicsAdapter.Adapters.Count))
 			{
 				FNALoggerEXT.LogWarn("SDL3 Window ID and Display ID desync'd");
 				if (retry)
@@ -1355,7 +1392,7 @@ namespace Microsoft.Xna.Framework
 			{
 				flags = SDL.SDL_GetGlobalMouseState(out fx, out fy);
 				int wx = 0, wy = 0;
-				SDL.SDL_GetWindowPosition(window, out wx, out wy);
+				SDL.SDL_GetWindowPosition(WrapWindow(window), out wx, out wy);
 				fx -= wx;
 				fy -= wy;
 			}
@@ -1377,7 +1414,7 @@ namespace Microsoft.Xna.Framework
 		public static void WarpMouseInWindow(IntPtr window, int x, int y)
 		{
 			// Implicit conversion to float
-			SDL.SDL_WarpMouseInWindow(window, x, y);
+			SDL.SDL_WarpMouseInWindow(WrapWindow(window), x, y);
 		}
 
 		public static void OnIsMouseVisibleChanged(bool visible)
@@ -1394,12 +1431,12 @@ namespace Microsoft.Xna.Framework
 
 		public static bool GetRelativeMouseMode(IntPtr window)
 		{
-			return SDL.SDL_GetWindowRelativeMouseMode(window);
+			return SDL.SDL_GetWindowRelativeMouseMode(WrapWindow(window));
 		}
 
 		public static void SetRelativeMouseMode(IntPtr window, bool enable)
 		{
-			SDL.SDL_SetWindowRelativeMouseMode(window, enable);
+			SDL.SDL_SetWindowRelativeMouseMode(WrapWindow(window), enable);
 			if (enable)
 			{
 			    // Flush this value, it's going to be jittery
@@ -1544,7 +1581,7 @@ namespace Microsoft.Xna.Framework
 			}
 
 			// This is stolen from Mono's Path.cs
-			if (storageRoot == null)
+			if (ReferenceEquals(storageRoot, null))
 			{
 				return null;
 			}
@@ -1615,13 +1652,13 @@ namespace Microsoft.Xna.Framework
 
 		#region Logging/Messaging Methods
 
-		public static void ShowRuntimeError(string title, string message)
+		public static void ShowRuntimeError(GameWindow gameWindow, string message)
 		{
 			SDL.SDL_ShowSimpleMessageBox(
 				SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR,
-				title ?? "",
-				message ?? "",
-				IntPtr.Zero
+				gameWindow.Title,
+				message,
+				gameWindow.Handle
 			);
 		}
 
@@ -1636,16 +1673,12 @@ namespace Microsoft.Xna.Framework
 		 */
 		private static bool micInit = false;
 
-		// FIXME SDL3: This is really sloppy -flibit
-		private static Dictionary<uint, IntPtr> micStreams;
-
 		public static Microphone[] GetMicrophones()
 		{
 			// Init subsystem if needed
 			if (!micInit)
 			{
 				SDL.SDL_InitSubSystem(SDL.SDL_InitFlags.SDL_INIT_AUDIO);
-				micStreams = new Dictionary<uint, IntPtr>();
 				micInit = true;
 			}
 
@@ -1660,72 +1693,59 @@ namespace Microsoft.Xna.Framework
 			Microphone[] result = new Microphone[numDev + 1];
 
 			// Default input format
-			SDL.SDL_AudioSpec want = new SDL.SDL_AudioSpec();
+			SDL.SDL_AudioSpec want;
 			want.freq = Microphone.SAMPLERATE;
 			want.format = SDL.SDL_AudioFormat.SDL_AUDIO_S16;
 			want.channels = 1;
 
-			// First mic is always OS default
 			result[0] = new Microphone(
-				SDL.SDL_OpenAudioDevice(
+				SDL.SDL_OpenAudioDeviceStream(
 					0xFFFFFFFEu, // FIXME CSHARP: SDL_AUDIO_DEVICE_DEFAULT_RECORDING
-					ref want
+					ref want, null, IntPtr.Zero
 				),
 				"Default Device"
 			);
-			for (int i = 0; i < numDev; i += 1)
+			for (int i = 0; i < numDev; i++)
 			{
-				string name = SDL.SDL_GetAudioDeviceName(devices[i]);
+				IntPtr stream = SDL.SDL_OpenAudioDeviceStream(devices[i], ref want, null, IntPtr.Zero);
 				result[i + 1] = new Microphone(
-					SDL.SDL_OpenAudioDevice(
-						devices[i],
-						ref want
-					),
-					name
+					stream,
+					SDL.SDL_GetAudioDeviceName(SDL.SDL_GetAudioStreamDevice(stream))
 				);
-
-				IntPtr stream;
-				SDL.SDL_AudioSpec have;
-				int filler;
-				SDL.SDL_GetAudioDeviceFormat(devices[i], out have, out filler);
-				stream = SDL.SDL_CreateAudioStream(ref want, ref have);
-
-				SDL.SDL_BindAudioStream(devices[i], stream);
-				micStreams.Add(devices[i], stream);
 			}
 			SDL.SDL_free((IntPtr) devices);
 			return result;
 		}
 
 		public static unsafe int GetMicrophoneSamples(
-			uint handle,
+			IntPtr handle,
 			byte[] buffer,
 			int offset,
 			int count
 		) {
 			fixed (byte* ptr = &buffer[offset])
 			{
-				return (int) SDL.SDL_GetAudioStreamData(
-					micStreams[handle],
+				return SDL.SDL_GetAudioStreamData(
+					handle,
 					(IntPtr) ptr,
 					count
 				);
 			}
 		}
 
-		public static int GetMicrophoneQueuedBytes(uint handle)
+		public static int GetMicrophoneQueuedBytes(IntPtr handle)
 		{
-			return SDL.SDL_GetAudioStreamQueued(micStreams[handle]);
+			return SDL.SDL_GetAudioStreamQueued(handle);
 		}
 
-		public static void StartMicrophone(uint handle)
+		public static void StartMicrophone(IntPtr handle)
 		{
-			SDL.SDL_ResumeAudioDevice(handle);
+			SDL.SDL_ResumeAudioStreamDevice(handle);
 		}
 
-		public static void StopMicrophone(uint handle)
+		public static void StopMicrophone(IntPtr handle)
 		{
-			SDL.SDL_PauseAudioDevice(handle);
+			SDL.SDL_PauseAudioStreamDevice(handle);
 		}
 
 		#endregion
@@ -2294,17 +2314,17 @@ namespace Microsoft.Xna.Framework
 
 		public static bool IsTextInputActive(IntPtr window)
 		{
-			return SDL.SDL_TextInputActive(window);
+			return SDL.SDL_TextInputActive(WrapWindow(window));
 		}
 
 		public static void StartTextInput(IntPtr window)
 		{
-			SDL.SDL_StartTextInput(window);
+			SDL.SDL_StartTextInput(WrapWindow(window));
 		}
 
 		public static void StopTextInput(IntPtr window)
 		{
-			SDL.SDL_StopTextInput(window);
+			SDL.SDL_StopTextInput(WrapWindow(window));
 		}
 
 		#endregion
@@ -2365,12 +2385,11 @@ namespace Microsoft.Xna.Framework
 			{ (int) SDL.SDL_Keycode.SDLK_KP_8,		Keys.NumPad8 },
 			{ (int) SDL.SDL_Keycode.SDLK_KP_9,		Keys.NumPad9 },
 			{ (int) SDL.SDL_Keycode.SDLK_KP_CLEAR,		Keys.OemClear },
-			{ (int) SDL.SDL_Keycode.SDLK_KP_DECIMAL,	Keys.Decimal },
 			{ (int) SDL.SDL_Keycode.SDLK_KP_DIVIDE,		Keys.Divide },
 			{ (int) SDL.SDL_Keycode.SDLK_KP_ENTER,		Keys.Enter },
 			{ (int) SDL.SDL_Keycode.SDLK_KP_MINUS,		Keys.Subtract },
 			{ (int) SDL.SDL_Keycode.SDLK_KP_MULTIPLY,	Keys.Multiply },
-			{ (int) SDL.SDL_Keycode.SDLK_KP_PERIOD,		Keys.OemPeriod },
+			{ (int) SDL.SDL_Keycode.SDLK_KP_PERIOD,		Keys.Decimal },
 			{ (int) SDL.SDL_Keycode.SDLK_KP_PLUS,		Keys.Add },
 			{ (int) SDL.SDL_Keycode.SDLK_F1,		Keys.F1 },
 			{ (int) SDL.SDL_Keycode.SDLK_F2,		Keys.F2 },
@@ -2438,8 +2457,10 @@ namespace Microsoft.Xna.Framework
 			{ (int) SDL.SDL_Keycode.SDLK_SLEEP,		Keys.Sleep },
 			{ (int) SDL.SDL_Keycode.SDLK_TAB,		Keys.Tab },
 			{ (int) SDL.SDL_Keycode.SDLK_GRAVE,		Keys.OemTilde },
+			{ (int) SDL.SDL_Keycode.SDLK_MUTE,		Keys.VolumeMute },
 			{ (int) SDL.SDL_Keycode.SDLK_VOLUMEUP,		Keys.VolumeUp },
 			{ (int) SDL.SDL_Keycode.SDLK_VOLUMEDOWN,	Keys.VolumeDown },
+			{ (int) SDL.SDL_Keycode.SDLK_LESS,		Keys.OemBackslash },
 			{ '²' /* FIXME: AZERTY SDL3? -flibit */,	Keys.OemTilde },
 			{ 'é' /* FIXME: BEPO SDL3? -flibit */,		Keys.None },
 			{ '|' /* FIXME: Norwegian SDL3? -flibit */,	Keys.OemPipe },
@@ -2497,12 +2518,11 @@ namespace Microsoft.Xna.Framework
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_KP_8,		Keys.NumPad8 },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_KP_9,		Keys.NumPad9 },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_KP_CLEAR,		Keys.OemClear },
-			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_KP_DECIMAL,	Keys.Decimal },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_KP_DIVIDE,	Keys.Divide },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_KP_ENTER,		Keys.Enter },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_KP_MINUS,		Keys.Subtract },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_KP_MULTIPLY,	Keys.Multiply },
-			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_KP_PERIOD,	Keys.OemPeriod },
+			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_KP_PERIOD,	Keys.Decimal },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_KP_PLUS,		Keys.Add },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_F1,		Keys.F1 },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_F2,		Keys.F2 },
@@ -2570,12 +2590,13 @@ namespace Microsoft.Xna.Framework
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_SLEEP,		Keys.Sleep },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_TAB,		Keys.Tab },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_GRAVE,		Keys.OemTilde },
+			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_MUTE,			Keys.VolumeMute },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_VOLUMEUP,		Keys.VolumeUp },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_VOLUMEDOWN,	Keys.VolumeDown },
+			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_NONUSBACKSLASH,	Keys.OemBackslash },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_UNKNOWN,		Keys.None },
 			/* FIXME: The following scancodes need verification! */
-			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_NONUSHASH,	Keys.None },
-			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_NONUSBACKSLASH,	Keys.None }
+			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_NONUSHASH,	Keys.None }
 		};
 		private static Dictionary<int, SDL.SDL_Scancode> INTERNAL_xnaMap = new Dictionary<int, SDL.SDL_Scancode>()
 		{
@@ -2626,7 +2647,7 @@ namespace Microsoft.Xna.Framework
 			{ (int) Keys.NumPad8,		SDL.SDL_Scancode.SDL_SCANCODE_KP_8 },
 			{ (int) Keys.NumPad9,		SDL.SDL_Scancode.SDL_SCANCODE_KP_9 },
 			{ (int) Keys.OemClear,		SDL.SDL_Scancode.SDL_SCANCODE_KP_CLEAR },
-			{ (int) Keys.Decimal,		SDL.SDL_Scancode.SDL_SCANCODE_KP_DECIMAL },
+			{ (int) Keys.Decimal,		SDL.SDL_Scancode.SDL_SCANCODE_KP_PERIOD },
 			{ (int) Keys.Divide,		SDL.SDL_Scancode.SDL_SCANCODE_KP_DIVIDE },
 			{ (int) Keys.Multiply,		SDL.SDL_Scancode.SDL_SCANCODE_KP_MULTIPLY },
 			{ (int) Keys.Subtract,		SDL.SDL_Scancode.SDL_SCANCODE_KP_MINUS },
@@ -2696,8 +2717,10 @@ namespace Microsoft.Xna.Framework
 			{ (int) Keys.Sleep,		SDL.SDL_Scancode.SDL_SCANCODE_SLEEP },
 			{ (int) Keys.Tab,		SDL.SDL_Scancode.SDL_SCANCODE_TAB },
 			{ (int) Keys.OemTilde,		SDL.SDL_Scancode.SDL_SCANCODE_GRAVE },
+			{ (int) Keys.VolumeMute,	SDL.SDL_Scancode.SDL_SCANCODE_MUTE },
 			{ (int) Keys.VolumeUp,		SDL.SDL_Scancode.SDL_SCANCODE_VOLUMEUP },
 			{ (int) Keys.VolumeDown,	SDL.SDL_Scancode.SDL_SCANCODE_VOLUMEDOWN },
+			{ (int) Keys.OemBackslash,	SDL.SDL_Scancode.SDL_SCANCODE_NONUSBACKSLASH },
 			{ (int) Keys.None,		SDL.SDL_Scancode.SDL_SCANCODE_UNKNOWN }
 		};
 

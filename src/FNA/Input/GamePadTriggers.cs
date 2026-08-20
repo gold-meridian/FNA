@@ -134,7 +134,12 @@ namespace Microsoft.Xna.Framework.Input
 
 		public override int GetHashCode ()
 		{
-			return this.Left.GetHashCode() + this.Right.GetHashCode();
+			return left.GetHashCode() ^ right.GetHashCode();
+		}
+
+		public override string ToString()
+		{
+			return "{Left:" + left + " Right:" + right + '}';
 		}
 
 		#endregion

@@ -264,7 +264,12 @@ namespace Microsoft.Xna.Framework.Input
 		/// </summary>
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			return ThumbSticks.GetHashCode() ^
+				Triggers.GetHashCode() ^
+				Buttons.GetHashCode() ^
+				IsConnected.GetHashCode() ^
+				DPad.GetHashCode() ^
+				PacketNumber.GetHashCode();
 		}
 
 		/// <summary>
@@ -272,7 +277,7 @@ namespace Microsoft.Xna.Framework.Input
 		/// </summary>
 		public override string ToString()
 		{
-			return base.ToString();
+			return "{IsConnected:" + IsConnected + '}';
 		}
 
 		#endregion

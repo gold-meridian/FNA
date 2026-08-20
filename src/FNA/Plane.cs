@@ -141,8 +141,7 @@ namespace Microsoft.Xna.Framework
 
 		public void Normalize()
 		{
-			float length = Normal.Length();
-			float factor = 1.0f / length;
+			float factor = 1.0f / Normal.Length();
 			Normal = Vector3.Multiply(Normal, factor);
 			D = D * factor;
 		}
@@ -169,6 +168,10 @@ namespace Microsoft.Xna.Framework
 
 		public PlaneIntersectionType Intersects(BoundingFrustum frustum)
 		{
+			if (ReferenceEquals(frustum, null))
+			{
+				throw new ArgumentNullException("frustum", "This method does not accept null for this parameter.");
+			}
 			return frustum.Intersects(this);
 		}
 
@@ -197,15 +200,13 @@ namespace Microsoft.Xna.Framework
 
 		public static Plane Normalize(Plane value)
 		{
-			Plane ret;
-			Normalize(ref value, out ret);
-			return ret;
+			value.Normalize();
+			return value;
 		}
 
 		public static void Normalize(ref Plane value, out Plane result)
 		{
-			float length = value.Normal.Length();
-			float factor = 1.0f / length;
+			float factor = 1.0f / value.Normal.Length();
 			result.Normal = Vector3.Multiply(value.Normal, factor);
 			result.D = value.D * factor;
 		}
@@ -307,7 +308,7 @@ namespace Microsoft.Xna.Framework
 
 		public override int GetHashCode()
 		{
-			return Normal.GetHashCode() ^ D.GetHashCode();
+			return Normal.GetHashCode() + D.GetHashCode();
 		}
 
 		public override string ToString()

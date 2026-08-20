@@ -34,6 +34,10 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 			set
 			{
+				if (IsDisposed)
+				{
+					throw new ObjectDisposedException(GetType().Name, "This object has already been disposed.");
+				}
 				if (hasStarted)
 				{
 					throw new InvalidOperationException();
@@ -53,20 +57,17 @@ namespace Microsoft.Xna.Framework.Audio
 			{
 				if (IsDisposed)
 				{
-					throw new ObjectDisposedException(
-						"SoundEffectInstance"
-					);
+					throw new ObjectDisposedException(GetType().Name, "This object has already been disposed.");
 				}
-
-				if (value > 1.0f || value < -1.0f)
+				if (is3D)
+				{
+					throw new InvalidOperationException("The method call is invalid.");
+				}
+				if (value < -1f || value > 1f)
 				{
 					throw new ArgumentOutOfRangeException("value");
 				}
 				INTERNAL_pan = value;
-				if (is3D)
-				{
-					return;
-				}
 
 				SetPanMatrixCoefficients();
 				if (handle != IntPtr.Zero)
@@ -92,6 +93,14 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 			set
 			{
+				if (IsDisposed)
+				{
+					throw new ObjectDisposedException(GetType().Name, "This object has already been disposed.");
+				}
+				if (value < -1f || value > 1f)
+				{
+					throw new ArgumentOutOfRangeException("value");
+				}
 				INTERNAL_pitch = MathHelper.Clamp(value, -1.0f, 1.0f);
 				if (handle != IntPtr.Zero)
 				{
@@ -105,17 +114,17 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			get
 			{
+				if (IsDisposed)
+				{
+					throw new ObjectDisposedException(GetType().Name, "This object has already been disposed.");
+				}
 				if (	!isDynamic &&
 					handle != IntPtr.Zero &&
 					INTERNAL_state == SoundState.Playing	)
 				{
 					FAudio.FAudioVoiceState state;
-					FAudio.FAudioSourceVoice_GetState(
-						handle,
-						out state,
-						FAudio.FAUDIO_VOICE_NOSAMPLESPLAYED
-					);
-					if (state.BuffersQueued == 0)
+					FAudio.FAudioSourceVoice_GetState(handle, out state, 0);
+					if (state.BuffersQueued == 0 && state.SamplesPlayed == 0)
 					{
 						Stop(true);
 					}
@@ -124,7 +133,7 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 		}
 
-		private float INTERNAL_volume = 1.0f;
+		private float INTERNAL_volume = 1f;
 		public float Volume
 		{
 			get
@@ -133,6 +142,14 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 			set
 			{
+				if (IsDisposed)
+				{
+					throw new ObjectDisposedException(GetType().Name, "This object has already been disposed.");
+				}
+				if (value < -FAudio.FAUDIO_MAX_VOLUME_LEVEL || value > FAudio.FAUDIO_MAX_VOLUME_LEVEL) // XNA: value < 0f || value > 1f
+				{
+					throw new ArgumentOutOfRangeException("value");
+				}
 				INTERNAL_volume = value;
 				if (handle != IntPtr.Zero)
 				{
@@ -181,7 +198,6 @@ namespace Microsoft.Xna.Framework.Audio
 
 			selfReference = new WeakReference(this, true);
 			parentEffect = parent;
-			isDynamic = this is DynamicSoundEffectInstance;
 			hasStarted = false;
 			is3D = false;
 			usingReverb = false;
@@ -283,6 +299,10 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public virtual void Play()
 		{
+			if (IsDisposed)
+			{
+				throw new ObjectDisposedException(GetType().Name, "This object has already been disposed.");
+			}
 			if (State == SoundState.Playing)
 			{
 				return;
@@ -328,7 +348,6 @@ namespace Microsoft.Xna.Framework.Audio
 			{
 				return; /* What */
 			}
-			FAudio.FAudio_AddRef(dev.Handle);
 
 			/* Apply current properties */
 			FAudio.FAudioVoice_SetVolume(handle, INTERNAL_volume, 0);
@@ -379,6 +398,10 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public void Pause()
 		{
+			if (IsDisposed)
+			{
+				throw new ObjectDisposedException(GetType().Name, "This object has already been disposed.");
+			}
 			if (handle != IntPtr.Zero && State == SoundState.Playing)
 			{
 				FAudio.FAudioSourceVoice_Stop(handle, 0, 0);
@@ -388,6 +411,10 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public void Resume()
 		{
+			if (IsDisposed)
+			{
+				throw new ObjectDisposedException(GetType().Name, "This object has already been disposed.");
+			}
 			SoundState state = State; // Triggers a query, update
 			if (handle == IntPtr.Zero)
 			{
@@ -408,6 +435,10 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public void Stop(bool immediate)
 		{
+			if (IsDisposed)
+			{
+				throw new ObjectDisposedException(GetType().Name, "This object has already been disposed.");
+			}
 			if (handle == IntPtr.Zero)
 			{
 				return;
@@ -424,7 +455,6 @@ namespace Microsoft.Xna.Framework.Audio
 				FAudio.FAudioSourceVoice_Stop(handle, 0, 0);
 				FAudio.FAudioSourceVoice_FlushSourceBuffers(handle);
 				FAudio.FAudioVoice_DestroyVoice(handle);
-				FAudio.FAudio_Release(SoundEffect.Device().Handle);
 				handle = IntPtr.Zero;
 				usingReverb = false;
 				INTERNAL_state = SoundState.Stopped;

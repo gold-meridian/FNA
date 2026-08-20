@@ -49,28 +49,25 @@ namespace Microsoft.Xna.Framework.Graphics
 		static VertexPositionNormalTexture()
 		{
 			VertexDeclaration = new VertexDeclaration(
-				new VertexElement[]
-				{
-					new VertexElement(
-						0,
-						VertexElementFormat.Vector3,
-						VertexElementUsage.Position,
-						0
-					),
-					new VertexElement(
-						12,
-						VertexElementFormat.Vector3,
-						VertexElementUsage.Normal,
-						0
-					),
-					new VertexElement(
-						24,
-						VertexElementFormat.Vector2,
-						VertexElementUsage.TextureCoordinate,
-						0
-					)
-				}
-			);
+				new VertexElement(
+					0,
+					VertexElementFormat.Vector3,
+					VertexElementUsage.Position,
+					0
+				),
+				new VertexElement(
+					12,
+					VertexElementFormat.Vector3,
+					VertexElementUsage.Normal,
+					0
+				),
+				new VertexElement(
+					24,
+					VertexElementFormat.Vector2,
+					VertexElementUsage.TextureCoordinate,
+					0
+				)
+			) { Name = "VertexPositionNormalTexture.VertexDeclaration" };
 		}
 
 		#endregion
@@ -93,8 +90,14 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public override int GetHashCode()
 		{
-			// TODO: Fix GetHashCode
-			return 0;
+			return Position.X.GetHashCode() ^
+				Position.Y.GetHashCode() ^
+				Position.Z.GetHashCode() ^
+				Normal.X.GetHashCode() ^
+				Normal.Y.GetHashCode() ^
+				Normal.Z.GetHashCode() ^
+				TextureCoordinate.X.GetHashCode() ^
+				TextureCoordinate.Y.GetHashCode();
 		}
 
 		public override string ToString()
@@ -121,15 +124,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public override bool Equals(object obj)
 		{
-			if (obj == null)
-			{
-				return false;
-			}
-			if (obj.GetType() != base.GetType())
-			{
-				return false;
-			}
-			return (this == ((VertexPositionNormalTexture) obj));
+			return obj is VertexPositionNormalTexture && this == (VertexPositionNormalTexture) obj;
 		}
 
 		#endregion

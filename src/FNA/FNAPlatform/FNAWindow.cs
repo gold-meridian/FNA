@@ -60,6 +60,7 @@ namespace Microsoft.Xna.Framework
 		{
 			get
 			{
+				// This does NOT use Wrap/Unwrap, that's done at construction
 				return window;
 			}
 		}
@@ -96,11 +97,12 @@ namespace Microsoft.Xna.Framework
 
 		#region Internal Constructor
 
-		internal FNAWindow(IntPtr nativeWindow, string display)
+		internal FNAWindow(IntPtr nativeWindow, string display, string title)
 		{
 			window = nativeWindow;
 			deviceName = display;
 			wantsFullscreen = false;
+			base._title = title;
 		}
 
 		#endregion

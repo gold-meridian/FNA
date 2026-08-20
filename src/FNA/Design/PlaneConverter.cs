@@ -11,6 +11,7 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
+using System.ComponentModel.Design.Serialization;
 using System.Globalization;
 #endregion
 
@@ -20,9 +21,13 @@ namespace Microsoft.Xna.Framework.Design
 	{
 		#region Public Constructor
 
-		public PlaneConverter() : base()
+		public PlaneConverter()
 		{
-			// FIXME: Initialize propertyDescriptions... how? -flibit
+			Type Plane = typeof(Plane);
+			propertyDescriptions = new PropertyDescriptorCollection(new PropertyDescriptor[] {
+				new FieldPropertyDescriptor(Plane.GetField("Normal")),
+				new FieldPropertyDescriptor(Plane.GetField("D"))
+			});
 			supportStringConvert = false;
 		}
 
@@ -36,7 +41,19 @@ namespace Microsoft.Xna.Framework.Design
 			object value,
 			Type destinationType
 		) {
-			// FIXME: This method exists in the spec, but... why?! -flibit
+			if (value is Plane)
+			{
+				if (destinationType == typeof(InstanceDescriptor))
+				{
+					Plane plane = (Plane) value;
+					return new InstanceDescriptor(
+						typeof(Plane).GetConstructor(
+							new Type[] { typeof(Vector3), typeof(float) }
+						),
+						new object[] { plane.Normal, plane.D }
+					);
+				}
+			}
 			return base.ConvertTo(context, culture, value, destinationType);
 		}
 
@@ -44,6 +61,10 @@ namespace Microsoft.Xna.Framework.Design
 			ITypeDescriptorContext context,
 			IDictionary propertyValues
 		) {
+			if (propertyValues == null)
+			{
+				throw new ArgumentNullException("propertyValues", "This method does not accept null for this parameter.");
+			}
 			return (object) new Plane(
 				(Vector3) propertyValues["Normal"],
 				(float) propertyValues["D"]

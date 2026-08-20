@@ -63,17 +63,17 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			if (audioEngine == null)
 			{
-				throw new ArgumentNullException("audioEngine");
+				throw new ArgumentNullException("audioEngine", "You must pass in a valid audio engine.");
 			}
-			if (String.IsNullOrEmpty(filename))
+			if (string.IsNullOrEmpty(filename))
 			{
-				throw new ArgumentNullException("filename");
+				throw new ArgumentNullException("filename", "This method does not accept null for this parameter.");
 			}
 
 			IntPtr bufferLen;
 			IntPtr buffer = TitleContainer.ReadToPointer(filename, out bufferLen);
 
-			FAudio.FACTAudioEngine_CreateSoundBank(
+			uint ret = FAudio.FACTAudioEngine_CreateSoundBank(
 				audioEngine.handle,
 				buffer,
 				(uint) bufferLen,
@@ -81,6 +81,10 @@ namespace Microsoft.Xna.Framework.Audio
 				0,
 				out handle
 			);
+			if (ret == 0x8ac70007) // FACTENGINE_E_INVALIDDATA
+			{
+				throw new ArgumentException("XACT could not load the data provided. Make sure you are using the correct version of the XACT tool.");
+			}
 
 			FNAPlatform.FreeFilePointer(buffer);
 
@@ -138,17 +142,17 @@ namespace Microsoft.Xna.Framework.Audio
 			{
 				if (!IsDisposed)
 				{
-					if (Disposing != null)
-					{
-						Disposing.Invoke(this, null);
-					}
-
 					// If this is disposed, stop leaking memory!
 					if (!engine.IsDisposed)
 					{
 						FAudio.FACTSoundBank_Destroy(handle);
 					}
 					OnSoundBankDestroyed();
+
+					if (disposing && Disposing != null)
+					{
+						Disposing(this, EventArgs.Empty);
+					}
 				}
 			}
 		}
@@ -159,9 +163,9 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public Cue GetCue(string name)
 		{
-			if (String.IsNullOrEmpty(name))
+			if (string.IsNullOrEmpty(name))
 			{
-				throw new ArgumentNullException("name");
+				throw new ArgumentNullException("name", "This method does not accept null for this parameter.");
 			}
 
 			ushort cue = FAudio.FACTSoundBank_GetCueIndex(
@@ -189,9 +193,9 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public void PlayCue(string name)
 		{
-			if (String.IsNullOrEmpty(name))
+			if (string.IsNullOrEmpty(name))
 			{
-				throw new ArgumentNullException("name");
+				throw new ArgumentNullException("name", "This method does not accept null for this parameter.");
 			}
 
 			ushort cue = FAudio.FACTSoundBank_GetCueIndex(
@@ -220,9 +224,9 @@ namespace Microsoft.Xna.Framework.Audio
 			AudioListener listener,
 			AudioEmitter emitter
 		) {
-			if (String.IsNullOrEmpty(name))
+			if (string.IsNullOrEmpty(name))
 			{
-				throw new ArgumentNullException("name");
+				throw new ArgumentNullException("name", "This method does not accept null for this parameter.");
 			}
 			if (listener == null)
 			{

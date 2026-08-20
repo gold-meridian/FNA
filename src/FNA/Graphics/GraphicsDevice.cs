@@ -305,7 +305,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		 * performance warnings on Intel/Mesa.
 		 * -sulix
 		 *
-		 * Also, these are NOT readonly, for weird performance reasons -flibit
+		 * Also, these are NOT readonly, for avoiding defensive copy -flibit
 		 */
 #if DEBUG
 		private static Vector4 DiscardColor = new Color(68, 34, 136, 255).ToVector4();
@@ -635,7 +635,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				GLDevice,
 				IntPtr.Zero,
 				IntPtr.Zero,
-				PresentationParameters.DeviceWindowHandle
+				PresentationParameters.parameters.deviceWindowHandle
 			);
 		}
 
@@ -650,7 +650,11 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			if (overrideWindowHandle == IntPtr.Zero)
 			{
-				overrideWindowHandle = PresentationParameters.DeviceWindowHandle;
+				overrideWindowHandle = PresentationParameters.parameters.deviceWindowHandle;
+			}
+			else
+			{
+				overrideWindowHandle = FNAPlatform.WrapWindow(overrideWindowHandle);
 			}
 			if (sourceRectangle.HasValue && destinationRectangle.HasValue)
 			{

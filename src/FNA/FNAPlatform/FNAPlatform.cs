@@ -175,6 +175,8 @@ namespace Microsoft.Xna.Framework
 				SupportsOrientationChanges =	SDL3_FNAPlatform.SupportsOrientationChanges;
 				NeedsPlatformMainLoop = 	SDL3_FNAPlatform.NeedsPlatformMainLoop;
 				RunPlatformMainLoop =		SDL3_FNAPlatform.RunPlatformMainLoop;
+				WrapWindow =			SDL3_FNAPlatform.WrapWindow;
+				UnwrapWindow =			SDL3_FNAPlatform.UnwrapWindow;
 			}
 			else
 			{
@@ -231,6 +233,8 @@ namespace Microsoft.Xna.Framework
 				SupportsOrientationChanges =	SDL2_FNAPlatform.SupportsOrientationChanges;
 				NeedsPlatformMainLoop = 	SDL2_FNAPlatform.NeedsPlatformMainLoop;
 				RunPlatformMainLoop =		SDL2_FNAPlatform.RunPlatformMainLoop;
+				WrapWindow =			SDL2_FNAPlatform.WrapWindow;
+				UnwrapWindow =			SDL2_FNAPlatform.UnwrapWindow;
 			}
 
 			FNALoggerEXT.Initialize();
@@ -449,27 +453,27 @@ namespace Microsoft.Xna.Framework
 		public delegate void FreeFilePointerFunc(IntPtr file);
 		public static readonly FreeFilePointerFunc FreeFilePointer;
 
-		public delegate void ShowRuntimeErrorFunc(string title, string message);
+		public delegate void ShowRuntimeErrorFunc(GameWindow gameWindow, string message);
 		public static readonly ShowRuntimeErrorFunc ShowRuntimeError;
 
 		public delegate Microphone[] GetMicrophonesFunc();
 		public static readonly GetMicrophonesFunc GetMicrophones;
 
 		public delegate int GetMicrophoneSamplesFunc(
-			uint handle,
+			IntPtr handle,
 			byte[] buffer,
 			int offset,
 			int count
 		);
 		public static readonly GetMicrophoneSamplesFunc GetMicrophoneSamples;
 
-		public delegate int GetMicrophoneQueuedBytesFunc(uint handle);
+		public delegate int GetMicrophoneQueuedBytesFunc(IntPtr handle);
 		public static readonly GetMicrophoneQueuedBytesFunc GetMicrophoneQueuedBytes;
 
-		public delegate void StartMicrophoneFunc(uint handle);
+		public delegate void StartMicrophoneFunc(IntPtr handle);
 		public static readonly StartMicrophoneFunc StartMicrophone;
 
-		public delegate void StopMicrophoneFunc(uint handle);
+		public delegate void StopMicrophoneFunc(IntPtr handle);
 		public static readonly StopMicrophoneFunc StopMicrophone;
 
 		public delegate TouchPanelCapabilities GetTouchCapabilitiesFunc();
@@ -489,6 +493,12 @@ namespace Microsoft.Xna.Framework
 
 		public delegate void RunPlatformMainLoopFunc(Game game);
 		public static readonly RunPlatformMainLoopFunc RunPlatformMainLoop;
+
+		public delegate IntPtr WrapWindowFunc(IntPtr handle);
+		public static readonly WrapWindowFunc WrapWindow;
+
+		public delegate IntPtr UnwrapWindowFunc(IntPtr handle);
+		public static readonly UnwrapWindowFunc UnwrapWindow;
 
 		#endregion
 	}

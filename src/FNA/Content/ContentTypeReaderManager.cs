@@ -33,11 +33,10 @@ namespace Microsoft.Xna.Framework.Content
 
 		private static readonly object locker;
 
-		private static readonly string assemblyName;
-
 		private static readonly Dictionary<Type, ContentTypeReader> contentReadersCache;
 
-		private static readonly string[] nestedMark = { "[[" };
+		private static readonly Regex regex;
+		private static readonly string regexReplacement;
 
 		// Trick to prevent the linker removing the code, but not actually execute the code
 		private static bool falseflag = false;
@@ -56,7 +55,9 @@ namespace Microsoft.Xna.Framework.Content
 		{
 			locker = new object();
 			contentReadersCache = new Dictionary<Type, ContentTypeReader>(255);
-			assemblyName = typeof(ContentTypeReaderManager).Assembly.FullName;
+
+			regex = new Regex(@", (Microsoft.Xna.Framework.Graphics|Microsoft.Xna.Framework.Video|Microsoft.Xna.Framework|MonoGame.Framework), Version=.+?, Culture=.+?, PublicKeyToken=[^\]]+", RegexOptions.Compiled);
+			regexReplacement = string.Format(", {0}", typeof(ContentTypeReaderManager).Assembly.FullName);
 		}
 
 		#endregion
@@ -89,7 +90,7 @@ namespace Microsoft.Xna.Framework.Content
 			 * -flibit
 			 */
 			Type fixType = Type.GetType(PrepareType(targetType.FullName), false);
-			if (fixType != null && contentReaders.TryGetValue(fixType, out reader))
+			if (!ReferenceEquals(fixType, null) && contentReaders.TryGetValue(fixType, out reader))
 			{
 				return reader;
 			}
@@ -197,16 +198,16 @@ namespace Microsoft.Xna.Framework.Content
 
 
 						readerTypeString = readerTypeString
-						                  .Replace("Microsoft.Xna.Framework.Vector2, FNA, Version=26.3.0.0, Culture=neutral, PublicKeyToken=null", typeof(Vector2).AssemblyQualifiedName)
-						                  .Replace("Microsoft.Xna.Framework.Vector3, FNA, Version=26.3.0.0, Culture=neutral, PublicKeyToken=null", typeof(Vector3).AssemblyQualifiedName)
-						                  .Replace("Microsoft.Xna.Framework.Vector4, FNA, Version=26.3.0.0, Culture=neutral, PublicKeyToken=null", typeof(Vector4).AssemblyQualifiedName)
-						                  .Replace("Microsoft.Xna.Framework.Point, FNA, Version=26.3.0.0, Culture=neutral, PublicKeyToken=null", typeof(Point).AssemblyQualifiedName)
-						                  .Replace("Microsoft.Xna.Framework.Rectangle, FNA, Version=26.3.0.0, Culture=neutral, PublicKeyToken=null", typeof(Rectangle).AssemblyQualifiedName)
-						                  .Replace("Microsoft.Xna.Framework.Matrix, FNA, Version=26.3.0.0, Culture=neutral, PublicKeyToken=null", typeof(Matrix).AssemblyQualifiedName)
-						                  .Replace("Microsoft.Xna.Framework.Quaternion, FNA, Version=26.3.0.0, Culture=neutral, PublicKeyToken=null", typeof(Quaternion).AssemblyQualifiedName);
+						                  .Replace("Microsoft.Xna.Framework.Vector2, FNA, Version=26.8.0.0, Culture=neutral, PublicKeyToken=null", typeof(Vector2).AssemblyQualifiedName)
+						                  .Replace("Microsoft.Xna.Framework.Vector3, FNA, Version=26.8.0.0, Culture=neutral, PublicKeyToken=null", typeof(Vector3).AssemblyQualifiedName)
+						                  .Replace("Microsoft.Xna.Framework.Vector4, FNA, Version=26.8.0.0, Culture=neutral, PublicKeyToken=null", typeof(Vector4).AssemblyQualifiedName)
+						                  .Replace("Microsoft.Xna.Framework.Point, FNA, Version=26.8.0.0, Culture=neutral, PublicKeyToken=null", typeof(Point).AssemblyQualifiedName)
+						                  .Replace("Microsoft.Xna.Framework.Rectangle, FNA, Version=26.8.0.0, Culture=neutral, PublicKeyToken=null", typeof(Rectangle).AssemblyQualifiedName)
+						                  .Replace("Microsoft.Xna.Framework.Matrix, FNA, Version=26.8.0.0, Culture=neutral, PublicKeyToken=null", typeof(Matrix).AssemblyQualifiedName)
+						                  .Replace("Microsoft.Xna.Framework.Quaternion, FNA, Version=26.8.0.0, Culture=neutral, PublicKeyToken=null", typeof(Quaternion).AssemblyQualifiedName);
 
 						Type l_readerType = Type.GetType(readerTypeString);
-						if (l_readerType != null)
+						if (!ReferenceEquals(l_readerType, null))
 						{
 							ContentTypeReader typeReader;
 							if (!contentReadersCache.TryGetValue(l_readerType, out typeReader))
@@ -263,7 +264,7 @@ namespace Microsoft.Xna.Framework.Content
 						}
 					}
 
-					if (newReaders[i].TargetType != null)
+					if (!ReferenceEquals(newReaders[i].TargetType, null))
 					{
 						contentReaders.Add(newReaders[i].TargetType, newReaders[i]);
 					}
@@ -328,60 +329,9 @@ namespace Microsoft.Xna.Framework.Content
 		/// <returns>
 		/// A <see cref="System.String"/>
 		/// </returns>
-		internal static string PrepareType(string type)
+		private static string PrepareType(string type)
 		{
-			// Needed to support nested types
-			int count = type.Split(
-				nestedMark,
-				StringSplitOptions.None
-			).Length - 1;
-			string preparedType = type;
-			for (int i = 0; i < count; i += 1)
-			{
-				preparedType = Regex.Replace(
-					preparedType,
-					@"\[(.+?), Version=.+?\]",
-					"[$1]"
-				);
-			}
-			// Handle non generic types
-			if (preparedType.Contains("PublicKeyToken"))
-			{
-				preparedType = Regex.Replace(
-					preparedType,
-					@"(.+?), Version=.+?$",
-					"$1"
-				);
-			}
-			preparedType = preparedType.Replace(
-				", Microsoft.Xna.Framework.Graphics",
-				string.Format(
-					", {0}",
-					assemblyName
-				)
-			);
-			preparedType = preparedType.Replace(
-				", Microsoft.Xna.Framework.Video",
-				string.Format(
-					", {0}",
-					assemblyName
-				)
-			);
-			preparedType = preparedType.Replace(
-				", Microsoft.Xna.Framework",
-				string.Format(
-					", {0}",
-					assemblyName
-				)
-			);
-			preparedType = preparedType.Replace(
-				", MonoGame.Framework",
-				string.Format(
-					", {0}",
-					assemblyName
-				)
-			);
-			return preparedType;
+			return regex.Replace(type, regexReplacement);
 		}
 
 		#endregion

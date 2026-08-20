@@ -34,11 +34,7 @@ namespace Microsoft.Xna.Framework
 				if (_enabled != value)
 				{
 					_enabled = value;
-					if (this.EnabledChanged != null)
-					{
-						this.EnabledChanged(this, EventArgs.Empty);
-					}
-					OnEnabledChanged(this, null);
+					OnEnabledChanged(this, EventArgs.Empty);
 				}
 			}
 		}
@@ -54,11 +50,7 @@ namespace Microsoft.Xna.Framework
 				if (_updateOrder != value)
 				{
 					_updateOrder = value;
-					if (this.UpdateOrderChanged != null)
-					{
-						this.UpdateOrderChanged(this, EventArgs.Empty);
-					}
-					OnUpdateOrderChanged(this, null);
+					OnUpdateOrderChanged(this, EventArgs.Empty);
 				}
 			}
 		}
@@ -121,18 +113,37 @@ namespace Microsoft.Xna.Framework
 
 		#region Protected Virtual Methods
 
-		protected virtual void OnUpdateOrderChanged(object sender, EventArgs args) {}
+		protected virtual void OnUpdateOrderChanged(object sender, EventArgs args)
+		{
+			if (this.UpdateOrderChanged != null)
+			{
+				this.UpdateOrderChanged(this, args);
+			}
+		}
 
-		protected virtual void OnEnabledChanged(object sender, EventArgs args) {}
+		protected virtual void OnEnabledChanged(object sender, EventArgs args)
+		{
+			if (this.EnabledChanged != null)
+			{
+				this.EnabledChanged(this, args);
+			}
+		}
 
 		/// <summary>
 		/// Shuts down the component.
 		/// </summary>
 		protected virtual void Dispose(bool disposing)
 		{
-			if (disposing && Disposed != null)
+			if (disposing)
 			{
-				Disposed(this, EventArgs.Empty);
+				if (Game != null)
+				{
+					Game.Components.Remove(this);
+				}
+				if (Disposed != null)
+				{
+					Disposed(this, EventArgs.Empty);
+				}
 			}
 		}
 

@@ -94,10 +94,7 @@ namespace Microsoft.Xna.Framework
 		/// <returns>A copy of this curve.</returns>
 		public Curve Clone()
 		{
-			Curve curve = new Curve(Keys.Clone());
-			curve.PreLoop = PreLoop;
-			curve.PostLoop = PostLoop;
-			return curve;
+			return new Curve(Keys.Clone()) { PreLoop = PreLoop, PostLoop = PostLoop };
 		}
 
 		/// <summary>
@@ -256,6 +253,10 @@ namespace Microsoft.Xna.Framework
 			CurveTangent tangentInType,
 			CurveTangent tangentOutType
 		) {
+			if (keyIndex >= Keys.Count || keyIndex < 0)
+			{
+				throw new ArgumentOutOfRangeException("keyIndex");
+			}
 			// See http://msdn.microsoft.com/en-us/library/microsoft.xna.framework.curvetangent.aspx
 
 			CurveKey key = Keys[keyIndex];

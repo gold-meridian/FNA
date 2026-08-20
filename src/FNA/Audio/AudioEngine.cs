@@ -114,9 +114,9 @@ namespace Microsoft.Xna.Framework.Audio
 			TimeSpan lookAheadTime,
 			string rendererId
 		) {
-			if (String.IsNullOrEmpty(settingsFile))
+			if (string.IsNullOrEmpty(settingsFile))
 			{
-				throw new ArgumentNullException("settingsFile");
+				throw new ArgumentNullException("settingsFile", "This method does not accept null for this parameter.");
 			}
 
 			// Allocate (but don't initialize just yet!)
@@ -176,7 +176,12 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 
 			// Init engine, finally
-			if (FAudio.FACTAudioEngine_Initialize(handle, ref settings) != 0)
+			uint ret = FAudio.FACTAudioEngine_Initialize(handle, ref settings);
+			if (ret == 0x8ac70007) // FACTENGINE_E_INVALIDDATA
+			{
+				throw new ArgumentException("XACT could not load the data provided. Make sure you are using the correct version of the XACT tool.");
+			}
+			else if (ret != 0)
 			{
 				throw new InvalidOperationException(
 					"Engine initialization failed!"
@@ -258,9 +263,9 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public AudioCategory GetCategory(string name)
 		{
-			if (String.IsNullOrEmpty(name))
+			if (string.IsNullOrEmpty(name))
 			{
-				throw new ArgumentNullException("name");
+				throw new ArgumentNullException("name", "This method does not accept null for this parameter.");
 			}
 
 			ushort category = FAudio.FACTAudioEngine_GetCategory(
@@ -270,9 +275,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 			if (category == FAudio.FACTCATEGORY_INVALID)
 			{
-				throw new InvalidOperationException(
-					"Invalid category name!"
-				);
+				throw new InvalidOperationException("This resource could not be created.");
 			}
 
 			return new AudioCategory(this, category, name);
@@ -280,9 +283,9 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public float GetGlobalVariable(string name)
 		{
-			if (String.IsNullOrEmpty(name))
+			if (string.IsNullOrEmpty(name))
 			{
-				throw new ArgumentNullException("name");
+				throw new ArgumentNullException("name", "This method does not accept null for this parameter.");
 			}
 
 			ushort variable = FAudio.FACTAudioEngine_GetGlobalVariableIndex(
@@ -308,9 +311,9 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public void SetGlobalVariable(string name, float value)
 		{
-			if (String.IsNullOrEmpty(name))
+			if (string.IsNullOrEmpty(name))
 			{
-				throw new ArgumentNullException("name");
+				throw new ArgumentNullException("name", "This method does not accept null for this parameter.");
 			}
 
 			ushort variable = FAudio.FACTAudioEngine_GetGlobalVariableIndex(
@@ -347,16 +350,15 @@ namespace Microsoft.Xna.Framework.Audio
 			{
 				if (!IsDisposed)
 				{
-					if (Disposing != null)
-					{
-						Disposing.Invoke(this, null);
-					}
-
 					FAudio.FACTAudioEngine_ShutDown(handle);
 					FAudio.FACTAudioEngine_Release(handle);
 					rendererDetails = null;
 
 					IsDisposed = true;
+					if (disposing && Disposing != null)
+					{
+						Disposing(this, EventArgs.Empty);
+					}
 				}
 			}
 		}

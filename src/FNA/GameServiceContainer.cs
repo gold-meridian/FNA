@@ -22,16 +22,7 @@ namespace Microsoft.Xna.Framework
 	{
 		#region Private Fields
 
-		Dictionary<Type, object> services;
-
-		#endregion
-
-		#region Public Constructors
-
-		public GameServiceContainer()
-		{
-			services = new Dictionary<Type, object>();
-		}
+		readonly Dictionary<Type, object> services = new Dictionary<Type, object>();
 
 		#endregion
 
@@ -39,18 +30,24 @@ namespace Microsoft.Xna.Framework
 
 		public void AddService(Type type, object provider)
 		{
-			if (type == null)
+			if (ReferenceEquals(type, null))
 			{
-				throw new ArgumentNullException("type");
+				throw new ArgumentNullException("type", "The service type cannot be null.");
 			}
 			if (provider == null)
 			{
-				throw new ArgumentNullException("provider");
+				throw new ArgumentNullException("provider", "The service provider instance cannot be null.");
+			}
+			if (services.ContainsKey(type))
+			{
+				throw new ArgumentException("Container already contains a service of this type.", "type");
 			}
 			if (!type.IsAssignableFrom(provider.GetType()))
 			{
 				throw new ArgumentException(
-					"The provider does not match the specified service type!"
+					"Service provider object of type " + provider.GetType().FullName +
+					" must be assignable to service type " +
+					type.FullName + "." // type.GetType().FullName in XNA. It is wrong so fixed it.
 				);
 			}
 
@@ -59,28 +56,47 @@ namespace Microsoft.Xna.Framework
 
 		public object GetService(Type type)
 		{
-			if (type == null)
+			if (ReferenceEquals(type, null))
 			{
-				throw new ArgumentNullException("type");
+				throw new ArgumentNullException("type", "The service type cannot be null.");
 			}
 
-			object service;
-			if (services.TryGetValue(type, out service))
-			{
-				return service;
-			}
-
-			return null;
+			return INTERNAL_GetService(type);
 		}
 
 		public void RemoveService(Type type)
 		{
-			if (type == null)
+			if (ReferenceEquals(type, null))
 			{
-				throw new ArgumentNullException("type");
+				throw new ArgumentNullException("type", "The service type cannot be null.");
 			}
 
 			services.Remove(type);
+		}
+
+		#endregion
+
+		#region Internal Methods
+
+		internal void INTERNAL_AddService(Type type, object provider)
+		{
+			if (services.ContainsKey(type))
+			{
+				throw new ArgumentException("Container already contains a service of this type.", "type");
+			}
+			services.Add(type, provider);
+		}
+
+		internal void INTERNAL_RemoveService(Type type)
+		{
+			services.Remove(type);
+		}
+
+		internal object INTERNAL_GetService(Type type)
+		{
+			object service;
+			services.TryGetValue(type, out service);
+			return service;
 		}
 
 		#endregion

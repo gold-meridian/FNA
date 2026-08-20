@@ -24,6 +24,10 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			get
 			{
+				if (IsDisposed)
+				{
+					throw new ObjectDisposedException(GetType().Name, "This object has already been disposed.");
+				}
 				return queuedBuffers.Count;
 			}
 		}
@@ -32,11 +36,23 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			get
 			{
+				if (IsDisposed)
+				{
+					throw new ObjectDisposedException(GetType().Name, "This object has already been disposed.");
+				}
 				return false;
 			}
 			set
 			{
-				// No-op, DynamicSoundEffectInstance cannot be looped!
+				if (IsDisposed)
+				{
+					throw new ObjectDisposedException(GetType().Name, "This object has already been disposed.");
+				}
+				// DynamicSoundEffectInstance cannot be looped!
+				if (value)
+				{
+					throw new InvalidOperationException("The method call is invalid.");
+				}
 			}
 		}
 
@@ -49,9 +65,6 @@ namespace Microsoft.Xna.Framework.Audio
 		#endregion
 
 		#region Private Variables
-
-		private int sampleRate;
-		private AudioChannels channels;
 
 		private List<IntPtr> queuedBuffers;
 		private List<uint> queuedSizes;
@@ -76,11 +89,18 @@ namespace Microsoft.Xna.Framework.Audio
 			int sampleRate,
 			AudioChannels channels
 		) : base() {
-			this.sampleRate = sampleRate;
-			this.channels = channels;
+			if (sampleRate < FAudio.FAUDIO_MIN_SAMPLE_RATE || sampleRate > FAudio.FAUDIO_MAX_SAMPLE_RATE) // XNA: sampleRate < 8000 || sampleRate > 48000
+			{
+				throw new ArgumentOutOfRangeException("sampleRate");
+			}
+			if (channels < AudioChannels.Mono || channels > AudioChannels.Stereo)
+			{
+				throw new ArgumentOutOfRangeException("channels");
+			}
+			FAudio.FAudio_AddRef(SoundEffect.Device().Handle);
+
 			isDynamic = true;
 
-			format = new FAudio.FAudioWaveFormatEx();
 			format.wFormatTag = 1;
 			format.nChannels = (ushort) channels;
 			format.nSamplesPerSec = (uint) sampleRate;
@@ -97,38 +117,48 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#endregion
 
-		#region Destructor
-
-		~DynamicSoundEffectInstance()
-		{
-			// FIXME: ReRegisterForFinalize? -flibit
-			Dispose();
-		}
-
-		#endregion
-
 		#region Public Methods
 
 		public TimeSpan GetSampleDuration(int sizeInBytes)
 		{
-			return SoundEffect.GetSampleDuration(
+			if (IsDisposed)
+			{
+				throw new ObjectDisposedException(GetType().Name, "This object has already been disposed.");
+			}
+			if (sizeInBytes < 0)
+			{
+				throw new ArgumentException("Buffer size cannot be negative.");
+			}
+			return SoundEffect.INTERNAL_GetSampleDuration(
 				sizeInBytes,
-				sampleRate,
-				channels
+				(int) format.nSamplesPerSec,
+				format.nBlockAlign
 			);
 		}
 
 		public int GetSampleSizeInBytes(TimeSpan duration)
 		{
-			return SoundEffect.GetSampleSizeInBytes(
+			if (IsDisposed)
+			{
+				throw new ObjectDisposedException(GetType().Name, "This object has already been disposed.");
+			}
+			if (duration.TotalMilliseconds < 0.0 || duration.TotalMilliseconds > int.MaxValue)
+			{
+				throw new ArgumentOutOfRangeException("duration");
+			}
+			return SoundEffect.INTERNAL_GetSampleSizeInBytes(
 				duration,
-				sampleRate,
-				channels
+				(int) format.nSamplesPerSec,
+				format.nBlockAlign
 			);
 		}
 
 		public override void Play()
 		{
+			if (IsDisposed)
+			{
+				throw new ObjectDisposedException(GetType().Name, "This object has already been disposed.");
+			}
 			// Wait! What if we need moar buffers?
 			Update();
 
@@ -150,6 +180,22 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public void SubmitBuffer(byte[] buffer, int offset, int count)
 		{
+			if (IsDisposed)
+			{
+				throw new ObjectDisposedException(GetType().Name, "This object has already been disposed.");
+			}
+			if (buffer == null || buffer.Length == 0 || buffer.Length % format.nBlockAlign != 0)
+			{
+				throw new ArgumentException("Buffer is invalid. Ensure that the buffer length is non-zero and meets the block alignment requirements for the audio format.");
+			}
+			if (unchecked((uint) offset >= (uint) buffer.Length) || offset % format.nBlockAlign != 0)
+			{
+				throw new ArgumentException("Byte offset is invalid. Ensure that it falls within the buffer and meets the block alignment requirements for the audio format.");
+			}
+			if (count <= 0 || unchecked((uint) (offset + count) > (uint) buffer.Length) || count % format.nBlockAlign != 0)
+			{
+				throw new ArgumentException("Number of samples to play is invalid. Ensure that it meets the block alignment requirements for the audio format.");
+			}
 			IntPtr next = FNAPlatform.Malloc(count);
 			Marshal.Copy(buffer, offset, next, count);
 			lock (queuedBuffers)
@@ -160,11 +206,7 @@ namespace Microsoft.Xna.Framework.Audio
 					FAudio.FAudioBuffer buf = new FAudio.FAudioBuffer();
 					buf.AudioBytes = (uint) count;
 					buf.pAudioData = next;
-					buf.PlayLength = (
-						buf.AudioBytes /
-						(uint) channels /
-						(uint) (format.wBitsPerSample / 8)
-					);
+					buf.PlayLength = buf.AudioBytes / format.nBlockAlign;
 					FAudio.FAudioSourceVoice_SubmitSourceBuffer(
 						handle,
 						ref buf,
@@ -210,11 +252,7 @@ namespace Microsoft.Xna.Framework.Audio
 					FAudio.FAudioBuffer buf = new FAudio.FAudioBuffer();
 					buf.AudioBytes = (uint) count * sizeof(float);
 					buf.pAudioData = next;
-					buf.PlayLength = (
-						buf.AudioBytes /
-						(uint) channels /
-						(uint) (format.wBitsPerSample / 8)
-					);
+					buf.PlayLength = buf.AudioBytes / format.nBlockAlign;
 					FAudio.FAudioSourceVoice_SubmitSourceBuffer(
 						handle,
 						ref buf,
@@ -234,8 +272,14 @@ namespace Microsoft.Xna.Framework.Audio
 
 		protected override void Dispose(bool disposing)
 		{
-			// Not much to see here...
+			bool needsRelease = !IsDisposed;
+
 			base.Dispose(disposing);
+
+			if (needsRelease)
+			{
+				FAudio.FAudio_Release(SoundEffect.Device().Handle);
+			}
 		}
 
 		#endregion
@@ -251,11 +295,7 @@ namespace Microsoft.Xna.Framework.Audio
 				{
 					buffer.AudioBytes = queuedSizes[i];
 					buffer.pAudioData = queuedBuffers[i];
-					buffer.PlayLength = (
-						buffer.AudioBytes /
-						(uint) channels /
-						(uint) (format.wBitsPerSample / 8)
-					);
+					buffer.PlayLength = buffer.AudioBytes / format.nBlockAlign;
 					FAudio.FAudioSourceVoice_SubmitSourceBuffer(
 						handle,
 						ref buffer,
