@@ -169,6 +169,10 @@ namespace Microsoft.Xna.Framework
 
 		public PlaneIntersectionType Intersects(BoundingFrustum frustum)
 		{
+			if (frustum == null)
+			{
+				throw new ArgumentNullException("frustum", "This method does not accept null for this parameter.");
+			}
 			return frustum.Intersects(this);
 		}
 
@@ -307,7 +311,7 @@ namespace Microsoft.Xna.Framework
 
 		public override int GetHashCode()
 		{
-			return Normal.GetHashCode() ^ D.GetHashCode();
+			return Normal.GetHashCode() + D.GetHashCode();
 		}
 
 		public override string ToString()

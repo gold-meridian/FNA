@@ -635,7 +635,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				GLDevice,
 				IntPtr.Zero,
 				IntPtr.Zero,
-				PresentationParameters.DeviceWindowHandle
+				PresentationParameters.parameters.deviceWindowHandle
 			);
 		}
 
@@ -650,7 +650,11 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			if (overrideWindowHandle == IntPtr.Zero)
 			{
-				overrideWindowHandle = PresentationParameters.DeviceWindowHandle;
+				overrideWindowHandle = PresentationParameters.parameters.deviceWindowHandle;
+			}
+			else
+			{
+				overrideWindowHandle = FNAPlatform.WrapWindow(overrideWindowHandle);
 			}
 			if (sourceRectangle.HasValue && destinationRectangle.HasValue)
 			{

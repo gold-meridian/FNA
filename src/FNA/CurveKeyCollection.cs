@@ -44,7 +44,7 @@ namespace Microsoft.Xna.Framework
 		{
 			get
 			{
-				return this.isReadOnly;
+				return false;
 			}
 		}
 
@@ -63,22 +63,17 @@ namespace Microsoft.Xna.Framework
 			{
 				if (value == null)
 				{
-					throw new ArgumentNullException("value");
+					throw new ArgumentNullException();
 				}
 
-				if (index >= innerlist.Count)
-				{
-					throw new IndexOutOfRangeException();
-				}
-
-				if (MathHelper.WithinEpsilon(innerlist[index].Position, value.Position))
+				if (innerlist[index].Position == value.Position)
 				{
 					innerlist[index] = value;
 				}
 				else
 				{
 					innerlist.RemoveAt(index);
-					innerlist.Add(value);
+					INTERNAL_Add(value);
 				}
 			}
 		}
@@ -87,8 +82,16 @@ namespace Microsoft.Xna.Framework
 
 		#region Private Fields
 
-		private bool isReadOnly = false;
-		private List<CurveKey> innerlist;
+		private readonly List<CurveKey> innerlist;
+
+		#endregion
+
+		#region Private Constructors
+
+		private CurveKeyCollection(List<CurveKey> innerlist)
+		{
+			this.innerlist = innerlist;
+		}
 
 		#endregion
 
@@ -116,25 +119,9 @@ namespace Microsoft.Xna.Framework
 		{
 			if (item == null)
 			{
-				throw new ArgumentNullException("item");
+				throw new ArgumentNullException();
 			}
-
-			if (innerlist.Count == 0)
-			{
-				this.innerlist.Add(item);
-				return;
-			}
-
-			for (int i = 0; i < this.innerlist.Count; i += 1)
-			{
-				if (item.Position < this.innerlist[i].Position)
-				{
-					this.innerlist.Insert(i, item);
-					return;
-				}
-			}
-
-			this.innerlist.Add(item);
+			INTERNAL_Add(item);
 		}
 
 		/// <summary>
@@ -151,12 +138,7 @@ namespace Microsoft.Xna.Framework
 		/// <returns>A copy of this collection.</returns>
 		public CurveKeyCollection Clone()
 		{
-			CurveKeyCollection ckc = new CurveKeyCollection();
-			foreach (CurveKey key in this.innerlist)
-			{
-				ckc.Add(key);
-			}
-			return ckc;
+			return new CurveKeyCollection(new List<CurveKey>(innerlist));
 		}
 
 		/// <summary>
@@ -220,6 +202,24 @@ namespace Microsoft.Xna.Framework
 		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return innerlist.GetEnumerator();
+		}
+
+		#endregion
+
+		#region Private Methods
+
+		private void INTERNAL_Add(CurveKey item)
+		{
+			int i = innerlist.BinarySearch(item);
+			if (i < 0)
+			{
+				/* ... otherwise, a negative number that is the bitwise complement
+				 * of the index of the next element that is larger than item or, if there
+				 * is no larger element, the bitwise complement of Count.
+				 */
+				i = ~i;
+			}
+			this.innerlist.Insert(i, item);
 		}
 
 		#endregion

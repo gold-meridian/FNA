@@ -66,11 +66,11 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			get
 			{
-				return parameters.deviceWindowHandle;
+				return FNAPlatform.UnwrapWindow(parameters.deviceWindowHandle);
 			}
 			set
 			{
-				parameters.deviceWindowHandle = value;
+				parameters.deviceWindowHandle = FNAPlatform.WrapWindow(value);
 			}
 		}
 
@@ -162,7 +162,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			BackBufferWidth = GraphicsDeviceManager.DefaultBackBufferWidth;
 			BackBufferHeight = GraphicsDeviceManager.DefaultBackBufferHeight;
 			DeviceWindowHandle = IntPtr.Zero;
-			IsFullScreen = false; // FIXME: Is this the default?
+			IsFullScreen = true;
 			DepthStencilFormat = DepthFormat.None;
 			MultiSampleCount = 0;
 			PresentationInterval = PresentInterval.Default;
@@ -176,18 +176,18 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public PresentationParameters Clone()
 		{
-			PresentationParameters clone = new PresentationParameters();
-			clone.BackBufferFormat = BackBufferFormat;
-			clone.BackBufferHeight = BackBufferHeight;
-			clone.BackBufferWidth = BackBufferWidth;
-			clone.DeviceWindowHandle = DeviceWindowHandle;
-			clone.IsFullScreen = IsFullScreen;
-			clone.DepthStencilFormat = DepthStencilFormat;
-			clone.MultiSampleCount = MultiSampleCount;
-			clone.PresentationInterval = PresentationInterval;
-			clone.DisplayOrientation = DisplayOrientation;
-			clone.RenderTargetUsage = RenderTargetUsage;
-			return clone;
+			return new PresentationParameters() {
+				BackBufferFormat = BackBufferFormat,
+				BackBufferHeight = BackBufferHeight,
+				BackBufferWidth = BackBufferWidth,
+				DeviceWindowHandle = DeviceWindowHandle,
+				IsFullScreen = IsFullScreen,
+				DepthStencilFormat = DepthStencilFormat,
+				MultiSampleCount = MultiSampleCount,
+				PresentationInterval = PresentationInterval,
+				DisplayOrientation = DisplayOrientation,
+				RenderTargetUsage = RenderTargetUsage
+			};
 		}
 
 		#endregion

@@ -530,7 +530,8 @@ namespace Microsoft.Xna.Framework
 				window,
 				@"\\.\DISPLAY" + (
 					SDL.SDL_GetWindowDisplayIndex(window) + 1
-				).ToString()
+				).ToString(),
+				title
 			);
 		}
 
@@ -602,7 +603,6 @@ namespace Microsoft.Xna.Framework
 				}
 				if (resize)
 				{
-					SDL.SDL_RestoreWindow(window);
 					SDL.SDL_SetWindowSize(window, clientWidth, clientHeight);
 					center = true;
 				}
@@ -879,12 +879,22 @@ namespace Microsoft.Xna.Framework
 
 		public static void SetTextInputRectangle(IntPtr window, Rectangle rectangle)
 		{
-			SDL.SDL_Rect rect = new SDL.SDL_Rect();
+			SDL.SDL_Rect rect;
 			rect.x = rectangle.X;
 			rect.y = rectangle.Y;
 			rect.w = rectangle.Width;
 			rect.h = rectangle.Height;
 			SDL.SDL_SetTextInputRect(ref rect);
+		}
+
+		public static IntPtr WrapWindow(IntPtr handle)
+		{
+			return handle;
+		}
+
+		public static IntPtr UnwrapWindow(IntPtr handle)
+		{
+			return handle;
 		}
 
 		#endregion
@@ -986,16 +996,17 @@ namespace Microsoft.Xna.Framework
 				if (evt.type == SDL.SDL_EventType.SDL_KEYDOWN)
 				{
 					Keys key = ToXNAKey(ref evt.key.keysym);
-					if (!Keyboard.keys.Contains(key))
+					if (Keyboard.keys.IsKeyUp(key))
 					{
-						Keyboard.keys.Add(key);
+						Keyboard.keys.AddPressedKey((int) key);
 						int textIndex;
 						if (FNAPlatform.TextInputBindings.TryGetValue(key, out textIndex))
 						{
 							textInputControlDown[textIndex] = true;
 							TextInputEXT.OnTextInput(FNAPlatform.TextInputCharacters[textIndex]);
 						}
-						else if ((Keyboard.keys.Contains(Keys.LeftControl) || Keyboard.keys.Contains(Keys.RightControl))
+						else if ((Keyboard.keys.IsKeyDown(Keys.LeftControl) || Keyboard.keys.IsKeyDown(Keys.RightControl))
+							&& Keyboard.keys.IsKeyUp(Keys.LeftAlt)
 							&& key == Keys.V)
 						{
 							textInputControlDown[6] = true;
@@ -1010,7 +1021,7 @@ namespace Microsoft.Xna.Framework
 						{
 							TextInputEXT.OnTextInput(FNAPlatform.TextInputCharacters[textIndex]);
 						}
-						else if ((Keyboard.keys.Contains(Keys.LeftControl) || Keyboard.keys.Contains(Keys.RightControl))
+						else if ((Keyboard.keys.IsKeyDown(Keys.LeftControl) || Keyboard.keys.IsKeyDown(Keys.RightControl))
 							&& key == Keys.V)
 						{
 							TextInputEXT.OnTextInput(FNAPlatform.TextInputCharacters[6]);
@@ -1020,14 +1031,15 @@ namespace Microsoft.Xna.Framework
 				else if (evt.type == SDL.SDL_EventType.SDL_KEYUP)
 				{
 					Keys key = ToXNAKey(ref evt.key.keysym);
-					if (Keyboard.keys.Remove(key))
+					if (Keyboard.keys.IsKeyDown(key))
 					{
+						Keyboard.keys.RemovePressedKey((int) key);
 						int value;
 						if (FNAPlatform.TextInputBindings.TryGetValue(key, out value))
 						{
 							textInputControlDown[value] = false;
 						}
-						else if (((!Keyboard.keys.Contains(Keys.LeftControl) && !Keyboard.keys.Contains(Keys.RightControl)) && textInputControlDown[6])
+						else if (((Keyboard.keys.IsKeyUp(Keys.LeftControl) && Keyboard.keys.IsKeyUp(Keys.RightControl)) && textInputControlDown[6])
 							|| key == Keys.V)
 						{
 							textInputControlDown[6] = false;
@@ -1043,8 +1055,7 @@ namespace Microsoft.Xna.Framework
 				}
 				else if (evt.type == SDL.SDL_EventType.SDL_MOUSEWHEEL)
 				{
-					// 120 units per notch. Because reasons.
-					Mouse.INTERNAL_MouseWheel += evt.wheel.y * 120;
+					Mouse.INTERNAL_MouseWheel += evt.wheel.preciseY * 120; // WHEEL_DELTA
 				}
 
 				// Touch Input
@@ -1718,11 +1729,12 @@ namespace Microsoft.Xna.Framework
 
 			// Default input format
 			SDL.SDL_AudioSpec have;
-			SDL.SDL_AudioSpec want = new SDL.SDL_AudioSpec();
-			want.freq = Microphone.SAMPLERATE;
-			want.format = SDL.AUDIO_S16;
-			want.channels = 1;
-			want.samples = 4096; /* FIXME: Anything specific? */
+			SDL.SDL_AudioSpec want = new SDL.SDL_AudioSpec {
+				freq = Microphone.SAMPLERATE,
+				format = SDL.AUDIO_S16,
+				channels = 1,
+				samples = 4096 /* FIXME: Anything specific? */
+			};
 
 			// First mic is always OS default
 			result[0] = new Microphone(
@@ -2508,12 +2520,11 @@ namespace Microsoft.Xna.Framework
 			{ (int) SDL.SDL_Keycode.SDLK_KP_8,		Keys.NumPad8 },
 			{ (int) SDL.SDL_Keycode.SDLK_KP_9,		Keys.NumPad9 },
 			{ (int) SDL.SDL_Keycode.SDLK_KP_CLEAR,		Keys.OemClear },
-			{ (int) SDL.SDL_Keycode.SDLK_KP_DECIMAL,	Keys.Decimal },
 			{ (int) SDL.SDL_Keycode.SDLK_KP_DIVIDE,		Keys.Divide },
 			{ (int) SDL.SDL_Keycode.SDLK_KP_ENTER,		Keys.Enter },
 			{ (int) SDL.SDL_Keycode.SDLK_KP_MINUS,		Keys.Subtract },
 			{ (int) SDL.SDL_Keycode.SDLK_KP_MULTIPLY,	Keys.Multiply },
-			{ (int) SDL.SDL_Keycode.SDLK_KP_PERIOD,		Keys.OemPeriod },
+			{ (int) SDL.SDL_Keycode.SDLK_KP_PERIOD,		Keys.Decimal },
 			{ (int) SDL.SDL_Keycode.SDLK_KP_PLUS,		Keys.Add },
 			{ (int) SDL.SDL_Keycode.SDLK_F1,		Keys.F1 },
 			{ (int) SDL.SDL_Keycode.SDLK_F2,		Keys.F2 },
@@ -2581,8 +2592,10 @@ namespace Microsoft.Xna.Framework
 			{ (int) SDL.SDL_Keycode.SDLK_SLEEP,		Keys.Sleep },
 			{ (int) SDL.SDL_Keycode.SDLK_TAB,		Keys.Tab },
 			{ (int) SDL.SDL_Keycode.SDLK_BACKQUOTE,		Keys.OemTilde },
+			{ (int) SDL.SDL_Keycode.SDLK_MUTE,			Keys.VolumeMute },
 			{ (int) SDL.SDL_Keycode.SDLK_VOLUMEUP,		Keys.VolumeUp },
 			{ (int) SDL.SDL_Keycode.SDLK_VOLUMEDOWN,	Keys.VolumeDown },
+			{ (int) SDL.SDL_Keycode.SDLK_LESS,		Keys.OemBackslash },
 			{ '²' /* FIXME: AZERTY SDL2? -flibit */,	Keys.OemTilde },
 			{ 'é' /* FIXME: BEPO SDL2? -flibit */,		Keys.None },
 			{ '|' /* FIXME: Norwegian SDL2? -flibit */,	Keys.OemPipe },
@@ -2640,12 +2653,11 @@ namespace Microsoft.Xna.Framework
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_KP_8,		Keys.NumPad8 },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_KP_9,		Keys.NumPad9 },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_KP_CLEAR,		Keys.OemClear },
-			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_KP_DECIMAL,	Keys.Decimal },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_KP_DIVIDE,	Keys.Divide },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_KP_ENTER,		Keys.Enter },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_KP_MINUS,		Keys.Subtract },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_KP_MULTIPLY,	Keys.Multiply },
-			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_KP_PERIOD,	Keys.OemPeriod },
+			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_KP_PERIOD,	Keys.Decimal },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_KP_PLUS,		Keys.Add },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_F1,		Keys.F1 },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_F2,		Keys.F2 },
@@ -2713,12 +2725,13 @@ namespace Microsoft.Xna.Framework
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_SLEEP,		Keys.Sleep },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_TAB,		Keys.Tab },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_GRAVE,		Keys.OemTilde },
+			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_MUTE,			Keys.VolumeMute },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_VOLUMEUP,		Keys.VolumeUp },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_VOLUMEDOWN,	Keys.VolumeDown },
+			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_NONUSBACKSLASH,	Keys.OemBackslash },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_UNKNOWN,		Keys.None },
 			/* FIXME: The following scancodes need verification! */
-			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_NONUSHASH,	Keys.None },
-			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_NONUSBACKSLASH,	Keys.None }
+			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_NONUSHASH,	Keys.None }
 		};
 		private static Dictionary<int, SDL.SDL_Scancode> INTERNAL_xnaMap = new Dictionary<int, SDL.SDL_Scancode>()
 		{
@@ -2769,7 +2782,7 @@ namespace Microsoft.Xna.Framework
 			{ (int) Keys.NumPad8,		SDL.SDL_Scancode.SDL_SCANCODE_KP_8 },
 			{ (int) Keys.NumPad9,		SDL.SDL_Scancode.SDL_SCANCODE_KP_9 },
 			{ (int) Keys.OemClear,		SDL.SDL_Scancode.SDL_SCANCODE_KP_CLEAR },
-			{ (int) Keys.Decimal,		SDL.SDL_Scancode.SDL_SCANCODE_KP_DECIMAL },
+			{ (int) Keys.Decimal,		SDL.SDL_Scancode.SDL_SCANCODE_KP_PERIOD },
 			{ (int) Keys.Divide,		SDL.SDL_Scancode.SDL_SCANCODE_KP_DIVIDE },
 			{ (int) Keys.Multiply,		SDL.SDL_Scancode.SDL_SCANCODE_KP_MULTIPLY },
 			{ (int) Keys.Subtract,		SDL.SDL_Scancode.SDL_SCANCODE_KP_MINUS },
@@ -2839,8 +2852,10 @@ namespace Microsoft.Xna.Framework
 			{ (int) Keys.Sleep,		SDL.SDL_Scancode.SDL_SCANCODE_SLEEP },
 			{ (int) Keys.Tab,		SDL.SDL_Scancode.SDL_SCANCODE_TAB },
 			{ (int) Keys.OemTilde,		SDL.SDL_Scancode.SDL_SCANCODE_GRAVE },
+			{ (int) Keys.VolumeMute,	SDL.SDL_Scancode.SDL_SCANCODE_MUTE },
 			{ (int) Keys.VolumeUp,		SDL.SDL_Scancode.SDL_SCANCODE_VOLUMEUP },
 			{ (int) Keys.VolumeDown,	SDL.SDL_Scancode.SDL_SCANCODE_VOLUMEDOWN },
+			{ (int) Keys.OemBackslash,	SDL.SDL_Scancode.SDL_SCANCODE_NONUSBACKSLASH },
 			{ (int) Keys.None,		SDL.SDL_Scancode.SDL_SCANCODE_UNKNOWN }
 		};
 

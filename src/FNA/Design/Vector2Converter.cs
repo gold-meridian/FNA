@@ -11,6 +11,7 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
+using System.ComponentModel.Design.Serialization;
 using System.Globalization;
 #endregion
 
@@ -20,9 +21,13 @@ namespace Microsoft.Xna.Framework.Design
 	{
 		#region Public Constructor
 
-		public Vector2Converter() : base()
+		public Vector2Converter()
 		{
-			// FIXME: Initialize propertyDescriptions... how? -flibit
+			Type Vector2 = typeof(Vector2);
+			propertyDescriptions = new PropertyDescriptorCollection(new PropertyDescriptor[] {
+				new FieldPropertyDescriptor(Vector2.GetField("X")),
+				new FieldPropertyDescriptor(Vector2.GetField("Y"))
+			});
 		}
 
 		#endregion
@@ -37,13 +42,8 @@ namespace Microsoft.Xna.Framework.Design
 			string s = value as string;
 			if (s != null)
 			{
-				string[] v = s.Split(
-					culture.TextInfo.ListSeparator.ToCharArray()
-				);
-				return new Vector2(
-					float.Parse(v[0], culture),
-					float.Parse(v[1], culture)
-				);
+				StringListEnumerator<float> enumerator = new StringListEnumerator<float>(culture, s);
+				return new Vector2(enumerator.Next(), enumerator.Next());
 			}
 			return base.ConvertFrom(context, culture, value);
 		}
@@ -54,17 +54,24 @@ namespace Microsoft.Xna.Framework.Design
 			object value,
 			Type destinationType
 		) {
-			if (destinationType == typeof(string))
+			if (value is Vector2)
 			{
-				Vector2 vec = (Vector2) value;
-				return string.Join(
-					culture.TextInfo.ListSeparator + " ",
-					new string[]
-					{
-						vec.X.ToString(culture),
-						vec.Y.ToString(culture)
-					}
-				);
+				Vector2 vector;
+				if (destinationType == typeof(string))
+				{
+					vector = (Vector2) value;
+					return ConvertToString(culture, vector.X, vector.Y);
+				}
+				else if (destinationType == typeof(InstanceDescriptor))
+				{
+					vector = (Vector2) value;
+					return new InstanceDescriptor(
+						typeof(Vector2).GetConstructor(
+							new Type[] { typeof(float), typeof(float) }
+						),
+						new float[] { vector.X, vector.Y }
+					);
+				}
 			}
 			return base.ConvertTo(context, culture, value, destinationType);
 		}
@@ -73,6 +80,10 @@ namespace Microsoft.Xna.Framework.Design
 			ITypeDescriptorContext context,
 			IDictionary propertyValues
 		) {
+			if (propertyValues == null)
+			{
+				throw new ArgumentNullException("propertyValues", "This method does not accept null for this parameter.");
+			}
 			return (object) new Vector2(
 				(float) propertyValues["X"],
 				(float) propertyValues["Y"]

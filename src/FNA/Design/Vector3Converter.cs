@@ -11,6 +11,7 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
+using System.ComponentModel.Design.Serialization;
 using System.Globalization;
 #endregion
 
@@ -20,9 +21,14 @@ namespace Microsoft.Xna.Framework.Design
 	{
 		#region Public Constructor
 
-		public Vector3Converter() : base()
+		public Vector3Converter()
 		{
-			// FIXME: Initialize propertyDescriptions... how? -flibit
+			Type Vector3 = typeof(Vector3);
+			propertyDescriptions = new PropertyDescriptorCollection(new PropertyDescriptor[] {
+				new FieldPropertyDescriptor(Vector3.GetField("X")),
+				new FieldPropertyDescriptor(Vector3.GetField("Y")),
+				new FieldPropertyDescriptor(Vector3.GetField("Z"))
+			});
 		}
 
 		#endregion
@@ -37,14 +43,8 @@ namespace Microsoft.Xna.Framework.Design
 			string s = value as string;
 			if (s != null)
 			{
-				string[] v = s.Split(
-					culture.TextInfo.ListSeparator.ToCharArray()
-				);
-				return new Vector3(
-					float.Parse(v[0], culture),
-					float.Parse(v[1], culture),
-					float.Parse(v[2], culture)
-				);
+				StringListEnumerator<float> enumerator = new StringListEnumerator<float>(culture, s);
+				return new Vector3(enumerator.Next(), enumerator.Next(), enumerator.Next());
 			}
 			return base.ConvertFrom(context, culture, value);
 		}
@@ -55,18 +55,24 @@ namespace Microsoft.Xna.Framework.Design
 			object value,
 			Type destinationType
 		) {
-			if (destinationType == typeof(string))
+			if (value is Vector3)
 			{
-				Vector3 vec = (Vector3) value;
-				return string.Join(
-					culture.TextInfo.ListSeparator + " ",
-					new string[]
-					{
-						vec.X.ToString(culture),
-						vec.Y.ToString(culture),
-						vec.Z.ToString(culture)
-					}
-				);
+				Vector3 vector;
+				if (destinationType == typeof(string))
+				{
+					vector = (Vector3) value;
+					return ConvertToString(culture, vector.X, vector.Y, vector.Z);
+				}
+				else if (destinationType == typeof(InstanceDescriptor))
+				{
+					vector = (Vector3) value;
+					return new InstanceDescriptor(
+						typeof(Vector3).GetConstructor(
+							new Type[] { typeof(float), typeof(float), typeof(float) }
+						),
+						new float[] { vector.X, vector.Y, vector.Z }
+					);
+				}
 			}
 			return base.ConvertTo(context, culture, value, destinationType);
 		}
@@ -75,6 +81,10 @@ namespace Microsoft.Xna.Framework.Design
 			ITypeDescriptorContext context,
 			IDictionary propertyValues
 		) {
+			if (propertyValues == null)
+			{
+				throw new ArgumentNullException("propertyValues", "This method does not accept null for this parameter.");
+			}
 			return (object) new Vector3(
 				(float) propertyValues["X"],
 				(float) propertyValues["Y"],

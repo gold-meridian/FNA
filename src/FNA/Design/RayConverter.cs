@@ -11,6 +11,7 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
+using System.ComponentModel.Design.Serialization;
 using System.Globalization;
 #endregion
 
@@ -20,9 +21,13 @@ namespace Microsoft.Xna.Framework.Design
 	{
 		#region Public Constructor
 
-		public RayConverter() : base()
+		public RayConverter()
 		{
-			// FIXME: Initialize propertyDescriptions... how? -flibit
+			Type Ray = typeof(Ray);
+			propertyDescriptions = new PropertyDescriptorCollection(new PropertyDescriptor[] {
+				new FieldPropertyDescriptor(Ray.GetField("Position")),
+				new FieldPropertyDescriptor(Ray.GetField("Direction"))
+			});
 			supportStringConvert = false;
 		}
 
@@ -35,7 +40,6 @@ namespace Microsoft.Xna.Framework.Design
 			CultureInfo culture,
 			object value
 		) {
-			// FIXME: This method exists in the spec, but... why?! -flibit
 			return base.ConvertFrom(context, culture, value);
 		}
 
@@ -45,7 +49,19 @@ namespace Microsoft.Xna.Framework.Design
 			object value,
 			Type destinationType
 		) {
-			// FIXME: This method exists in the spec, but... why?! -flibit
+			if (value is Ray)
+			{
+				if (destinationType == typeof(InstanceDescriptor))
+				{
+					Ray ray = (Ray) value;
+					return new InstanceDescriptor(
+						typeof(Ray).GetConstructor(
+							new Type[] { typeof(Vector3), typeof(Vector3) }
+						),
+						new Vector3[] { ray.Position, ray.Direction }
+					);
+				}
+			}
 			return base.ConvertTo(context, culture, value, destinationType);
 		}
 
@@ -53,6 +69,10 @@ namespace Microsoft.Xna.Framework.Design
 			ITypeDescriptorContext context,
 			IDictionary propertyValues
 		) {
+			if (propertyValues == null)
+			{
+				throw new ArgumentNullException("propertyValues", "This method does not accept null for this parameter.");
+			}
 			return (object) new Ray(
 				(Vector3) propertyValues["Position"],
 				(Vector3) propertyValues["Direction"]
