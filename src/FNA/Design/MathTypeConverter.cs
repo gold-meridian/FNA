@@ -177,7 +177,7 @@ namespace Microsoft.Xna.Framework.Design
 		{
 			get
 			{
-				return field.FieldType;
+				return this.field.FieldType;
 			}
 		}
 
