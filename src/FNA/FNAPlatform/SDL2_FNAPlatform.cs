@@ -445,7 +445,7 @@ namespace Microsoft.Xna.Framework
 				string cachePath = SDL.SDL_GetHint(
 					"FNA3D_VULKAN_PIPELINE_CACHE_FILE_NAME"
 				);
-				if (cachePath == null) // Empty is a valid value
+				if (ReferenceEquals(cachePath, null)) // Empty is a valid value
 				{
 					if (	OSVersion.Equals("Windows") ||
 						OSVersion.Equals("Mac OS X") ||
@@ -1620,7 +1620,7 @@ namespace Microsoft.Xna.Framework
 			}
 
 			// This is stolen from Mono's Path.cs
-			if (storageRoot == null)
+			if (ReferenceEquals(storageRoot, null))
 			{
 				return null;
 			}
@@ -1688,13 +1688,13 @@ namespace Microsoft.Xna.Framework
 
 		#region Logging/Messaging Methods
 
-		public static void ShowRuntimeError(string title, string message)
+		public static void ShowRuntimeError(GameWindow gameWindow, string message)
 		{
 			SDL.SDL_ShowSimpleMessageBox(
 				SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR,
-				title ?? "",
-				message ?? "",
-				IntPtr.Zero
+				gameWindow.Title,
+				message,
+				gameWindow.Handle
 			);
 		}
 
@@ -1729,35 +1729,34 @@ namespace Microsoft.Xna.Framework
 
 			// Default input format
 			SDL.SDL_AudioSpec have;
-			SDL.SDL_AudioSpec want = new SDL.SDL_AudioSpec {
-				freq = Microphone.SAMPLERATE,
-				format = SDL.AUDIO_S16,
-				channels = 1,
-				samples = 4096 /* FIXME: Anything specific? */
-			};
+			SDL.SDL_AudioSpec want = new SDL.SDL_AudioSpec();
+			want.freq = Microphone.SAMPLERATE;
+			want.format = SDL.AUDIO_S16;
+			want.channels = 1;
+			want.samples = 4096; // FIXME: Anything specific?
 
 			// First mic is always OS default
 			result[0] = new Microphone(
-				SDL.SDL_OpenAudioDevice(
+				(IntPtr) unchecked((int) SDL.SDL_OpenAudioDevice(
 					null,
 					1,
 					ref want,
 					out have,
 					0
-				),
+				)),
 				"Default Device"
 			);
 			for (int i = 0; i < numDev; i += 1)
 			{
 				string name = SDL.SDL_GetAudioDeviceName(i, 1);
 				result[i + 1] = new Microphone(
-					SDL.SDL_OpenAudioDevice(
+					(IntPtr) unchecked((int) SDL.SDL_OpenAudioDevice(
 						name,
 						1,
 						ref want,
 						out have,
 						0
-					),
+					)),
 					name
 				);
 			}
@@ -1765,7 +1764,7 @@ namespace Microsoft.Xna.Framework
 		}
 
 		public static unsafe int GetMicrophoneSamples(
-			uint handle,
+			IntPtr handle,
 			byte[] buffer,
 			int offset,
 			int count
@@ -1773,26 +1772,26 @@ namespace Microsoft.Xna.Framework
 			fixed (byte* ptr = &buffer[offset])
 			{
 				return (int) SDL.SDL_DequeueAudio(
-					handle,
+					unchecked((uint) handle),
 					(IntPtr) ptr,
 					(uint) count
 				);
 			}
 		}
 
-		public static int GetMicrophoneQueuedBytes(uint handle)
+		public static int GetMicrophoneQueuedBytes(IntPtr handle)
 		{
-			return (int) SDL.SDL_GetQueuedAudioSize(handle);
+			return (int) SDL.SDL_GetQueuedAudioSize(unchecked((uint) handle));
 		}
 
-		public static void StartMicrophone(uint handle)
+		public static void StartMicrophone(IntPtr handle)
 		{
-			SDL.SDL_PauseAudioDevice(handle, 0);
+			SDL.SDL_PauseAudioDevice(unchecked((uint) handle), 0);
 		}
 
-		public static void StopMicrophone(uint handle)
+		public static void StopMicrophone(IntPtr handle)
 		{
-			SDL.SDL_PauseAudioDevice(handle, 1);
+			SDL.SDL_PauseAudioDevice(unchecked((uint) handle), 1);
 		}
 
 		#endregion

@@ -54,7 +54,7 @@ namespace Microsoft.Xna.Framework
 
 		#region Private Static Variables
 
-		// These are NOT readonly, for weird performance reasons -flibit
+		// These are NOT readonly, for avoiding defensive copy -flibit
 		private static Vector3 MaxVector3 = new Vector3(float.MaxValue);
 		private static Vector3 MinVector3 = new Vector3(float.MinValue);
 
@@ -118,7 +118,7 @@ namespace Microsoft.Xna.Framework
 
 		public ContainmentType Contains(BoundingFrustum frustum)
 		{
-			if (frustum == null)
+			if (ReferenceEquals(frustum, null))
 			{
 				throw new ArgumentNullException("frustum", "This method does not accept null for this parameter.");
 			}
@@ -266,18 +266,18 @@ namespace Microsoft.Xna.Framework
 		public void Contains(ref Vector3 point, out ContainmentType result)
 		{
 			// Determine if point is outside of this box.
-			if (	point.X < this.Min.X ||
-				point.X > this.Max.X ||
-				point.Y < this.Min.Y ||
-				point.Y > this.Max.Y ||
-				point.Z < this.Min.Z ||
-				point.Z > this.Max.Z	)
+			if (	point.X >= this.Min.X &&
+				point.X <= this.Max.X &&
+				point.Y >= this.Min.Y &&
+				point.Y <= this.Max.Y &&
+				point.Z >= this.Min.Z &&
+				point.Z <= this.Max.Z	)
 			{
-				result = ContainmentType.Disjoint;
+				result = ContainmentType.Contains;
 			}
 			else
 			{
-				result = ContainmentType.Contains;
+				result = ContainmentType.Disjoint;
 			}
 		}
 
@@ -343,7 +343,7 @@ namespace Microsoft.Xna.Framework
 
 		public bool Intersects(BoundingFrustum frustum)
 		{
-			if (frustum == null)
+			if (ReferenceEquals(frustum, null))
 			{
 				throw new ArgumentNullException("frustum", "This method does not accept null for this parameter.");
 			}

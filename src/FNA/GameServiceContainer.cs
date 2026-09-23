@@ -30,7 +30,7 @@ namespace Microsoft.Xna.Framework
 
 		public void AddService(Type type, object provider)
 		{
-			if (type == null)
+			if (ReferenceEquals(type, null))
 			{
 				throw new ArgumentNullException("type", "The service type cannot be null.");
 			}
@@ -46,7 +46,8 @@ namespace Microsoft.Xna.Framework
 			{
 				throw new ArgumentException(
 					"Service provider object of type " + provider.GetType().FullName +
-					" must be assignable to service type " + type.GetType().FullName + "."
+					" must be assignable to service type " +
+					type.FullName + "." // type.GetType().FullName in XNA. It is wrong so fixed it.
 				);
 			}
 
@@ -55,28 +56,47 @@ namespace Microsoft.Xna.Framework
 
 		public object GetService(Type type)
 		{
-			if (type == null)
+			if (ReferenceEquals(type, null))
 			{
 				throw new ArgumentNullException("type", "The service type cannot be null.");
 			}
 
-			object service;
-			if (services.TryGetValue(type, out service))
-			{
-				return service;
-			}
-
-			return null;
+			return INTERNAL_GetService(type);
 		}
 
 		public void RemoveService(Type type)
 		{
-			if (type == null)
+			if (ReferenceEquals(type, null))
 			{
 				throw new ArgumentNullException("type", "The service type cannot be null.");
 			}
 
 			services.Remove(type);
+		}
+
+		#endregion
+
+		#region Internal Methods
+
+		internal void INTERNAL_AddService(Type type, object provider)
+		{
+			if (services.ContainsKey(type))
+			{
+				throw new ArgumentException("Container already contains a service of this type.", "type");
+			}
+			services.Add(type, provider);
+		}
+
+		internal void INTERNAL_RemoveService(Type type)
+		{
+			services.Remove(type);
+		}
+
+		internal object INTERNAL_GetService(Type type)
+		{
+			object service;
+			services.TryGetValue(type, out service);
+			return service;
 		}
 
 		#endregion

@@ -134,7 +134,6 @@ namespace Microsoft.Xna.Framework.Audio
 				throw new NoAudioHardwareException();
 			}
 			rendererDetails = new RendererDetail[rendererCount];
-			byte[] converted = new byte[0xFF * sizeof(short)];
 			for (ushort i = 0; i < rendererCount; i += 1)
 			{
 				FAudio.FACTRendererDetails details;
@@ -145,11 +144,8 @@ namespace Microsoft.Xna.Framework.Audio
 				);
 				unsafe
 				{
-					Marshal.Copy((IntPtr) details.displayName, converted, 0, converted.Length);
-					string name = System.Text.Encoding.Unicode.GetString(converted).TrimEnd('\0');
-					Marshal.Copy((IntPtr) details.rendererID, converted, 0, converted.Length);
-					string id = System.Text.Encoding.Unicode.GetString(converted).TrimEnd('\0');
-					rendererDetails[i] = new RendererDetail(name, id);
+					rendererDetails[i].FriendlyName = new string((char*) details.displayName);
+					rendererDetails[i].RendererId = new string((char*) details.rendererID);
 				}
 			}
 
@@ -171,27 +167,29 @@ namespace Microsoft.Xna.Framework.Audio
 			settings.lookAheadTime = (uint) lookAheadTime.Milliseconds;
 			if (!string.IsNullOrEmpty(rendererId))
 			{
-				// FIXME: wchar_t? -flibit
-				settings.pRendererID = Marshal.StringToHGlobalAuto(rendererId);
+				settings.pRendererID = Marshal.StringToHGlobalUni(rendererId);
 			}
 
 			// Init engine, finally
 			uint ret = FAudio.FACTAudioEngine_Initialize(handle, ref settings);
-			if (ret == 0x8ac70007) // FACTENGINE_E_INVALIDDATA
-			{
-				throw new ArgumentException("XACT could not load the data provided. Make sure you are using the correct version of the XACT tool.");
-			}
-			else if (ret != 0)
-			{
-				throw new InvalidOperationException(
-					"Engine initialization failed!"
-				);
-			}
 
 			// Free the settings strings
 			if (settings.pRendererID != IntPtr.Zero)
 			{
 				Marshal.FreeHGlobal(settings.pRendererID);
+			}
+
+			if (ret == 0x8ac70007) // FACTENGINE_E_INVALIDDATA
+			{
+				FAudio.FACTAudioEngine_Release(handle);
+				throw new ArgumentException("XACT could not load the data provided. Make sure you are using the correct version of the XACT tool.");
+			}
+			else if (ret != 0)
+			{
+				FAudio.FACTAudioEngine_Release(handle);
+				throw new InvalidOperationException(
+					"Engine initialization failed!"
+				);
 			}
 
 			// Init 3D audio
@@ -268,17 +266,20 @@ namespace Microsoft.Xna.Framework.Audio
 				throw new ArgumentNullException("name", "This method does not accept null for this parameter.");
 			}
 
-			ushort category = FAudio.FACTAudioEngine_GetCategory(
+			AudioCategory category;
+			category.index = FAudio.FACTAudioEngine_GetCategory(
 				handle,
 				name
 			);
 
-			if (category == FAudio.FACTCATEGORY_INVALID)
+			if (category.index == FAudio.FACTCATEGORY_INVALID)
 			{
 				throw new InvalidOperationException("This resource could not be created.");
 			}
 
-			return new AudioCategory(this, category, name);
+			category.parent = this;
+			category.name = name;
+			return category;
 		}
 
 		public float GetGlobalVariable(string name)
@@ -295,9 +296,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 			if (variable == FAudio.FACTVARIABLEINDEX_INVALID)
 			{
-				throw new InvalidOperationException(
-					"Invalid variable name!"
-				);
+				throw new IndexOutOfRangeException("The specified variable index is invalid.");
 			}
 
 			float result;
@@ -323,9 +322,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 			if (variable == FAudio.FACTVARIABLEINDEX_INVALID)
 			{
-				throw new InvalidOperationException(
-					"Invalid variable name!"
-				);
+				throw new IndexOutOfRangeException("The specified variable index is invalid.");
 			}
 
 			FAudio.FACTAudioEngine_SetGlobalVariable(

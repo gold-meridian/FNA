@@ -81,12 +81,11 @@ namespace Microsoft.Xna.Framework.Audio
 				0,
 				out handle
 			);
+			FNAPlatform.FreeFilePointer(buffer);
 			if (ret == 0x8ac70007) // FACTENGINE_E_INVALIDDATA
 			{
 				throw new ArgumentException("XACT could not load the data provided. Make sure you are using the correct version of the XACT tool.");
 			}
-
-			FNAPlatform.FreeFilePointer(buffer);
 
 			engine = audioEngine;
 			selfReference = new WeakReference(this, true);
@@ -175,19 +174,19 @@ namespace Microsoft.Xna.Framework.Audio
 
 			if (cue == FAudio.FACTINDEX_INVALID)
 			{
-				throw new InvalidOperationException(
-					"Invalid cue name!"
-				);
+				throw new ArgumentException("An error occurred trying to play the cue named \"" + name + "\". Is the cue name correct?");
 			}
 
 			IntPtr result;
-			FAudio.FACTSoundBank_Prepare(
+			if (FAudio.FACTSoundBank_Prepare(
 				handle,
 				cue,
 				0,
 				0,
 				out result
-			);
+			) == 0x8AC70013) {
+				throw new InvalidOperationException("No wavebank exists for the requested operation.");
+			}
 			return new Cue(result, name, this);
 		}
 
@@ -205,9 +204,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 			if (cue == FAudio.FACTINDEX_INVALID)
 			{
-				throw new InvalidOperationException(
-					"Invalid cue name!"
-				);
+				throw new InvalidOperationException("An error occurred trying to play the cue named \"" + name + "\". Is the cue name correct?");
 			}
 
 			FAudio.FACTSoundBank_Play(
@@ -244,9 +241,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 			if (cue == FAudio.FACTINDEX_INVALID)
 			{
-				throw new InvalidOperationException(
-					"Invalid cue name!"
-				);
+				throw new InvalidOperationException("An error occurred trying to play the cue named \"" + name + "\". Is the cue name correct?");
 			}
 
 			emitter.emitterData.ChannelCount = dspSettings.SrcChannelCount;

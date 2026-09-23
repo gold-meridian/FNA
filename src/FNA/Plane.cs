@@ -169,7 +169,7 @@ namespace Microsoft.Xna.Framework
 
 		public PlaneIntersectionType Intersects(BoundingFrustum frustum)
 		{
-			if (frustum == null)
+			if (ReferenceEquals(frustum, null))
 			{
 				throw new ArgumentNullException("frustum", "This method does not accept null for this parameter.");
 			}
@@ -201,9 +201,8 @@ namespace Microsoft.Xna.Framework
 
 		public static Plane Normalize(Plane value)
 		{
-			Plane ret;
-			Normalize(ref value, out ret);
-			return ret;
+			value.Normalize();
+			return value;
 		}
 
 		public static void Normalize(ref Plane value, out Plane result)

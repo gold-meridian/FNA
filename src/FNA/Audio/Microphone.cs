@@ -96,7 +96,7 @@ namespace Microsoft.Xna.Framework.Audio
 		#region Private Variables
 
 		private TimeSpan bufferDuration;
-		private readonly uint handle;
+		private readonly IntPtr handle;
 
 		#endregion
 
@@ -125,7 +125,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region Internal Constructor
 
-		internal Microphone(uint id, string name)
+		internal Microphone(IntPtr id, string name)
 		{
 			handle = id;
 			Name = name;
@@ -149,11 +149,11 @@ namespace Microsoft.Xna.Framework.Audio
 			{
 				throw new ArgumentException("Buffer is invalid. Ensure that the buffer length is non-zero and meets the block alignment requirements for the audio format.");
 			}
-			if (offset < 0 || offset >= buffer.Length || offset % 2 != 0)
+			if (unchecked((uint) offset >= (uint) buffer.Length) || offset % 2 != 0)
 			{
 				throw new ArgumentException("Byte offset is invalid. Ensure that it falls within the buffer and meets the block alignment requirements for the audio format.");
 			}
-			if (count <= 0 || offset + count < 0 || offset + count > buffer.Length || count % 2 != 0)
+			if (count <= 0 || unchecked((uint) (offset + count) > (uint) buffer.Length) || count % 2 != 0)
 			{
 				throw new ArgumentException("Number of samples to play is invalid. Ensure that it meets the block alignment requirements for the audio format.");
 			}
@@ -174,7 +174,7 @@ namespace Microsoft.Xna.Framework.Audio
 			return SoundEffect.INTERNAL_GetSampleDuration(
 				sizeInBytes,
 				SampleRate,
-				AudioChannels.Mono
+				2 // 16-bit PCM!
 			);
 		}
 
@@ -187,7 +187,7 @@ namespace Microsoft.Xna.Framework.Audio
 			return SoundEffect.INTERNAL_GetSampleSizeInBytes(
 				duration,
 				SampleRate,
-				AudioChannels.Mono
+				2 // 16-bit PCM!
 			);
 		}
 

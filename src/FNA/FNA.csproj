@@ -10,7 +10,7 @@
         <AssemblyName>FNA</AssemblyName>
 
         <AssemblyTitle>FNA</AssemblyTitle>
-        <Version>26.08.0.0</Version>
+        <Version>26.09.0.0</Version>
     </PropertyGroup>
 
     <ItemGroup>

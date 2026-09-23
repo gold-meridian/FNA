@@ -72,7 +72,7 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 			set
 			{
-				if (value < -FAudio.FAUDIO_MAX_VOLUME_LEVEL || value > FAudio.FAUDIO_MAX_VOLUME_LEVEL) // XNA: value < 0f || value > 1f
+				if (!(value >= -FAudio.FAUDIO_MAX_VOLUME_LEVEL && value <= FAudio.FAUDIO_MAX_VOLUME_LEVEL)) // XNA: !(value >= 0f && value <= 1f)
 				{
 					throw new ArgumentOutOfRangeException("value");
 				}
@@ -108,7 +108,7 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 			set
 			{
-				if (value < 0f)
+				if (!(value >= 0f))
 				{
 					throw new ArgumentOutOfRangeException("value");
 				}
@@ -124,7 +124,7 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 			set
 			{
-				if (value <= 0f)
+				if (!(value > 0f))
 				{
 					throw new ArgumentOutOfRangeException("value");
 				}
@@ -362,6 +362,10 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public bool Play(float volume, float pitch, float pan)
 		{
+			if (!FrameworkDispatcher.IsUpdated)
+			{
+				throw new InvalidOperationException("FrameworkDispatcher.Update has not been called. Regular FrameworkDispatcher.Update calls are necessary for fire and forget sound effects and framework events to function correctly. See http://go.microsoft.com/fwlink/?LinkId=193853 for details.");
+			}
 			if (IsDisposed)
 			{
 				throw new ObjectDisposedException(GetType().Name, "This object has already been disposed.");
@@ -410,7 +414,7 @@ namespace Microsoft.Xna.Framework.Audio
 			{
 				throw new ArgumentOutOfRangeException("channels");
 			}
-			return INTERNAL_GetSampleDuration(sizeInBytes, sampleRate, channels);
+			return INTERNAL_GetSampleDuration(sizeInBytes, sampleRate, 2 * (int) channels); // 16-bit PCM!
 		}
 
 		public static int GetSampleSizeInBytes(
@@ -430,7 +434,7 @@ namespace Microsoft.Xna.Framework.Audio
 			{
 				throw new ArgumentOutOfRangeException("channels");
 			}
-			return INTERNAL_GetSampleSizeInBytes(duration, sampleRate, channels);
+			return INTERNAL_GetSampleSizeInBytes(duration, sampleRate, 2 * (int) channels); // 16-bit PCM!
 		}
 
 		public static SoundEffect FromStream(Stream stream)
@@ -589,11 +593,10 @@ namespace Microsoft.Xna.Framework.Audio
 		internal static TimeSpan INTERNAL_GetSampleDuration(
 			int sizeInBytes,
 			int sampleRate,
-			AudioChannels channels
+			int blockAlign
 		) {
-			sizeInBytes /= 2; // 16-bit PCM!
 			int ms = (int) (
-				(sizeInBytes / (int) channels) /
+				(sizeInBytes / blockAlign) /
 				(sampleRate / 1000.0f)
 			);
 			return new TimeSpan(0, 0, 0, 0, ms);
@@ -602,13 +605,12 @@ namespace Microsoft.Xna.Framework.Audio
 		internal static int INTERNAL_GetSampleSizeInBytes(
 			TimeSpan duration,
 			int sampleRate,
-			AudioChannels channels
+			int blockAlign
 		) {
 			return (int) (
 				duration.TotalSeconds *
 				sampleRate *
-				(int) channels *
-				2 // 16-bit PCM!
+				blockAlign
 			);
 		}
 

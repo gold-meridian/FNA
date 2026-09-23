@@ -90,7 +90,7 @@ namespace Microsoft.Xna.Framework.Content
 			 * -flibit
 			 */
 			Type fixType = Type.GetType(PrepareType(targetType.FullName), false);
-			if (fixType != null && contentReaders.TryGetValue(fixType, out reader))
+			if (!ReferenceEquals(fixType, null) && contentReaders.TryGetValue(fixType, out reader))
 			{
 				return reader;
 			}
@@ -198,16 +198,16 @@ namespace Microsoft.Xna.Framework.Content
 
 
 						readerTypeString = readerTypeString
-						                  .Replace("Microsoft.Xna.Framework.Vector2, FNA, Version=26.8.0.0, Culture=neutral, PublicKeyToken=null", typeof(Vector2).AssemblyQualifiedName)
-						                  .Replace("Microsoft.Xna.Framework.Vector3, FNA, Version=26.8.0.0, Culture=neutral, PublicKeyToken=null", typeof(Vector3).AssemblyQualifiedName)
-						                  .Replace("Microsoft.Xna.Framework.Vector4, FNA, Version=26.8.0.0, Culture=neutral, PublicKeyToken=null", typeof(Vector4).AssemblyQualifiedName)
-						                  .Replace("Microsoft.Xna.Framework.Point, FNA, Version=26.8.0.0, Culture=neutral, PublicKeyToken=null", typeof(Point).AssemblyQualifiedName)
-						                  .Replace("Microsoft.Xna.Framework.Rectangle, FNA, Version=26.8.0.0, Culture=neutral, PublicKeyToken=null", typeof(Rectangle).AssemblyQualifiedName)
-						                  .Replace("Microsoft.Xna.Framework.Matrix, FNA, Version=26.8.0.0, Culture=neutral, PublicKeyToken=null", typeof(Matrix).AssemblyQualifiedName)
-						                  .Replace("Microsoft.Xna.Framework.Quaternion, FNA, Version=26.8.0.0, Culture=neutral, PublicKeyToken=null", typeof(Quaternion).AssemblyQualifiedName);
+						                  .Replace("Microsoft.Xna.Framework.Vector2, FNA, Version=26.9.0.0, Culture=neutral, PublicKeyToken=null", typeof(Vector2).AssemblyQualifiedName)
+						                  .Replace("Microsoft.Xna.Framework.Vector3, FNA, Version=26.9.0.0, Culture=neutral, PublicKeyToken=null", typeof(Vector3).AssemblyQualifiedName)
+						                  .Replace("Microsoft.Xna.Framework.Vector4, FNA, Version=26.9.0.0, Culture=neutral, PublicKeyToken=null", typeof(Vector4).AssemblyQualifiedName)
+						                  .Replace("Microsoft.Xna.Framework.Point, FNA, Version=26.9.0.0, Culture=neutral, PublicKeyToken=null", typeof(Point).AssemblyQualifiedName)
+						                  .Replace("Microsoft.Xna.Framework.Rectangle, FNA, Version=26.9.0.0, Culture=neutral, PublicKeyToken=null", typeof(Rectangle).AssemblyQualifiedName)
+						                  .Replace("Microsoft.Xna.Framework.Matrix, FNA, Version=26.9.0.0, Culture=neutral, PublicKeyToken=null", typeof(Matrix).AssemblyQualifiedName)
+						                  .Replace("Microsoft.Xna.Framework.Quaternion, FNA, Version=26.9.0.0, Culture=neutral, PublicKeyToken=null", typeof(Quaternion).AssemblyQualifiedName);
 
 						Type l_readerType = Type.GetType(readerTypeString);
-						if (l_readerType != null)
+						if (!ReferenceEquals(l_readerType, null))
 						{
 							ContentTypeReader typeReader;
 							if (!contentReadersCache.TryGetValue(l_readerType, out typeReader))
@@ -264,7 +264,7 @@ namespace Microsoft.Xna.Framework.Content
 						}
 					}
 
-					if (newReaders[i].TargetType != null)
+					if (!ReferenceEquals(newReaders[i].TargetType, null))
 					{
 						contentReaders.Add(newReaders[i].TargetType, newReaders[i]);
 					}

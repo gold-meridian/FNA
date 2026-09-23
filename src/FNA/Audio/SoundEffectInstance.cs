@@ -40,7 +40,7 @@ namespace Microsoft.Xna.Framework.Audio
 				}
 				if (hasStarted)
 				{
-					throw new InvalidOperationException();
+					throw new InvalidOperationException("Loop must be set before the first Play call.");
 				}
 				INTERNAL_looped = value;
 			}
@@ -55,18 +55,19 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 			set
 			{
+				if (!(value >= -1f && value <= 1f))
+				{
+					throw new ArgumentOutOfRangeException("value");
+				}
 				if (IsDisposed)
 				{
 					throw new ObjectDisposedException(GetType().Name, "This object has already been disposed.");
 				}
-				if (is3D)
+				if (hasStarted && is3D)
 				{
-					throw new InvalidOperationException("The method call is invalid.");
+					throw new InvalidOperationException("Pan cannot be set on a 3D sound. To ensure a 2D sound avoid calling Apply3D and ensure Pan is set before the first Play call.");
 				}
-				if (value < -1f || value > 1f)
-				{
-					throw new ArgumentOutOfRangeException("value");
-				}
+				is3D = false;
 				INTERNAL_pan = value;
 
 				SetPanMatrixCoefficients();
@@ -93,15 +94,15 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 			set
 			{
+				if (!(value >= -1f && value <= 1f))
+				{
+					throw new ArgumentOutOfRangeException("value");
+				}
 				if (IsDisposed)
 				{
 					throw new ObjectDisposedException(GetType().Name, "This object has already been disposed.");
 				}
-				if (value < -1f || value > 1f)
-				{
-					throw new ArgumentOutOfRangeException("value");
-				}
-				INTERNAL_pitch = MathHelper.Clamp(value, -1.0f, 1.0f);
+				INTERNAL_pitch = value;
 				if (handle != IntPtr.Zero)
 				{
 					UpdatePitch();
@@ -142,13 +143,13 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 			set
 			{
+				if (!(value >= -FAudio.FAUDIO_MAX_VOLUME_LEVEL && value <= FAudio.FAUDIO_MAX_VOLUME_LEVEL)) // XNA: !(value >= 0f && value <= 1f)
+				{
+					throw new ArgumentOutOfRangeException("value");
+				}
 				if (IsDisposed)
 				{
 					throw new ObjectDisposedException(GetType().Name, "This object has already been disposed.");
-				}
-				if (value < -FAudio.FAUDIO_MAX_VOLUME_LEVEL || value > FAudio.FAUDIO_MAX_VOLUME_LEVEL) // XNA: value < 0f || value > 1f
-				{
-					throw new ArgumentOutOfRangeException("value");
 				}
 				INTERNAL_volume = value;
 				if (handle != IntPtr.Zero)
@@ -167,7 +168,6 @@ namespace Microsoft.Xna.Framework.Audio
 		#region Internal Variables
 
 		internal IntPtr handle;
-		internal bool isDynamic;
 
 		#endregion
 
@@ -175,6 +175,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 		private SoundEffect parentEffect;
 		private WeakReference selfReference;
+		private bool isDynamic;
 		private bool hasStarted;
 		private bool is3D;
 		private bool usingReverb;
@@ -192,25 +193,26 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region Internal Constructor
 
-		internal SoundEffectInstance(SoundEffect parent = null)
+		internal SoundEffectInstance(SoundEffect parent)
 		{
 			SoundEffect.Device();
 
 			selfReference = new WeakReference(this, true);
 			parentEffect = parent;
-			isDynamic = this is DynamicSoundEffectInstance;
 			hasStarted = false;
 			is3D = false;
 			usingReverb = false;
 			INTERNAL_state = SoundState.Stopped;
 
-			if (!isDynamic)
-			{
-				InitDSPSettings(parentEffect.channels);
-			}
 			if (parentEffect != null)
 			{
+				InitDSPSettings(parentEffect.channels);
 				parentEffect.Instances.Add(selfReference);
+			}
+			else
+			{
+				// Only DynamicSoundEffectInstance can avoid sending a SoundEffect base
+				isDynamic = true;
 			}
 		}
 
@@ -254,6 +256,10 @@ namespace Microsoft.Xna.Framework.Audio
 				throw new ObjectDisposedException(
 					"SoundEffectInstance"
 				);
+			}
+			if (hasStarted && !is3D)
+			{
+				throw new InvalidOperationException("The sound is not a 3D sound. Call Apply3D before the first Play call to configure it to be a 3D sound.");
 			}
 
 			is3D = true;

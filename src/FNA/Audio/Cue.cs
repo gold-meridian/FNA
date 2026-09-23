@@ -206,9 +206,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 			if (variable == FAudio.FACTVARIABLEINDEX_INVALID)
 			{
-				throw new InvalidOperationException(
-					"Invalid variable name!"
-				);
+				throw new IndexOutOfRangeException("The specified variable index is invalid.");
 			}
 
 			float result;
@@ -222,7 +220,10 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public void Pause()
 		{
-			FAudio.FACTCue_Pause(handle, 1);
+			if (FAudio.FACTCue_Pause(handle, 1) == 0x8AC70006) // FACTENGINE_E_INVALIDUSAGE
+			{
+				throw new InvalidOperationException("The method or function that was called cannot be used in the manner requested.");
+			}
 		}
 
 		public void Play()
@@ -233,7 +234,10 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public void Resume()
 		{
-			FAudio.FACTCue_Pause(handle, 0);
+			if (FAudio.FACTCue_Pause(handle, 0) == 0x8AC70006) // FACTENGINE_E_INVALIDUSAGE
+			{
+				throw new InvalidOperationException("The method or function that was called cannot be used in the manner requested.");
+			}
 		}
 
 		public void SetVariable(string name, float value)
@@ -250,9 +254,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 			if (variable == FAudio.FACTVARIABLEINDEX_INVALID)
 			{
-				throw new InvalidOperationException(
-					"Invalid variable name!"
-				);
+				throw new IndexOutOfRangeException("The specified variable index is invalid.");
 			}
 
 			FAudio.FACTCue_SetVariable(
@@ -264,11 +266,13 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public void Stop(AudioStopOptions options)
 		{
+			if (unchecked((uint) options) > 1)
+			{
+				throw new ArgumentException();
+			}
 			FAudio.FACTCue_Stop(
 				handle,
-				(options == AudioStopOptions.Immediate) ?
-					FAudio.FACT_FLAG_STOP_IMMEDIATE :
-					FAudio.FACT_FLAG_STOP_RELEASE
+				(uint) options
 			);
 		}
 

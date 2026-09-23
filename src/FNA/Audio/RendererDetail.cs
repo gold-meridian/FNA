@@ -21,23 +21,13 @@ namespace Microsoft.Xna.Framework.Audio
 		public string FriendlyName
 		{
 			get;
-			private set;
+			internal set;
 		}
 
 		public string RendererId
 		{
 			get;
-			private set;
-		}
-
-		#endregion
-
-		#region Internal Constructor
-
-		internal RendererDetail(string name, string id)
-		{
-			FriendlyName = name;
-			RendererId = id;
+			internal set;
 		}
 
 		#endregion
@@ -53,11 +43,6 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			return (string.IsNullOrEmpty(RendererId) ? 0 : RendererId.GetHashCode()) ^
 				(string.IsNullOrEmpty(FriendlyName) ? 0 : FriendlyName.GetHashCode());
-		}
-
-		public override string ToString()
-		{
-			return base.ToString();
 		}
 		
 		#endregion

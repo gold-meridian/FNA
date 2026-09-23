@@ -198,7 +198,7 @@ namespace Microsoft.Xna.Framework
 
 		public float? Intersects(BoundingFrustum frustum)
 		{
-			if (frustum == null)
+			if (ReferenceEquals(frustum, null))
 			{
 				throw new ArgumentNullException("frustum");
 			}
@@ -240,11 +240,11 @@ namespace Microsoft.Xna.Framework
 
 			float distanceAlongRay;
 
-			/* If the distance between the ray start and the sphere's center is less than
+			/* If the distance between the ray start and the sphere's center is less than or equal
 			 * the radius of the sphere, it means we've intersected. Checking the
 			 * LengthSquared is faster.
 			 */
-			if (differenceLengthSquared < sphereRadiusSquared)
+			if (differenceLengthSquared <= sphereRadiusSquared)
 			{
 				result = 0.0f;
 				return;

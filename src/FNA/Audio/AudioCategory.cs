@@ -18,35 +18,21 @@ namespace Microsoft.Xna.Framework.Audio
 	{
 		#region Public Properties
 
-		private string INTERNAL_name;
 		public string Name
 		{
 			get
 			{
-				return INTERNAL_name;
+				return name;
 			}
 		}
 
 		#endregion
 
-		#region Private Variables
+		#region Internal Variables
 
-		private AudioEngine parent;
-		private ushort index;
-
-		#endregion
-
-		#region Internal Constructor
-
-		internal AudioCategory(
-			AudioEngine engine,
-			ushort category,
-			string name
-		) {
-			parent = engine;
-			index = category;
-			INTERNAL_name = name;
-		}
+		internal AudioEngine parent;
+		internal ushort index;
+		internal string name;
 
 		#endregion
 
@@ -58,7 +44,7 @@ namespace Microsoft.Xna.Framework.Audio
 			{
 				if (parent.IsDisposed)
 				{
-					return;
+					throw new ArgumentException();
 				}
 				FAudio.FACTAudioEngine_Pause(parent.handle, index, 1);
 			}
@@ -70,7 +56,7 @@ namespace Microsoft.Xna.Framework.Audio
 			{
 				if (parent.IsDisposed)
 				{
-					return;
+					throw new ArgumentException();
 				}
 				FAudio.FACTAudioEngine_Pause(parent.handle, index, 0);
 			}
@@ -82,11 +68,15 @@ namespace Microsoft.Xna.Framework.Audio
 			{
 				throw new ArgumentException("Volume must be a positive float value.");
 			}
+			if (volume > FAudio.FACTVOLUME_MAX)
+			{
+				throw new ArgumentException();
+			}
 			lock (parent.gcSync)
 			{
 				if (parent.IsDisposed)
 				{
-					return;
+					throw new ArgumentException();
 				}
 				FAudio.FACTAudioEngine_SetVolume(parent.handle, index, volume);
 			}
@@ -94,18 +84,20 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public void Stop(AudioStopOptions options)
 		{
+			if (unchecked((uint) options) > 1)
+			{
+				throw new ArgumentException();
+			}
 			lock (parent.gcSync)
 			{
 				if (parent.IsDisposed)
 				{
-					return;
+					throw new ArgumentException();
 				}
 				FAudio.FACTAudioEngine_Stop(
 					parent.handle,
 					index,
-					(options == AudioStopOptions.Immediate) ?
-						FAudio.FACT_FLAG_STOP_IMMEDIATE :
-						FAudio.FACT_FLAG_STOP_RELEASE
+					(uint) options
 				);
 			}
 		}
@@ -125,7 +117,7 @@ namespace Microsoft.Xna.Framework.Audio
 			return other.parent == parent && other.index == index;
 		}
 
-		public override bool Equals(Object obj)
+		public override bool Equals(object obj)
 		{
 			return obj is AudioCategory && Equals((AudioCategory) obj);
 		}
@@ -142,6 +134,11 @@ namespace Microsoft.Xna.Framework.Audio
 			AudioCategory value2
 		) {
 			return !(value1.Equals(value2));
+		}
+
+		public override string ToString()
+		{
+			return name ?? string.Empty;
 		}
 
 		#endregion

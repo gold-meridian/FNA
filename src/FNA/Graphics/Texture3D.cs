@@ -50,7 +50,19 @@ namespace Microsoft.Xna.Framework.Graphics
 		) {
 			if (graphicsDevice == null)
 			{
-				throw new ArgumentNullException("graphicsDevice");
+				throw new ArgumentNullException("graphicsDevice", "The GraphicsDevice must not be null when creating new resources.");
+			}
+			if (width <= 0)
+			{
+				throw new ArgumentOutOfRangeException("width", "Resource size must be greater than zero.");
+			}
+			if (height <= 0)
+			{
+				throw new ArgumentOutOfRangeException("height", "Resource size must be greater than zero.");
+			}
+			if (depth <= 0)
+			{
+				throw new ArgumentOutOfRangeException("depth", "Resource size must be greater than zero.");
 			}
 
 			GraphicsDevice = graphicsDevice;
@@ -79,7 +91,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			SetData<T>(
 				data,
 				0,
-				data.Length
+				data == null ? 0 : data.Length
 			);
 		}
 
@@ -182,7 +194,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			GetData(
 				data,
 				0,
-				data.Length
+				data == null ? 0 : data.Length
 			);
 		}
 
@@ -249,9 +261,9 @@ namespace Microsoft.Xna.Framework.Graphics
 					" but " + elementCount.ToString() + " pixels have been requested."
 				);
 			}
-			if (	(left < 0 || left >= right) ||
-				(top < 0 || top >= bottom) ||
-				(front < 0 || front >= back)	)
+			if (	unchecked((uint) left >= (uint) right) ||
+				unchecked((uint) top >= (uint) bottom) ||
+				unchecked((uint) front >= (uint) back)	)
 			{
 				throw new ArgumentException("Neither box size nor box position can be negative");
 			}

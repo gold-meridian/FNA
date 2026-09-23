@@ -143,10 +143,15 @@ namespace Microsoft.Xna.Framework
 
 		#endregion
 
+		#region Internal Fields
+
+		internal readonly Vector3[] corners = new Vector3[CornerCount];
+
+		#endregion
+
 		#region Private Fields
 
 		private Matrix matrix;
-		private readonly Vector3[] corners = new Vector3[CornerCount];
 		private readonly Plane[] planes = new Plane[PlaneCount];
 
 		/// <summary>
@@ -284,7 +289,7 @@ namespace Microsoft.Xna.Framework
 		/// <returns>Result of testing for containment between this <see cref="BoundingFrustum"/> and specified <see cref="Vector3"/>.</returns>
 		public ContainmentType Contains(Vector3 point)
 		{
-			ContainmentType result = default(ContainmentType);
+			ContainmentType result;
 			this.Contains(ref point, out result);
 			return result;
 		}
@@ -296,7 +301,6 @@ namespace Microsoft.Xna.Framework
 		/// <param name="result">Result of testing for containment between this <see cref="BoundingFrustum"/> and specified <see cref="Vector3"/> as an output parameter.</param>
 		public void Contains(ref Vector3 point, out ContainmentType result)
 		{
-			bool intersects = false;
 			for (int i = 0; i < PlaneCount; i += 1)
 			{
 				float classifyPoint = (
@@ -305,18 +309,13 @@ namespace Microsoft.Xna.Framework
 					(point.Z * planes[i].Normal.Z) +
 					planes[i].D
 				);
-				if (classifyPoint > 0)
+				if (classifyPoint > 1E-5f)
 				{
 					result = ContainmentType.Disjoint;
 					return;
 				}
-				else if (classifyPoint == 0)
-				{
-					intersects = true;
-					break;
-				}
 			}
-			result = intersects ? ContainmentType.Intersects : ContainmentType.Contains;
+			result = ContainmentType.Contains;
 		}
 
 		/// <summary>
@@ -641,17 +640,7 @@ namespace Microsoft.Xna.Framework
 		/// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
 		public static bool operator ==(BoundingFrustum a, BoundingFrustum b)
 		{
-			if (object.Equals(a, null))
-			{
-				return (object.Equals(b, null));
-			}
-
-			if (object.Equals(b, null))
-			{
-				return (object.Equals(a, null));
-			}
-
-			return a.matrix == (b.matrix);
+			return ReferenceEquals(a, null) ? ReferenceEquals(b, null) : a.Equals(b);
 		}
 
 		/// <summary>
@@ -672,7 +661,7 @@ namespace Microsoft.Xna.Framework
 		/// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
 		public bool Equals(BoundingFrustum other)
 		{
-			return (this == other);
+			return ReferenceEquals(this, other) || !ReferenceEquals(other, null) && other.matrix == matrix;
 		}
 
 		/// <summary>
@@ -682,7 +671,7 @@ namespace Microsoft.Xna.Framework
 		/// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
 		public override bool Equals(object obj)
 		{
-			return (obj is BoundingFrustum) && Equals((BoundingFrustum) obj);
+			return Equals(obj as BoundingFrustum);
 		}
 
 		/// <summary>

@@ -9,6 +9,8 @@
 
 #region Using Statements
 using System;
+using System.IO;
+using System.Text;
 using System.Collections.Generic;
 
 using Microsoft.Xna.Framework.Graphics;
@@ -216,18 +218,38 @@ namespace Microsoft.Xna.Framework
 
 			INTERNAL_preferMultiSampling = false;
 
-			if (game.Services.GetService(typeof(IGraphicsDeviceManager)) != null)
+			if (game.Services.INTERNAL_GetService(typeof(IGraphicsDeviceManager)) != null)
 			{
-				throw new ArgumentException("Graphics Device Manager Already Present");
+				throw new ArgumentException("A graphics device manager is already registered.  The graphics device manager cannot be changed once it is set.");
 			}
 
-			game.Services.AddService(typeof(IGraphicsDeviceManager), this);
-			game.Services.AddService(typeof(IGraphicsDeviceService), this);
+			game.Services.INTERNAL_AddService(typeof(IGraphicsDeviceManager), this);
+			game.Services.INTERNAL_AddService(typeof(IGraphicsDeviceService), this);
 
 			prefsChanged = true;
 			useResizedBackBuffer = false;
 			supportsOrientations = FNAPlatform.SupportsOrientationChanges();
 			game.Window.ClientSizeChanged += INTERNAL_OnClientSizeChanged;
+
+			Stream resourceStream = game.GetType().Assembly.GetManifestResourceStream("Microsoft.Xna.Framework.RuntimeProfile");
+			if (resourceStream != null)
+			{
+				using (StreamReader streamReader = new StreamReader(resourceStream, Encoding.ASCII, false))
+				{
+					string text = streamReader.ReadLine();
+					if (text != null)
+					{
+						if (text.EndsWith("Reach"))
+						{
+							GraphicsProfile = GraphicsProfile.Reach;
+						}
+						else if (text.EndsWith("HiDef"))
+						{
+							GraphicsProfile = GraphicsProfile.HiDef;
+						}
+					}
+				}
+			}
 		}
 
 		#endregion
@@ -247,8 +269,8 @@ namespace Microsoft.Xna.Framework
 		{
 			if (!disposed)
 			{
-				game.Services.RemoveService(typeof(IGraphicsDeviceManager));
-				game.Services.RemoveService(typeof(IGraphicsDeviceService));
+				game.Services.INTERNAL_RemoveService(typeof(IGraphicsDeviceManager));
+				game.Services.INTERNAL_RemoveService(typeof(IGraphicsDeviceService));
 				if (disposing)
 				{
 					if (graphicsDevice != null)
@@ -305,6 +327,8 @@ namespace Microsoft.Xna.Framework
 
 			// Recreate device information before resetting
 			GraphicsDeviceInformation gdi = new GraphicsDeviceInformation();
+			gdi.PresentationParameters.BackBufferWidth = DefaultBackBufferWidth;
+			gdi.PresentationParameters.BackBufferHeight = DefaultBackBufferHeight;
 			gdi.Adapter = graphicsDevice.Adapter;
 			gdi.PresentationParameters = graphicsDevice.PresentationParameters.Clone();
 			INTERNAL_CreateGraphicsDeviceInformation(gdi);
@@ -531,6 +555,8 @@ namespace Microsoft.Xna.Framework
 
 			// Set the default device information
 			GraphicsDeviceInformation gdi = new GraphicsDeviceInformation();
+			gdi.PresentationParameters.BackBufferWidth = DefaultBackBufferWidth;
+			gdi.PresentationParameters.BackBufferHeight = DefaultBackBufferHeight;
 			gdi.PresentationParameters.DeviceWindowHandle = game.Window.Handle;
 			INTERNAL_CreateGraphicsDeviceInformation(gdi);
 
