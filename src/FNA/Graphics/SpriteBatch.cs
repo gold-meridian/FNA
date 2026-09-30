@@ -103,7 +103,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		private EffectPass spriteEffectPass;
 
 		// Tracks Begin/End calls
-		private bool beginCalled;
+		public bool beginCalled;
 
 		// Current sort mode
 		public SpriteSortMode sortMode;
