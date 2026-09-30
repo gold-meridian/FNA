@@ -106,13 +106,13 @@ namespace Microsoft.Xna.Framework.Graphics
 		private bool beginCalled;
 
 		// Current sort mode
-		private SpriteSortMode sortMode;
+		public SpriteSortMode sortMode;
 
 		// Keep render state for non-Immediate modes.
-		private BlendState blendState;
-		private SamplerState samplerState;
-		private DepthStencilState depthStencilState;
-		private RasterizerState rasterizerState;
+		public BlendState blendState;
+		public SamplerState samplerState;
+		public DepthStencilState depthStencilState;
+		public RasterizerState rasterizerState;
 
 		// How many sprites are in the current batch?
 		private int numSprites;
@@ -122,10 +122,10 @@ namespace Microsoft.Xna.Framework.Graphics
 		private bool supportsNoOverwrite;
 
 		// Matrix to be used when creating the projection matrix
-		private Matrix transformMatrix;
+		public Matrix transformMatrix;
 
 		// User-provided Effect, if applicable
-		private Effect customEffect;
+		public Effect customEffect;
 
 		#endregion
 
