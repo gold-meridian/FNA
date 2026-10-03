@@ -20,7 +20,7 @@ using Microsoft.Xna.Framework.Input.Touch;
 
 namespace Microsoft.Xna.Framework
 {
-	internal static class FNAPlatform
+	public static class FNAPlatform
 	{
 		#region Static Constructor
 
@@ -142,6 +142,9 @@ namespace Microsoft.Xna.Framework
 				GetCurrentDisplayMode =		SDL3_FNAPlatform.GetCurrentDisplayMode;
 				GetMonitorHandle =		SDL3_FNAPlatform.GetMonitorHandle;
 				GetKeyFromScancode =		SDL3_FNAPlatform.GetKeyFromScancode;
+				Infiniseed_GetSdlKey =		SDL3_FNAPlatform.Infiniseed_GetSdlKey;
+				Infiniseed_GetXnaKey =		SDL3_FNAPlatform.Infiniseed_GetXnaKey;
+				Infiniseed_GetXnaKeyFromSdlScancode =		SDL3_FNAPlatform.Infiniseed_GetXnaKeyFromSdlScancode;
 				IsTextInputActive =		SDL3_FNAPlatform.IsTextInputActive;
 				StartTextInput =		SDL3_FNAPlatform.StartTextInput;
 				StopTextInput =			SDL3_FNAPlatform.StopTextInput;
@@ -200,6 +203,9 @@ namespace Microsoft.Xna.Framework
 				GetCurrentDisplayMode =		SDL2_FNAPlatform.GetCurrentDisplayMode;
 				GetMonitorHandle =		SDL2_FNAPlatform.GetMonitorHandle;
 				GetKeyFromScancode =		SDL2_FNAPlatform.GetKeyFromScancode;
+				Infiniseed_GetSdlKey =		SDL2_FNAPlatform.Infiniseed_GetSdlKey;
+				Infiniseed_GetXnaKey =		SDL2_FNAPlatform.Infiniseed_GetXnaKey;
+				Infiniseed_GetXnaKeyFromSdlScancode =		SDL2_FNAPlatform.Infiniseed_GetXnaKeyFromSdlScancode;
 				IsTextInputActive =		SDL2_FNAPlatform.IsTextInputActive;
 				StartTextInput =		SDL2_FNAPlatform.StartTextInput;
 				StopTextInput =			SDL2_FNAPlatform.StopTextInput;
@@ -365,6 +371,15 @@ namespace Microsoft.Xna.Framework
 
 		public delegate Keys GetKeyFromScancodeFunc(Keys scancode);
 		public static readonly GetKeyFromScancodeFunc GetKeyFromScancode;
+
+		public delegate int Infiniseed_GetSdlKeyFunc(Keys key);
+		public static readonly Infiniseed_GetSdlKeyFunc Infiniseed_GetSdlKey;
+
+		public delegate Keys Infiniseed_GetXnaKeyFunc(int i);
+		public static readonly Infiniseed_GetXnaKeyFunc Infiniseed_GetXnaKey;
+
+		public delegate Keys Infiniseed_GetXnaKeyFromSdlScancodeFunc(int i);
+		public static readonly Infiniseed_GetXnaKeyFromSdlScancodeFunc Infiniseed_GetXnaKeyFromSdlScancode;
 
 		public delegate bool IsTextInputActiveFunc(IntPtr window);
 		public static readonly IsTextInputActiveFunc IsTextInputActive;

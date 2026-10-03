@@ -12,6 +12,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 using SDL3;
@@ -2765,19 +2766,40 @@ namespace Microsoft.Xna.Framework
 				{
 					return result;
 				}
+				/*
 				FNALoggerEXT.LogWarn(
 					"KEYCODE MISSING FROM SDL3->XNA DICTIONARY: " +
 					sym.ToString()
 				);
+				*/
 			}
 			else
 			{
+				/*
 				FNALoggerEXT.LogWarn(
 					"SCANCODE MISSING FROM XNA->SDL3 DICTIONARY: " +
 					scancode.ToString()
 				);
+				*/
 			}
 			return Keys.None;
+		}
+
+		private static readonly Dictionary<Keys, int> reversed_key_map = INTERNAL_keyMap.GroupBy(x => x.Value).ToDictionary(x => x.Key, x => x.First().Key);
+
+		public static int Infiniseed_GetSdlKey(Keys key)
+		{
+			return reversed_key_map[key];
+		}
+
+		public static Keys Infiniseed_GetXnaKey(int i)
+		{
+			return INTERNAL_keyMap.GetValueOrDefault(i, (Keys)(-1));
+		}
+
+		public static Keys Infiniseed_GetXnaKeyFromSdlScancode(int i)
+		{
+			return INTERNAL_scanMap.GetValueOrDefault(i, Keys.None);
 		}
 
 		#endregion
