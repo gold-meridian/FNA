@@ -11,11 +11,12 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using Infiniseed.Framework.Rendering;
 #endregion
 
 namespace Microsoft.Xna.Framework.Graphics
 {
-	public class Texture2D : Texture
+	public class Texture2D : Texture, ITexture2D
 	{
 		#region Public Properties
 
