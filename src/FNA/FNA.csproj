@@ -14,13 +14,18 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\..\Infiniseed\Infiniseed.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
         <Compile Include="..\..\lib\SDL2-CS\src\SDL2.cs"/>
         <Compile Include="..\..\lib\SDL3-CS\SDL3\SDL3.Legacy.cs"/>
         <Compile Include="..\..\lib\FAudio\csharp\FAudio.cs"/>
         <Compile Include="..\..\lib\Theorafile\csharp\Theorafile.cs"/>
 		<Compile Include="..\..\lib\dav1dfile\csharp\dav1dfile.Legacy.cs" />
 
-		<Using Alias="Vector2" Include="System.Numerics.Vector2"/>
+        <Using Alias="Color" Include="Infiniseed.Framework.Rendering.Color"/>
+        <Using Alias="Vector2" Include="System.Numerics.Vector2"/>
 		<Using Alias="Vector3" Include="System.Numerics.Vector3"/>
 		<Using Alias="Vector4" Include="System.Numerics.Vector4"/>
 		<Using Alias="Quaternion" Include="System.Numerics.Quaternion"/>

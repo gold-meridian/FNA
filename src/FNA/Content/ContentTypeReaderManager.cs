@@ -198,6 +198,7 @@ namespace Microsoft.Xna.Framework.Content
 
 
 						readerTypeString = readerTypeString
+						                  .Replace("Microsoft.Xna.Framework.Color, FNA, Version=26.10.0.0, Culture=neutral, PublicKeyToken=null", typeof(Color).AssemblyQualifiedName)
 						                  .Replace("Microsoft.Xna.Framework.Vector2, FNA, Version=26.10.0.0, Culture=neutral, PublicKeyToken=null", typeof(Vector2).AssemblyQualifiedName)
 						                  .Replace("Microsoft.Xna.Framework.Vector3, FNA, Version=26.10.0.0, Culture=neutral, PublicKeyToken=null", typeof(Vector3).AssemblyQualifiedName)
 						                  .Replace("Microsoft.Xna.Framework.Vector4, FNA, Version=26.10.0.0, Culture=neutral, PublicKeyToken=null", typeof(Vector4).AssemblyQualifiedName)

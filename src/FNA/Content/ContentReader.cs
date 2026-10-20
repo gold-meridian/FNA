@@ -263,9 +263,7 @@ namespace Microsoft.Xna.Framework.Content
 
 		public Color ReadColor()
 		{
-			Color result;
-			result.packedValue = ReadUInt32();
-			return result;
+			return Color.FromPackedValue(ReadUInt32());
 		}
 
 		#endregion
