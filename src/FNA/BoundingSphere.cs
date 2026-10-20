@@ -87,7 +87,7 @@ namespace Microsoft.Xna.Framework
 		/// <returns>Transformed <see cref="BoundingSphere"/>.</returns>
 		public BoundingSphere Transform(Matrix matrix)
 		{
-			BoundingSphere sphere = new BoundingSphere();
+			BoundingSphere sphere;
 			sphere.Center = Vector3.Transform(this.Center, matrix);
 			sphere.Radius = this.Radius *
 				(
@@ -228,7 +228,7 @@ namespace Microsoft.Xna.Framework
 			// Check if all corners are in sphere.
 			bool inside = true;
 
-			Vector3[] corners = frustum.GetCorners();
+			Vector3[] corners = frustum.corners;
 			foreach (Vector3 corner in corners)
 			{
 				if (this.Contains(corner) == ContainmentType.Disjoint)
@@ -331,16 +331,14 @@ namespace Microsoft.Xna.Framework
 		public static void CreateFromBoundingBox(ref BoundingBox box, out BoundingSphere result)
 		{
 			// Find the center of the box.
-			Vector3 center = new Vector3(
+			result.Center = new Vector3(
 				(box.Min.X + box.Max.X) / 2.0f,
 				(box.Min.Y + box.Max.Y) / 2.0f,
 				(box.Min.Z + box.Max.Z) / 2.0f
 			);
 
 			// Find the distance between the center and one of the corners of the box.
-			float radius = Vector3.Distance(center, box.Max);
-
-			result = new BoundingSphere(center, radius);
+			result.Radius = Vector3.Distance(result.Center, box.Max);
 		}
 
 		/// <summary>
@@ -517,7 +515,6 @@ namespace Microsoft.Xna.Framework
 					* ocenterToaCenter
 				);
 
-			result = new BoundingSphere();
 			result.Center = original.Center + ocenterToaCenter;
 			result.Radius = (leftRadius + Rightradius) / 2;
 		}
@@ -601,7 +598,7 @@ namespace Microsoft.Xna.Framework
 		/// <returns>Type of intersection.</returns>
 		public PlaneIntersectionType Intersects(Plane plane)
 		{
-			PlaneIntersectionType result = default(PlaneIntersectionType);
+			PlaneIntersectionType result;
 			// TODO: We might want to inline this for performance reasons.
 			this.Intersects(ref plane, out result);
 			return result;
@@ -614,7 +611,7 @@ namespace Microsoft.Xna.Framework
 		/// <param name="result">Type of intersection as an output parameter.</param>
 		public void Intersects(ref Plane plane, out PlaneIntersectionType result)
 		{
-			float distance = default(float);
+			float distance;
 			// TODO: We might want to inline this for performance reasons.
 			distance = Vector3.Dot(plane.Normal, this.Center);
 			distance += plane.D;

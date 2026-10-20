@@ -141,8 +141,9 @@ namespace Microsoft.Xna.Framework
 
 		public void Normalize()
 		{
-			float length = Normal.Length();
-			float factor = 1.0f / length;
+			float lengthSquared = Normal.LengthSquared();
+			if (Math.Abs(lengthSquared - 1f) < MathHelper.FloatEpsilon) return;
+			float factor = 1.0f / (float) Math.Sqrt(lengthSquared);
 			Normal = Vector3.Multiply(Normal, factor);
 			D = D * factor;
 		}
@@ -178,25 +179,6 @@ namespace Microsoft.Xna.Framework
 
 		#endregion
 
-		#region Internal Methods
-
-		internal PlaneIntersectionType Intersects(ref Vector3 point)
-		{
-			float distance;
-			DotCoordinate(ref point, out distance);
-			if (distance > 0)
-			{
-				return PlaneIntersectionType.Front;
-			}
-			if (distance < 0)
-			{
-				return PlaneIntersectionType.Back;
-			}
-			return PlaneIntersectionType.Intersecting;
-		}
-
-		#endregion
-
 		#region Public Static Methods
 
 		public static Plane Normalize(Plane value)
@@ -207,8 +189,13 @@ namespace Microsoft.Xna.Framework
 
 		public static void Normalize(ref Plane value, out Plane result)
 		{
-			float length = value.Normal.Length();
-			float factor = 1.0f / length;
+			float lengthSquared = value.Normal.LengthSquared();
+			if (Math.Abs(lengthSquared - 1f) < MathHelper.FloatEpsilon)
+			{
+				result = value;
+				return;
+			}
+			float factor = 1.0f / (float) Math.Sqrt(lengthSquared);
 			result.Normal = Vector3.Multiply(value.Normal, factor);
 			result.D = value.D * factor;
 		}

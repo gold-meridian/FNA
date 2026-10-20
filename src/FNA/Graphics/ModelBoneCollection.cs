@@ -8,6 +8,7 @@
 #endregion
 
 #region Using Statements
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -18,7 +19,7 @@ namespace Microsoft.Xna.Framework.Graphics
 	/// <summary>
 	/// Represents a set of bones associated with a model.
 	/// </summary>
-	public class ModelBoneCollection : ReadOnlyCollection<ModelBone>
+	public sealed class ModelBoneCollection : ReadOnlyCollection<ModelBone>
 	{
 		#region Public Properties
 
@@ -45,7 +46,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Internal Constructor
 
-		internal ModelBoneCollection(IList<ModelBone> list) : base(list)
+		internal ModelBoneCollection(ModelBone[] list) : base(list)
 		{
 		}
 
@@ -64,7 +65,11 @@ namespace Microsoft.Xna.Framework.Graphics
 		/// </param>
 		public bool TryGetValue(string boneName, out ModelBone value)
 		{
-			foreach (ModelBone bone in base.Items)
+			if (string.IsNullOrEmpty(boneName))
+			{
+				throw new ArgumentNullException("boneName");
+			}
+			foreach (ModelBone bone in this)
 			{
 				if (bone.Name == boneName)
 				{
@@ -86,7 +91,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		/// <returns></returns>
 		public new Enumerator GetEnumerator()
 		{
-			return new Enumerator(this);
+			return new Enumerator((ModelBone[]) Items);
 		}
 
 		/// <summary>
@@ -94,10 +99,10 @@ namespace Microsoft.Xna.Framework.Graphics
 		/// </summary>
 		public struct Enumerator : IEnumerator<ModelBone>
 		{
-			private readonly ModelBoneCollection collection;
+			private readonly ModelBone[] collection;
 			private int position;
 
-			internal Enumerator(ModelBoneCollection collection)
+			internal Enumerator(ModelBone[] collection)
 			{
 				this.collection = collection;
 				position = -1;
@@ -121,7 +126,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			public bool MoveNext()
 			{
 				position += 1;
-				return (position < collection.Count);
+				return (position < collection.Length);
 			}
 
 			/// <summary>

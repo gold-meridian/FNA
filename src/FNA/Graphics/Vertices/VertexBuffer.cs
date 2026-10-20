@@ -86,9 +86,21 @@ namespace Microsoft.Xna.Framework.Graphics
 			BufferUsage bufferUsage,
 			bool dynamic
 		) {
+			if (vertexDeclaration == null)
+			{
+				throw new ArgumentNullException("vertexDeclaration", "This method does not accept null for this parameter.");
+			}
+			if (vertexCount <= 0)
+			{
+				throw new ArgumentOutOfRangeException("vertexCount", "Resource size must be greater than zero.");
+			}
+			if (vertexDeclaration.IsDisposed)
+			{
+				throw new ObjectDisposedException(typeof(VertexDeclaration).Name);
+			}
 			if (graphicsDevice == null)
 			{
-				throw new ArgumentNullException("graphicsDevice");
+				throw new NullReferenceException();
 			}
 
 			GraphicsDevice = graphicsDevice;
@@ -97,10 +109,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			BufferUsage = bufferUsage;
 
 			// Make sure the graphics device is assigned in the vertex declaration.
-			if (vertexDeclaration.GraphicsDevice != graphicsDevice)
-			{
-				vertexDeclaration.GraphicsDevice = graphicsDevice;
-			}
+			vertexDeclaration.graphicsDevice = graphicsDevice;
 
 			buffer = FNA3D.FNA3D_GenVertexBuffer(
 				GraphicsDevice.GLDevice,
@@ -140,7 +149,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				0,
 				data,
 				0,
-				data.Length,
+				data == null ? 0 : data.Length,
 				MarshalHelper.SizeOf<T>()
 			);
 		}
@@ -166,17 +175,15 @@ namespace Microsoft.Xna.Framework.Graphics
 			int elementCount,
 			int vertexStride
 		) where T : struct {
-			if (data == null)
+			if (buffer == IntPtr.Zero)
 			{
-				throw new ArgumentNullException("data");
+				throw new ObjectDisposedException(GetType().Name);
 			}
-			if (data.Length < (startIndex + elementCount))
+			if (data == null || data.Length == 0)
 			{
-				throw new ArgumentOutOfRangeException(
-					"elementCount",
-					"This parameter must be a valid index within the array."
-				);
+				throw new ArgumentNullException("data", "This method does not accept null for this parameter.");
 			}
+			ValidateCopyParameters(data.Length, startIndex, elementCount);
 			if (BufferUsage == BufferUsage.WriteOnly)
 			{
 				throw new NotSupportedException("Calling GetData on a resource that was created with BufferUsage.WriteOnly is not supported.");
@@ -231,7 +238,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				0,
 				data,
 				0,
-				data.Length,
+				data == null ? 0 : data.Length,
 				MarshalHelper.SizeOf<T>(),
 				options
 			);
@@ -329,18 +336,15 @@ namespace Microsoft.Xna.Framework.Graphics
 			int elementCount,
 			int vertexStride
 		) where T : struct {
-			if (data == null)
+			if (buffer == IntPtr.Zero)
 			{
-				throw new ArgumentNullException("data");
+				throw new ObjectDisposedException(GetType().Name);
 			}
-			if ((startIndex + elementCount > data.Length) || elementCount <= 0)
+			if (data == null || data.Length == 0)
 			{
-				throw new InvalidOperationException(
-					"The array specified in the data parameter" +
-					" is not the correct size for the amount of" +
-					" data requested."
-				);
+				throw new ArgumentNullException("data", "This method does not accept null for this parameter.");
 			}
+			ValidateCopyParameters(data.Length, startIndex, elementCount);
 			if (	elementCount > 1 &&
 				(elementCount * vertexStride) > (VertexCount * VertexDeclaration.VertexStride)	)
 			{

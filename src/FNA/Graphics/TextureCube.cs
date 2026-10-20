@@ -41,7 +41,16 @@ namespace Microsoft.Xna.Framework.Graphics
 		) {
 			if (graphicsDevice == null)
 			{
-				throw new ArgumentNullException("graphicsDevice");
+				throw new ArgumentNullException("graphicsDevice", "The GraphicsDevice must not be null when creating new resources.");
+			}
+			if (size <= 0)
+			{
+				throw new ArgumentOutOfRangeException("size", "Resource size must be greater than zero.");
+			}
+			if (	(format == SurfaceFormat.Dxt1 || format == SurfaceFormat.Dxt3 || format == SurfaceFormat.Dxt5)
+				&& (size & 3) != 0)
+			{
+				throw new ArgumentException("DXT compressed texture sizes must be multiples of four.");
 			}
 
 			GraphicsDevice = graphicsDevice;
@@ -111,7 +120,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				null,
 				data,
 				0,
-				data.Length
+				data == null ? 0 : data.Length
 			);
 		}
 
@@ -139,9 +148,24 @@ namespace Microsoft.Xna.Framework.Graphics
 			int startIndex,
 			int elementCount
 		) where T : struct {
-			if (data == null)
+			if (texture == IntPtr.Zero)
 			{
-				throw new ArgumentNullException("data");
+				throw new ObjectDisposedException(GetType().Name);
+			}
+			if (data == null || data.Length == 0)
+			{
+				throw new ArgumentNullException("data", "This method does not accept null for this parameter.");
+			}
+			if (unchecked((uint) level >= (uint) LevelCount))
+			{
+				throw new InvalidOperationException("An unexpected error has occurred.");
+			}
+			ValidateCopyParameters(data.Length, startIndex, elementCount);
+			int formatSize = GetFormatSizeEXT(Format);
+			int elementSizeInBytes = MarshalHelper.SizeOf<T>();
+			if (formatSize % elementSizeInBytes != 0)
+			{
+				throw new ArgumentException("The type you are using for T in this method is an invalid size for this resource.");
 			}
 
 			int xOffset, yOffset, width, height;
@@ -160,7 +184,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				height = Math.Max(1, Size >> level);
 			}
 
-			int elementSizeInBytes = MarshalHelper.SizeOf<T>();
 			GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
 			FNA3D.FNA3D_SetTextureDataCube(
 				GraphicsDevice.GLDevice,
@@ -232,7 +255,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				null,
 				data,
 				0,
-				data.Length
+				data == null ? 0 : data.Length
 			);
 		}
 
@@ -260,16 +283,24 @@ namespace Microsoft.Xna.Framework.Graphics
 			int startIndex,
 			int elementCount
 		) where T : struct {
+			if (texture == IntPtr.Zero)
+			{
+				throw new ObjectDisposedException(GetType().Name);
+			}
 			if (data == null || data.Length == 0)
 			{
-				throw new ArgumentException("data cannot be null");
+				throw new ArgumentNullException("data", "This method does not accept null for this parameter.");
 			}
-			if (data.Length < startIndex + elementCount)
+			if (unchecked((uint) level >= (uint) LevelCount))
 			{
-				throw new ArgumentException(
-					"The data passed has a length of " + data.Length.ToString() +
-					" but " + elementCount.ToString() + " pixels have been requested."
-				);
+				throw new InvalidOperationException("An unexpected error has occurred.");
+			}
+			ValidateCopyParameters(data.Length, startIndex, elementCount);
+			int formatSize = GetFormatSizeEXT(Format);
+			int elementSizeInBytes = MarshalHelper.SizeOf<T>();
+			if (formatSize % elementSizeInBytes != 0)
+			{
+				throw new ArgumentException("The type you are using for T in this method is an invalid size for this resource.");
 			}
 
 			int subX, subY, subW, subH;
@@ -287,9 +318,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				subW = rect.Value.Width;
 				subH = rect.Value.Height;
 			}
-
-			int elementSizeInBytes = MarshalHelper.SizeOf<T>();
-			ValidateGetDataFormat(Format, elementSizeInBytes);
 
 			GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
 			FNA3D.FNA3D_GetTextureDataCube(

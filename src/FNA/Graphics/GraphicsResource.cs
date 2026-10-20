@@ -49,6 +49,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 				selfReference = GCHandle.Alloc(this, GCHandleType.Weak);
 				graphicsDevice.AddResourceReference(selfReference);
+				graphicsDevice.OnResourceCreated(this);
 			}
 		}
 
@@ -80,11 +81,15 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
+		#region Internal Variables
+
+		internal GraphicsDevice graphicsDevice;
+
+		#endregion
+
 		#region Private Variables
 
 		private GCHandle selfReference;
-
-		private GraphicsDevice graphicsDevice;
 
 		#endregion
 
@@ -191,15 +196,32 @@ namespace Microsoft.Xna.Framework.Graphics
 				}
 
 				// Remove from the list of graphics resources
-				if (graphicsDevice != null && selfReference.IsAllocated)
+				if (selfReference.IsAllocated)
 				{
 					if (graphicsDevice.RemoveResourceReference(selfReference))
 					{
 						selfReference.Free();
+						GraphicsDevice.OnResourceDestroyed(Name, Tag);
 					}
 				}
 
 				IsDisposed = true;
+			}
+		}
+
+		#endregion
+
+		#region Internal Static Methods
+
+		internal static void ValidateCopyParameters(int dataLength, int dataIndex, int elementCount)
+		{
+			if (unchecked((uint) dataIndex >= (uint) dataLength))
+			{
+				throw new ArgumentOutOfRangeException("dataIndex", "This parameter must be a valid index within the array.");
+			}
+			if (elementCount <= 0 || elementCount + dataIndex > dataLength)
+			{
+				throw new ArgumentOutOfRangeException("elementCount", "This parameter must be a valid index within the array.");
 			}
 		}
 

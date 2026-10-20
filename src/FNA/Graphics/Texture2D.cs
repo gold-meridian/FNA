@@ -65,7 +65,20 @@ namespace Microsoft.Xna.Framework.Graphics
 		) {
 			if (graphicsDevice == null)
 			{
-				throw new ArgumentNullException("graphicsDevice");
+				throw new ArgumentNullException("graphicsDevice", "The GraphicsDevice must not be null when creating new resources.");
+			}
+			if (width <= 0)
+			{
+				throw new ArgumentOutOfRangeException("width", "Resource size must be greater than zero.");
+			}
+			if (height <= 0)
+			{
+				throw new ArgumentOutOfRangeException("height", "Resource size must be greater than zero.");
+			}
+			if (	(format == SurfaceFormat.Dxt1 || format == SurfaceFormat.Dxt3 || format == SurfaceFormat.Dxt5)
+				&& ((width & 3) != 0 || (height & 3) != 0)
+			) {
+				throw new ArgumentException("DXT compressed texture sizes must be multiples of four.");
 			}
 
 			GraphicsDevice = graphicsDevice;
@@ -136,7 +149,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				null,
 				data,
 				0,
-				data.Length
+				data == null ? 0 : data.Length
 			);
 		}
 
@@ -161,19 +174,25 @@ namespace Microsoft.Xna.Framework.Graphics
 			int startIndex,
 			int elementCount
 		) where T : struct {
-			if (data == null)
+			if (texture == IntPtr.Zero)
 			{
-				throw new ArgumentNullException("data");
+				throw new ObjectDisposedException(GetType().Name);
 			}
-			if (startIndex < 0)
+			if (data == null || data.Length == 0)
 			{
-				throw new ArgumentOutOfRangeException("startIndex");
+				throw new ArgumentNullException("data", "This method does not accept null for this parameter.");
 			}
-			if (data.Length < (elementCount + startIndex))
+			if (unchecked((uint) level >= (uint) LevelCount))
 			{
-				throw new ArgumentOutOfRangeException("elementCount");
+				throw new InvalidOperationException("An unexpected error has occurred.");
 			}
-
+			ValidateCopyParameters(data.Length, startIndex, elementCount);
+			int formatSize = GetFormatSizeEXT(Format);
+			int elementSizeInBytes = MarshalHelper.SizeOf<T>();
+			if (formatSize % elementSizeInBytes != 0)
+			{
+				throw new ArgumentException("The type you are using for T in this method is an invalid size for this resource.");
+			}
 			int x, y, w, h;
 			if (rect.HasValue)
 			{
@@ -189,9 +208,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				w = Math.Max(Width >> level, 1);
 				h = Math.Max(Height >> level, 1);
 			}
-			int elementSize = MarshalHelper.SizeOf<T>();
-			int requiredBytes = (w * h * GetFormatSizeEXT(Format)) / GetBlockSizeSquaredEXT(Format);
-			int availableBytes = elementCount * elementSize;
+			int requiredBytes = (w * h * formatSize) / GetBlockSizeSquaredEXT(Format);
+			int availableBytes = elementCount * elementSizeInBytes;
 			if (requiredBytes > availableBytes)
 			{
 				throw new ArgumentOutOfRangeException("rect", "The region you are trying to upload is larger than the amount of data you provided.");
@@ -206,8 +224,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				w,
 				h,
 				level,
-				handle.AddrOfPinnedObject() + startIndex * elementSize,
-				elementCount * elementSize
+				handle.AddrOfPinnedObject() + startIndex * elementSizeInBytes,
+				elementCount * elementSizeInBytes
 			);
 			handle.Free();
 		}
@@ -263,7 +281,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				null,
 				data,
 				0,
-				data.Length
+				data == null ? 0 : data.Length
 			);
 		}
 
@@ -288,20 +306,25 @@ namespace Microsoft.Xna.Framework.Graphics
 			int startIndex,
 			int elementCount
 		) where T : struct {
+			if (texture == IntPtr.Zero)
+			{
+				throw new ObjectDisposedException(GetType().Name);
+			}
 			if (data == null || data.Length == 0)
 			{
-				throw new ArgumentException("data cannot be null");
+				throw new ArgumentNullException("data", "This method does not accept null for this parameter.");
 			}
-			if (data.Length < startIndex + elementCount)
+			if (unchecked((uint) level >= (uint) LevelCount))
 			{
-				throw new ArgumentException(
-					"The data passed has a length of " + data.Length.ToString() +
-					" but " + elementCount.ToString() + " pixels have been requested."
-				);
+				throw new InvalidOperationException("An unexpected error has occurred.");
 			}
-
+			ValidateCopyParameters(data.Length, startIndex, elementCount);
+			int formatSize = GetFormatSizeEXT(Format);
 			int elementSizeInBytes = MarshalHelper.SizeOf<T>();
-			ValidateGetDataFormat(Format, elementSizeInBytes);
+			if (formatSize % elementSizeInBytes != 0)
+			{
+				throw new ArgumentException("The type you are using for T in this method is an invalid size for this resource.");
+			}
 
 			GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
 			GetDataPointerEXT(
@@ -353,11 +376,23 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public void SaveAsJpeg(Stream stream, int width, int height)
 		{
+			if (stream == null)
+			{
+				throw new ArgumentNullException("stream", "The stream is required to be seekable.");
+			}
+			if (!stream.CanWrite)
+			{
+				throw new ArgumentException("stream");
+			}
+			if (Format != SurfaceFormat.Color)
+			{
+				throw new NotImplementedException("FNA only implements SurfaceFormat.Color for SaveAsJpeg");
+			}
 			int quality;
 			string qualityString = Environment.GetEnvironmentVariable("FNA_GRAPHICS_JPEG_SAVE_QUALITY");
 			if (string.IsNullOrEmpty(qualityString) || !int.TryParse(qualityString, out quality))
 			{
-				quality = 100; // FIXME: What does XNA pick for quality? -flibit
+				quality = 90; // https://learn.microsoft.com/en-us/windows/win32/wic/jpeg-format-overview
 			}
 
 			int len = Width * Height * GetFormatSizeEXT(Format);
@@ -389,6 +424,18 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public void SaveAsPng(Stream stream, int width, int height)
 		{
+			if (stream == null)
+			{
+				throw new ArgumentNullException("stream", "The stream is required to be seekable.");
+			}
+			if (!stream.CanWrite)
+			{
+				throw new ArgumentException("stream");
+			}
+			if (Format != SurfaceFormat.Color)
+			{
+				throw new NotImplementedException("FNA only implements SurfaceFormat.Color for SaveAsPng");
+			}
 			int len = Width * Height * GetFormatSizeEXT(Format);
 			IntPtr data = FNAPlatform.Malloc(len);
 			FNA3D.FNA3D_GetTextureData2D(
@@ -422,7 +469,19 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public static Texture2D FromStream(GraphicsDevice graphicsDevice, Stream stream)
 		{
-			if (stream.CanSeek && stream.Position == stream.Length)
+			if (graphicsDevice == null)
+			{
+				throw new NullReferenceException();
+			}
+			if (stream == null)
+			{
+				throw new ArgumentNullException("stream", "This method does not accept null for this parameter.");
+			}
+			if (!stream.CanSeek)
+			{
+				throw new ArgumentException("The stream is required to be seekable.", "stream");
+			}
+			if (stream.Position == stream.Length)
 			{
 				stream.Seek(0, SeekOrigin.Begin);
 			}
@@ -460,7 +519,27 @@ namespace Microsoft.Xna.Framework.Graphics
 			int height,
 			bool zoom
 		) {
-			if (stream.CanSeek && stream.Position == stream.Length)
+			if (graphicsDevice == null)
+			{
+				throw new ArgumentNullException("graphicsDevice", "The GraphicsDevice must not be null when creating new resources.");
+			}
+			if (stream == null)
+			{
+				throw new ArgumentNullException("stream", "This method does not accept null for this parameter.");
+			}
+			if (!stream.CanSeek)
+			{
+				throw new ArgumentException("The stream is required to be seekable.", "stream");
+			}
+			if (width <= 0)
+			{
+				throw new ArgumentOutOfRangeException("width", "Resource size must be greater than zero.");
+			}
+			if (height <= 0)
+			{
+				throw new ArgumentOutOfRangeException("height", "Resource size must be greater than zero.");
+			}
+			if (stream.Position == stream.Length)
 			{
 				stream.Seek(0, SeekOrigin.Begin);
 			}
