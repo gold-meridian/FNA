@@ -71,11 +71,15 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
-		#region Destructor
+		#region Protected Dispose Method
 
-		~VertexDeclaration()
+		protected override void Dispose(bool disposing)
 		{
-			handle.Free();
+			if (handle.IsAllocated)
+			{
+				handle.Free();
+			}
+			base.Dispose(disposing);
 		}
 
 		#endregion
@@ -104,26 +108,29 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			if (ReferenceEquals(vertexType, null))
 			{
-				throw new ArgumentNullException("vertexType", "Cannot be null");
+				throw new ArgumentNullException("vertexType", "This method does not accept null for this parameter.");
 			}
 
 			if (!vertexType.IsValueType)
 			{
-				throw new ArgumentException("vertexType", "Must be value type");
+				throw new ArgumentException("Invalid vertex type. " + vertexType + " is not a value type.");
 			}
 
 			IVertexType type = Activator.CreateInstance(vertexType) as IVertexType;
 			if (type == null)
 			{
-				throw new ArgumentException("vertexData does not inherit IVertexType");
+				throw new ArgumentException("Invalid vertex type. " + vertexType + " does not implement the IVertexType interface.");
 			}
 
 			VertexDeclaration vertexDeclaration = type.VertexDeclaration;
 			if (vertexDeclaration == null)
 			{
-				throw new ArgumentException("vertexType's VertexDeclaration cannot be null");
+				throw new InvalidOperationException("Invalid vertex type. " + vertexType + " returned a null VertexDeclaration.");
 			}
-
+			if (Marshal.SizeOf(vertexType) != vertexDeclaration.VertexStride)
+			{
+				throw new InvalidOperationException("Invalid vertex type. The size of " + vertexType + " does not match the stride of its vertex declaration.");
+			}
 			return vertexDeclaration;
 		}
 

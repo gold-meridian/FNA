@@ -17,7 +17,7 @@ namespace Microsoft.Xna.Framework.Graphics
 	/// <summary>
 	/// A basic 3D model with per mesh parent bones.
 	/// </summary>
-	public class Model
+	public sealed class Model
 	{
 		#region Public Properties
 
@@ -79,7 +79,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		/// <param name="graphicsDevice">A valid reference to <see cref="GraphicsDevice"/>.</param>
 		/// <param name="bones">The collection of bones.</param>
 		/// <param name="meshes">The collection of meshes.</param>
-		internal Model(GraphicsDevice graphicsDevice, List<ModelBone> bones, List<ModelMesh> meshes)
+		internal Model(GraphicsDevice graphicsDevice, ModelBone[] bones, ModelMesh[] meshes)
 		{
 			Bones = new ModelBoneCollection(bones);
 			Meshes = new ModelMeshCollection(meshes);
@@ -176,7 +176,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				throw new ArgumentOutOfRangeException("sourceBoneTransforms");
 			}
-			for (int i = 0; i < sourceBoneTransforms.Length; i += 1)
+			for (int i = 0; i < Bones.Count; i += 1)
 			{
 				Bones[i].Transform = sourceBoneTransforms[i];
 			}
@@ -196,7 +196,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				throw new ArgumentOutOfRangeException("destinationBoneTransforms");
 			}
-			for (int i = 0; i < destinationBoneTransforms.Length; i += 1)
+			for (int i = 0; i < Bones.Count; i += 1)
 			{
 				destinationBoneTransforms[i] = Bones[i].Transform;
 			}
