@@ -11,11 +11,28 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Infiniseed.Framework.Rendering;
 #endregion
 
 namespace Microsoft.Xna.Framework.Graphics
 {
-	public class GraphicsDevice : IDisposable
+	partial class GraphicsDevice : IGraphicsDevice
+	{
+		Infiniseed.Framework.Rendering.Viewport IGraphicsDevice.Viewport => new()
+		{
+			X = Viewport.X,
+			Y = Viewport.Y,
+			Width = Viewport.Width,
+			Height = Viewport.Height,
+		};
+
+		public object GetNativeObject()
+		{
+			return this;
+		}
+	}
+
+	public partial class GraphicsDevice : IDisposable
 	{
 		#region Internal Constants
 
