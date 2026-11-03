@@ -446,7 +446,7 @@ namespace Microsoft.Xna.Framework
 				string cachePath = SDL.SDL_GetHint(
 					"FNA3D_VULKAN_PIPELINE_CACHE_FILE_NAME"
 				);
-				if (ReferenceEquals(cachePath, null)) // Empty is a valid value
+				if (cachePath == null) // Empty is a valid value
 				{
 					if (	OSVersion.Equals("Windows") ||
 						OSVersion.Equals("Mac OS X") ||
@@ -989,6 +989,7 @@ namespace Microsoft.Xna.Framework
 			bool[] textInputControlDown,
 			ref bool textInputSuppress
 		) {
+			uint windowID = SDL.SDL_GetWindowID(game.Window.Handle);
 			SDL.SDL_Event evt;
 			char* charsBuffer = stackalloc char[32]; // SDL_TEXTINPUTEVENT_TEXT_SIZE
 			while (SDL.SDL_PollEvent(out evt) == 1)
@@ -1100,6 +1101,10 @@ namespace Microsoft.Xna.Framework
 				// Various Window Events...
 				else if (evt.type == SDL.SDL_EventType.SDL_WINDOWEVENT)
 				{
+					if (evt.window.windowID != windowID)
+					{
+						continue;
+					}
 					// Window Focus
 					if (evt.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_GAINED)
 					{
@@ -1193,6 +1198,10 @@ namespace Microsoft.Xna.Framework
 					else if (evt.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_LEAVE)
 					{
 						SDL.SDL_EnableScreenSaver();
+					}
+					else if (evt.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_CLOSE)
+					{
+						game.IsActive = false;
 					}
 				}
 
@@ -1621,7 +1630,7 @@ namespace Microsoft.Xna.Framework
 			}
 
 			// This is stolen from Mono's Path.cs
-			if (ReferenceEquals(storageRoot, null))
+			if (storageRoot == null)
 			{
 				return null;
 			}
