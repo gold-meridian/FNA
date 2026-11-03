@@ -172,22 +172,20 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
+		#region Private Constructors
+
+		private PresentationParameters(PresentationParameters presentationParameters)
+		{
+			parameters = presentationParameters.parameters;
+		}
+
+		#endregion
+
 		#region Public Methods
 
 		public PresentationParameters Clone()
 		{
-			return new PresentationParameters() {
-				BackBufferFormat = BackBufferFormat,
-				BackBufferHeight = BackBufferHeight,
-				BackBufferWidth = BackBufferWidth,
-				DeviceWindowHandle = DeviceWindowHandle,
-				IsFullScreen = IsFullScreen,
-				DepthStencilFormat = DepthStencilFormat,
-				MultiSampleCount = MultiSampleCount,
-				PresentationInterval = PresentationInterval,
-				DisplayOrientation = DisplayOrientation,
-				RenderTargetUsage = RenderTargetUsage
-			};
+			return new PresentationParameters(this);
 		}
 
 		#endregion
