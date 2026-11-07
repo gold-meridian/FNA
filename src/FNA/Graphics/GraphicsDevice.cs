@@ -2071,6 +2071,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			ApplySamplers();
 		}
 
+        public static event Action<GraphicsDevice>? SamplerStatesAppliedEXT;
+
 		private void ApplySamplers()
 		{
 			for (int sampler = 0; sampler < modifiedSamplers.Length; sampler += 1)
@@ -2116,6 +2118,8 @@ namespace Microsoft.Xna.Framework.Graphics
 					ref VertexSamplerStates[sampler].state
 				);
 			}
+
+            SamplerStatesAppliedEXT?.Invoke(this);
 		}
 
 		private unsafe void PrepareVertexBindingArray(int baseVertex)
